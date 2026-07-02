@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#0A0F1F] text-white">
@@ -5,9 +6,11 @@ export default function Home() {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-blue-900">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center font-bold text-xl">
-            7A
-          </div>
+          <img
+  src="/logo/logo7a.png"
+  alt="7A Logo"
+  className="w-14 h-14 object-contain"
+/>
 
           <div>
             <h1 className="font-bold text-xl">7 APRIL STORE</h1>
@@ -18,47 +21,53 @@ export default function Home() {
         </div>
 
         <div className="hidden md:flex gap-6">
-          <a href="#" className="hover:text-blue-400">
-            Beranda
-          </a>
+  <Link href="/" className="hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
+    Beranda
+  </Link>
 
-          <a href="#" className="hover:text-blue-400">
-            Top Up FF
-          </a>
+  <Link href="/topup" className="hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
+    Top Up FF
+  </Link>
 
-          <a href="#" className="hover:text-blue-400">
-            Jual Akun
-          </a>
+  <Link href="/akun" className="hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
+    Jual Akun FF
+  </Link>
 
-          <a href="#" className="hover:text-blue-400">
-            Rekber
-          </a>
+  <Link href="/rekber" className="hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
+    Rekber FF
+  </Link>
 
-          <a href="#" className="hover:text-blue-400">
-            Rental
-          </a>
+  <Link href="/rental" className="hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
+    Rental Akun
+  </Link>
 
-          <a href="#" className="hover:text-blue-400">
-            ID Cantik
-          </a>
-        </div>
+  <Link href="/id-cantik" className="hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
+    ID Cantik FF
+  </Link>
+
+</div>
+
       </nav>
 
       {/* Hero Section */}
       <section className="text-center py-24 px-6">
-        <h2 className="text-5xl font-bold text-blue-400">
-          TOP UP FREE FIRE
-        </h2>
+        <h2 className="text-6xl font-extrabold text-blue-400 drop-shadow-lg">
+  7 APRIL STORE
+</h2>
+
+<h3 className="text-4xl font-bold mt-4">
+  Top Up & Marketplace Free Fire
+</h3>
 
         <h3 className="text-5xl font-bold mt-2">
           TERMURAH & TERPERCAYA
         </h3>
 
-        <p className="mt-6 text-gray-400 max-w-2xl mx-auto">
-          Top Up Diamond, Jual Beli Akun, Jasa Rekber,
-          Rental Akun, dan ID Cantik Free Fire dengan
-          proses cepat dan aman.
-        </p>
+        <p className="mt-6 text-gray-400 max-w-2xl mx-auto text-lg">
+  Tempat Top Up Diamond, Jual Beli Akun, Rekber,
+  Rental Akun Sultan, dan ID Cantik Free Fire
+  dengan proses cepat, aman, dan terpercaya.
+</p>
 
         <div className="mt-8 flex justify-center gap-4">
           <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold">
@@ -82,40 +91,55 @@ export default function Home() {
 
   <div className="grid md:grid-cols-3 gap-6">
 
-    <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 transition">
+    <Link
+      href="/topup"
+      className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 hover:scale-105 transition block"
+    >
       <h3 className="text-2xl mb-3">💎 Top Up FF</h3>
       <p className="text-gray-400">
         Top up diamond Free Fire cepat, aman, dan harga bersahabat.
       </p>
-    </div>
+    </Link>
 
-    <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 transition">
+    <Link
+      href="/akun"
+      className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 hover:scale-105 transition block"
+    >
       <h3 className="text-2xl mb-3">👑 Jual Akun FF</h3>
       <p className="text-gray-400">
         Berbagai akun Free Fire mulai dari sultan hingga akun murah.
       </p>
-    </div>
+    </Link>
 
-    <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 transition">
+    <Link
+      href="/rekber"
+      className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 hover:scale-105 transition block"
+    >
       <h3 className="text-2xl mb-3">🔒 Jasa Rekber</h3>
       <p className="text-gray-400">
         Transaksi akun lebih aman dengan layanan rekber terpercaya.
       </p>
-    </div>
+    </Link>
 
-    <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 transition">
+    <Link
+      href="/rental"
+      className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 hover:scale-105 transition block"
+    >
       <h3 className="text-2xl mb-3">🎮 Rental Akun FF</h3>
       <p className="text-gray-400">
         Rental akun sultan Free Fire dengan sistem yang aman.
       </p>
-    </div>
+    </Link>
 
-    <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 transition">
+    <Link
+      href="/id-cantik"
+      className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 hover:border-blue-500 hover:scale-105 transition block"
+    >
       <h3 className="text-2xl mb-3">✨ ID Cantik FF</h3>
       <p className="text-gray-400">
         Jual berbagai ID Free Fire unik dan langka.
       </p>
-    </div>
+    </Link>
 
   </div>
 </section>
