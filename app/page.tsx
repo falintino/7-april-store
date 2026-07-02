@@ -191,7 +191,7 @@ export default function Home() {
 </section>
 {/* Footer */}
 <footer className="bg-black border-t border-blue-900 px-8 py-10 mt-10">
-  <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
+  <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
 
     {/* Brand */}
     <div>
