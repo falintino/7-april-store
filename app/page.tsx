@@ -1,10 +1,25 @@
+"use client";
+
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import AOS from "aos";
+
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      once: true,
+    });
+  }, []);
+
   return (
+
     <main className="min-h-screen bg-[#0A0F1F] text-white">
       
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-blue-900">
+      <nav className="relative flex items-center justify-between px-8 py-5 border-b border-blue-900">
         <div className="flex items-center gap-3">
           <img
   src="/logo/logo7a.png"
@@ -47,10 +62,49 @@ export default function Home() {
 
 </div>
 
+{/* Tombol Mobile */}
+<button
+  onClick={() => setMenuOpen(!menuOpen)}
+  className="md:hidden text-3xl"
+>
+  ☰
+</button>
+
+{menuOpen && (
+  <div className="absolute top-20 left-0 w-full bg-[#0A0F1F] border-t border-blue-900 flex flex-col items-center gap-5 py-6 md:hidden z-50">
+
+    <Link href="/" onClick={() => setMenuOpen(false)}>
+      Beranda
+    </Link>
+
+    <Link href="/topup" onClick={() => setMenuOpen(false)}>
+      Top Up FF
+    </Link>
+
+    <Link href="/akun" onClick={() => setMenuOpen(false)}>
+      Jual Akun FF
+    </Link>
+
+    <Link href="/rekber" onClick={() => setMenuOpen(false)}>
+      Rekber FF
+    </Link>
+
+    <Link href="/rental" onClick={() => setMenuOpen(false)}>
+      Rental Akun
+    </Link>
+
+    <Link href="/id-cantik" onClick={() => setMenuOpen(false)}>
+      ID Cantik FF
+    </Link>
+
+  </div>
+)}
+
+
       </nav>
 
       {/* Hero Section */}
-<section className="relative overflow-hidden px-6 py-24 text-center bg-gradient-to-b from-[#0F172A] to-[#0A0F1F]">
+<section className="relative overflow-hidden px-6 py-20 text-center bg-gradient-to-b from-[#0F172A] to-[#0A0F1F]">
 
   {/* Efek Glow */}
   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-600/20 blur-3xl rounded-full"></div>
@@ -58,7 +112,7 @@ export default function Home() {
 <img
   src="/hero/ff-hero.png"
   alt="Free Fire Hero"
-  className="absolute right-0 bottom-0 h-[400px] opacity-20 hidden lg:block"
+  className="absolute right-10 top-1/2 -translate-y-1/2 h-[450px] opacity-90 hidden lg:block pointer-events-none"
 />
 
   <div className="relative z-10">
@@ -100,6 +154,49 @@ export default function Home() {
 
   </div>
 
+</section>
+
+{/* Statistik */}
+<section className="px-8 py-16">
+  <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+
+    <div className="bg-[#121B33] p-6 rounded-2xl text-center">
+      <h3 className="text-3xl font-bold text-blue-400">
+        337K+
+      </h3>
+      <p className="text-gray-400 mt-2">
+        Followers TikTok
+      </p>
+    </div>
+
+    <div className="bg-[#121B33] p-6 rounded-2xl text-center">
+      <h3 className="text-3xl font-bold text-blue-400">
+        10K+
+      </h3>
+      <p className="text-gray-400 mt-2">
+        Transaksi
+      </p>
+    </div>
+
+    <div className="bg-[#121B33] p-6 rounded-2xl text-center">
+      <h3 className="text-3xl font-bold text-blue-400">
+        24/7
+      </h3>
+      <p className="text-gray-400 mt-2">
+        Fast Response
+      </p>
+    </div>
+
+    <div className="bg-[#121B33] p-6 rounded-2xl text-center">
+      <h3 className="text-3xl font-bold text-blue-400">
+        100%
+      </h3>
+      <p className="text-gray-400 mt-2">
+        Rekber Aman
+      </p>
+    </div>
+
+  </div>
 </section>
 
 {/* Layanan Kami */}
@@ -162,6 +259,60 @@ export default function Home() {
 
   </div>
 </section>
+
+{/* Testimoni */}
+<section className="px-8 py-16 bg-[#0A0F1F]">
+  <h2 className="text-3xl font-bold text-center mb-10">
+    ⭐ Testimoni Pelanggan
+  </h2>
+
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900">
+      <h3 className="font-bold text-yellow-400 mb-3">
+        ⭐⭐⭐⭐⭐
+      </h3>
+
+      <p className="text-gray-300">
+        "Top up cepat banget, cuma 2 menit langsung masuk. Recommended!"
+      </p>
+
+      <p className="text-blue-400 mt-4 font-bold">
+        — Rizky, Pontianak
+      </p>
+    </div>
+
+    <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900">
+      <h3 className="font-bold text-yellow-400 mb-3">
+        ⭐⭐⭐⭐⭐
+      </h3>
+
+      <p className="text-gray-300">
+        "Jual beli akun aman pakai rekber, admin responsif dan terpercaya."
+      </p>
+
+      <p className="text-blue-400 mt-4 font-bold">
+        — Andi, Sambas
+      </p>
+    </div>
+
+    <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900">
+      <h3 className="font-bold text-yellow-400 mb-3">
+        ⭐⭐⭐⭐⭐
+      </h3>
+
+      <p className="text-gray-300">
+        "Rental akun sultan lancar, skin lengkap dan harga bersahabat."
+      </p>
+
+      <p className="text-blue-400 mt-4 font-bold">
+        — Fajar, Singkawang
+      </p>
+    </div>
+
+  </div>
+</section>
+
 {/* Diamond Free Fire */}
 <section className="px-8 py-16 bg-[#0D1428]">
   <h2 className="text-3xl font-bold text-center mb-10">
@@ -254,6 +405,21 @@ export default function Home() {
     © 2026 7 APRIL STORE. All Rights Reserved.
   </div>
 </footer>
+
+{/* Floating WhatsApp */}
+<a
+  href="https://wa.me/6285960237306"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-2xl z-50 transition hover:scale-110"
+>
+  <img
+  src="https://cdn-icons-png.flaticon.com/512/220/220236.png"
+  alt="WhatsApp"
+  className="w-9 h-9"
+/>
+</a>
+
     </main>
   );
 }
