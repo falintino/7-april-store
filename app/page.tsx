@@ -50,39 +50,58 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="text-center py-24 px-6">
-        <h2 className="text-6xl font-extrabold text-blue-400 drop-shadow-lg">
-  7 APRIL STORE
-</h2>
+<section className="relative overflow-hidden px-6 py-24 text-center bg-gradient-to-b from-[#0F172A] to-[#0A0F1F]">
 
-<h3 className="text-4xl font-bold mt-4">
-  Top Up & Marketplace Free Fire
-</h3>
+  {/* Efek Glow */}
+  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-600/20 blur-3xl rounded-full"></div>
 
-        <h3 className="text-5xl font-bold mt-2">
-          TERMURAH & TERPERCAYA
-        </h3>
+<img
+  src="/hero/ff-hero.png"
+  alt="Free Fire Hero"
+  className="absolute right-0 bottom-0 h-[400px] opacity-20 hidden lg:block"
+/>
 
-        <p className="mt-6 text-gray-400 max-w-2xl mx-auto text-lg">
-  Tempat Top Up Diamond, Jual Beli Akun, Rekber,
-  Rental Akun Sultan, dan ID Cantik Free Fire
-  dengan proses cepat, aman, dan terpercaya.
-</p>
+  <div className="relative z-10">
 
-        <div className="mt-8 flex justify-center gap-4">
-          <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold">
-            Top Up Sekarang
-          </button>
+    <span className="bg-blue-600 px-4 py-2 rounded-full text-sm font-bold">
+      🔥 Free Fire Marketplace Indonesia
+    </span>
 
-          <a
-            href="https://wa.me/6285960237306"
-            target="_blank"
-            className="border border-blue-500 px-6 py-3 rounded-xl font-bold hover:bg-blue-900"
-          >
-            Hubungi CS
-          </a>
-        </div>
-      </section>
+    <h1 className="mt-8 text-4xl md:text-6xl font-extrabold text-blue-400">
+      7 APRIL STORE
+    </h1>
+
+    <h2 className="mt-4 text-2xl md:text-4xl font-bold">
+      Top Up & Marketplace Free Fire
+    </h2>
+
+    <p className="mt-6 max-w-2xl mx-auto text-gray-400 text-base md:text-lg">
+      Top Up Diamond, Jual Beli Akun, Rekber, Rental Akun Sultan,
+      dan ID Cantik Free Fire dengan proses cepat, aman, dan terpercaya.
+    </p>
+
+    <div className="mt-10 flex flex-col md:flex-row justify-center gap-4">
+
+      <a
+        href="/topup"
+        className="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-2xl font-bold transition"
+      >
+        💎 Top Up Sekarang
+      </a>
+
+      <a
+        href="/akun"
+        className="border border-blue-500 hover:bg-blue-500/20 px-8 py-4 rounded-2xl font-bold transition"
+      >
+        👑 Lihat Akun
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
 {/* Layanan Kami */}
 <section className="px-8 py-16">
   <h2 className="text-3xl font-bold text-center mb-10">
