@@ -1,49 +1,306 @@
-export default function TopupPage() {
+import Link from "next/link";
+import {
+  ArrowRight,
+  BadgeCheck,
+  ChevronRight,
+  Gamepad2,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+
+const products = [
+  {
+    name: "Free Fire",
+    description:
+      "Top up Diamond Free Fire cepat, aman, dan langsung diproses setelah pembayaran.",
+    href: "/topup/free-fire",
+    initial: "FF",
+    tag: "TERPOPULER",
+    price: "Mulai Rp1.000",
+    accent: "from-orange-500 via-red-500 to-rose-600",
+    glow: "bg-orange-500/20",
+  },
+];
+
+export default function TopUpPage() {
   return (
-    <main className="min-h-screen bg-[#0A0F1F] text-white p-8">
-      <h1 className="text-4xl font-bold text-center text-blue-400 mb-8">
-        💎 Top Up Free Fire
-      </h1>
-
-      <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-6">
-
-        <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 text-center">
-          <h2 className="text-2xl font-bold">70 Diamond</h2>
-          <p className="text-blue-400 text-xl mt-3">Rp12.000</p>
-
-          <a
-            href="https://wa.me/6285960237306?text=Halo,%20saya%20ingin%20top%20up%2070%20Diamond"
-            className="block mt-5 bg-blue-600 py-3 rounded-xl font-bold"
-          >
-            Beli Sekarang
-          </a>
-        </div>
-
-        <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 text-center">
-          <h2 className="text-2xl font-bold">140 Diamond</h2>
-          <p className="text-blue-400 text-xl mt-3">Rp23.000</p>
-
-          <a
-            href="https://wa.me/6285960237306?text=Halo,%20saya%20ingin%20top%20up%20140%20Diamond"
-            className="block mt-5 bg-blue-600 py-3 rounded-xl font-bold"
-          >
-            Beli Sekarang
-          </a>
-        </div>
-
-        <div className="bg-[#121B33] p-6 rounded-2xl border border-blue-900 text-center">
-          <h2 className="text-2xl font-bold">355 Diamond</h2>
-          <p className="text-blue-400 text-xl mt-3">Rp56.000</p>
-
-          <a
-            href="https://wa.me/6285960237306?text=Halo,%20saya%20ingin%20top%20up%20355%20Diamond"
-            className="block mt-5 bg-blue-600 py-3 rounded-xl font-bold"
-          >
-            Beli Sekarang
-          </a>
-        </div>
-
+    <main className="min-h-screen bg-[#050914] text-white">
+      {/* Background */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute left-1/2 top-[-220px] h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600/10 blur-[130px]" />
+        <div className="absolute -right-40 top-[420px] h-[400px] w-[400px] rounded-full bg-violet-600/10 blur-[120px]" />
       </div>
+
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#050914]/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-[74px] max-w-7xl items-center justify-between px-5 lg:px-8">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 font-black shadow-[0_0_30px_rgba(37,99,235,0.35)]">
+              7A
+            </div>
+
+            <div>
+              <p className="text-[15px] font-bold leading-tight">
+                7 April Store
+              </p>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                Gaming Marketplace
+              </p>
+            </div>
+          </Link>
+
+          <nav className="hidden items-center gap-8 text-[13px] font-medium text-slate-400 md:flex">
+            <Link href="/" className="transition hover:text-white">
+              Beranda
+            </Link>
+
+            <Link href="/topup" className="text-white">
+              Top Up
+            </Link>
+
+            <Link href="/akun" className="transition hover:text-white">
+              Jual Akun
+            </Link>
+
+            <Link href="/rekber" className="transition hover:text-white">
+              Rekber
+            </Link>
+
+            <Link href="/rental" className="transition hover:text-white">
+              Rental
+            </Link>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <button className="hidden h-10 w-10 items-center justify-center rounded-xl border border-white/10 text-slate-400 transition hover:bg-white/5 hover:text-white sm:flex">
+              <Search size={18} />
+            </button>
+
+            <button className="hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/5 sm:block">
+              Login
+            </button>
+
+            <button className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold transition hover:bg-blue-500">
+              Daftar
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* HERO */}
+      <section className="relative">
+        <div className="mx-auto max-w-7xl px-5 pb-10 pt-14 lg:px-8 lg:pb-14 lg:pt-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-xs font-semibold text-blue-300">
+              <Sparkles size={14} />
+              Top Up Game Cepat & Aman
+            </div>
+
+            <h1 className="text-4xl font-black tracking-[-0.04em] sm:text-5xl lg:text-6xl">
+              Top Up Game
+              <span className="block bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 bg-clip-text text-transparent">
+                Tanpa Ribet.
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">
+              Pilih game favoritmu, masukkan ID, pilih nominal dan selesaikan
+              pembayaran. Pesanan diproses melalui sistem 7 April Store.
+            </p>
+
+            {/* SEARCH */}
+            <div className="mx-auto mt-8 flex max-w-xl items-center rounded-2xl border border-white/[0.08] bg-white/[0.045] p-2 shadow-2xl backdrop-blur-xl">
+              <Search className="ml-3 text-slate-500" size={19} />
+
+              <input
+                type="text"
+                placeholder="Cari game..."
+                className="h-11 flex-1 bg-transparent px-3 text-sm text-white outline-none placeholder:text-slate-600"
+              />
+
+              <button className="h-11 rounded-xl bg-blue-600 px-5 text-sm font-bold transition hover:bg-blue-500">
+                Cari
+              </button>
+            </div>
+          </div>
+
+          {/* TRUST */}
+          <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="flex items-center justify-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
+              <Zap size={18} className="text-yellow-400" />
+              <div>
+                <p className="text-xs font-bold">Proses Cepat</p>
+                <p className="text-[10px] text-slate-500">
+                  Sistem otomatis
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
+              <ShieldCheck size={18} className="text-emerald-400" />
+              <div>
+                <p className="text-xs font-bold">Pembayaran Aman</p>
+                <p className="text-[10px] text-slate-500">
+                  Payment terpercaya
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
+              <BadgeCheck size={18} className="text-blue-400" />
+              <div>
+                <p className="text-xs font-bold">7 April Store</p>
+                <p className="text-[10px] text-slate-500">
+                  Gaming marketplace
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* GAME LIST */}
+      <section className="relative border-t border-white/[0.04]">
+        <div className="mx-auto max-w-7xl px-5 py-12 lg:px-8 lg:py-16">
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <div className="mb-2 flex items-center gap-2 text-blue-400">
+                <Gamepad2 size={18} />
+                <span className="text-xs font-bold uppercase tracking-[0.18em]">
+                  Daftar Game
+                </span>
+              </div>
+
+              <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
+                Pilih Game Favoritmu
+              </h2>
+
+              <p className="mt-2 text-sm text-slate-500">
+                Game lainnya akan segera tersedia.
+              </p>
+            </div>
+
+            <span className="hidden text-xs text-slate-600 sm:block">
+              1 Game tersedia
+            </span>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {products.map((product) => (
+              <Link
+                key={product.name}
+                href={product.href}
+                className="group relative overflow-hidden rounded-[26px] border border-white/[0.07] bg-[#0b1120] p-3 transition duration-300 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-[0_20px_70px_rgba(37,99,235,0.12)]"
+              >
+                <div
+                  className={`absolute -right-16 -top-16 h-40 w-40 rounded-full ${product.glow} blur-[70px]`}
+                />
+
+                <div
+                  className={`relative flex h-44 items-center justify-center overflow-hidden rounded-[20px] bg-gradient-to-br ${product.accent}`}
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.28),transparent_35%)]" />
+
+                  <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/20 px-3 py-1.5 text-[9px] font-black tracking-wider backdrop-blur-md">
+                    {product.tag}
+                  </div>
+
+                  <div className="relative flex h-[90px] w-[90px] items-center justify-center rounded-[28px] border border-white/20 bg-black/20 text-3xl font-black shadow-2xl backdrop-blur-xl">
+                    {product.initial}
+                  </div>
+                </div>
+
+                <div className="relative p-3 pb-2 pt-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-black">{product.name}</h3>
+
+                      <p className="mt-1 text-xs font-semibold text-blue-400">
+                        {product.price}
+                      </p>
+                    </div>
+
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-slate-400 transition group-hover:border-blue-500/30 group-hover:bg-blue-500/10 group-hover:text-blue-400">
+                      <ChevronRight size={18} />
+                    </div>
+                  </div>
+
+                  <p className="mt-4 line-clamp-2 text-xs leading-5 text-slate-500">
+                    {product.description}
+                  </p>
+
+                  <div className="mt-5 flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 text-xs font-black transition group-hover:bg-blue-500">
+                    Top Up Sekarang
+                    <ArrowRight size={15} />
+                  </div>
+                </div>
+              </Link>
+            ))}
+
+            {/* COMING SOON */}
+            <div className="relative flex min-h-[350px] items-center justify-center overflow-hidden rounded-[26px] border border-dashed border-white/[0.08] bg-white/[0.015] p-6">
+              <div className="text-center">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.035]">
+                  <Gamepad2 size={23} className="text-slate-600" />
+                </div>
+
+                <p className="mt-4 text-sm font-bold text-slate-400">
+                  Game Lainnya
+                </p>
+
+                <p className="mt-1 text-xs text-slate-600">
+                  Segera hadir di 7 April Store
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative">
+        <div className="mx-auto max-w-7xl px-5 pb-16 lg:px-8">
+          <div className="relative overflow-hidden rounded-[28px] border border-blue-500/20 bg-gradient-to-br from-blue-600/15 via-[#0b1120] to-[#0b1120] px-6 py-9 sm:px-10">
+            <div className="absolute right-0 top-0 h-60 w-60 rounded-full bg-blue-500/10 blur-[80px]" />
+
+            <div className="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-400">
+                  7 April Store
+                </p>
+
+                <h3 className="mt-2 text-xl font-black sm:text-2xl">
+                  Top up lebih gampang.
+                </h3>
+
+                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                  Pilih produk, masukkan data akun, lakukan pembayaran dan
+                  pantau status pesanan langsung dari website.
+                </p>
+              </div>
+
+              <Link
+                href="/topup/free-fire"
+                className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-slate-200"
+              >
+                Mulai Top Up
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-white/[0.05]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+          <p>© 2026 7 April Store. All rights reserved.</p>
+
+          <p>Gaming Marketplace Indonesia</p>
+        </div>
+      </footer>
     </main>
   );
 }

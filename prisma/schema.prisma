@@ -1,0 +1,470 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  game          String
+  name          String
+  sku           String   @unique
+  providerCode  String
+  price         Int
+  providerPrice Int
+  popular       Boolean  @default(false)
+  active        Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  /*
+   * Promo yang secara khusus
+   * dibatasi ke produk ini.
+   */
+  promoCodes PromoCode[]
+}
+
+model Order {
+  id             String   @id @default(cuid())
+  invoice        String   @unique
+  uid            String
+  server         String?
+  whatsapp       String
+  paymentMethod  String
+  paymentStatus  String   @default("PENDING")
+  providerStatus String   @default("PENDING")
+
+  /*
+   * =========================================
+   * HARGA ORDER
+   * =========================================
+   *
+   * Harga jual sebelum diskon promo.
+   *
+   * Nullable agar order lama tetap aman.
+   */
+  subtotal Int?
+
+  /*
+   * Jumlah diskon harga produk.
+   */
+  discountAmount Int @default(0)
+
+  /*
+   * Harga produk setelah diskon,
+   * sebelum fee pembayaran Midtrans.
+   */
+  total Int
+
+  /*
+   * =========================================
+   * SNAPSHOT MODAL PROVIDER
+   * =========================================
+   *
+   * Modal provider ketika order dibuat.
+   *
+   * Perubahan providerPrice setelah order
+   * dibuat tidak akan mengubah snapshot ini.
+   */
+  providerPriceSnapshot Int?
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  payment Payment?
+
+  /*
+   * =========================================
+   * PROMO
+   * =========================================
+   */
+
+  promoCodeId String?
+  promoCode   PromoCode? @relation(fields: [promoCodeId], references: [id])
+
+  /*
+   * true khusus promo pembebasan
+   * biaya pembayaran.
+   */
+  paymentFeeWaived Boolean @default(false)
+
+  /*
+   * Waktu promo ditempelkan ke order.
+   */
+  promoAppliedAt DateTime?
+
+  /*
+   * Waktu promo resmi dihitung sebagai
+   * pemakaian.
+   *
+   * Diisi ketika pembayaran sudah PAID.
+   */
+  promoRedeemedAt DateTime?
+
+  /*
+   * =========================================
+   * AFFILIATE
+   * =========================================
+   *
+   * Nullable agar order biasa dan
+   * order lama tetap aman.
+   */
+
+  affiliateId String?
+  affiliate   Affiliate? @relation(fields: [affiliateId], references: [id])
+
+  /*
+   * Snapshot komisi affiliate pada saat
+   * order dibuat/dibayar.
+   *
+   * Jadi kalau nilai komisi affiliate
+   * berubah nanti, order lama tidak ikut
+   * berubah.
+   */
+  affiliateCommission Int @default(0)
+
+  /*
+   * =========================================
+   * BUKTI TRANSAKSI PROVIDER
+   * =========================================
+   */
+
+  providerRefId       String?
+  providerSn          String?
+  providerRc          String?
+  providerMessage     String?
+  providerActualPrice Int?
+  providerLastBalance Int?
+  providerResponse    Json?
+  providerUpdatedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([promoCodeId])
+  @@index([affiliateId])
+  @@index([whatsapp])
+  @@index([paymentStatus])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  orderId       String   @unique
+  transactionId String?
+  paymentType   String?
+  status        String
+  grossAmount   Int
+  paidAt        DateTime?
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+}
+
+model PromoCode {
+  id   String @id @default(cuid())
+  code String @unique
+
+  /*
+   * =========================================
+   * JENIS PROMO
+   * =========================================
+   *
+   * FREE_PAYMENT_FEE
+   * FIXED_DISCOUNT
+   * PERCENT_DISCOUNT
+   *
+   * String sengaja dipertahankan supaya
+   * mudah dikembangkan tanpa merusak
+   * promo lama.
+   */
+  type String @default("FREE_PAYMENT_FEE")
+
+  /*
+   * Nama promo untuk dashboard admin.
+   *
+   * Contoh:
+   *
+   * Promo September
+   * Promo Member Setia
+   * Promo Creator A
+   */
+  name String?
+
+  /*
+   * Catatan internal admin.
+   *
+   * Tidak perlu ditampilkan kepada
+   * customer.
+   */
+  description String?
+
+  active Boolean @default(true)
+
+  /*
+   * =========================================
+   * NILAI DISKON
+   * =========================================
+   *
+   * FIXED_DISCOUNT:
+   * nilai Rupiah.
+   *
+   * PERCENT_DISCOUNT:
+   * nilai persen.
+   *
+   * FREE_PAYMENT_FEE:
+   * boleh null.
+   */
+  discountValue Int?
+
+  /*
+   * Maksimal nominal diskon.
+   *
+   * Terutama untuk PERCENT_DISCOUNT.
+   */
+  maxDiscount Int?
+
+  /*
+   * Minimum harga order sebelum diskon
+   * agar promo boleh digunakan.
+   */
+  minOrder Int?
+
+  /*
+   * =========================================
+   * PENGAMAN PROFIT
+   * =========================================
+   *
+   * Minimum keuntungan yang wajib tersisa
+   * setelah diskon produk.
+   *
+   * Server tetap wajib melakukan validasi.
+   */
+  minimumMargin Int @default(0)
+
+  /*
+   * =========================================
+   * PERIODE PROMO
+   * =========================================
+   *
+   * startsAt null:
+   * promo dapat digunakan segera.
+   *
+   * expiresAt null:
+   * tidak ada tanggal kedaluwarsa.
+   */
+
+  startsAt DateTime?
+  expiresAt DateTime?
+
+  /*
+   * =========================================
+   * BATAS GLOBAL
+   * =========================================
+   *
+   * Contoh:
+   *
+   * maxUses = 100
+   *
+   * berarti seluruh customer digabung
+   * maksimal 100 penggunaan PAID.
+   *
+   * null = tidak terbatas.
+   */
+
+  maxUses   Int?
+  usedCount Int @default(0)
+
+  /*
+   * =========================================
+   * BATAS PER CUSTOMER
+   * =========================================
+   *
+   * Customer sementara dikenali melalui
+   * nomor WhatsApp order.
+   *
+   * Contoh:
+   *
+   * maxUsesPerCustomer = 1
+   *
+   * berarti satu customer maksimal
+   * menggunakan promo satu kali.
+   *
+   * null = tidak ada batas per customer.
+   */
+
+  maxUsesPerCustomer Int?
+
+  /*
+   * =========================================
+   * FIRST ORDER
+   * =========================================
+   *
+   * true:
+   * promo hanya boleh digunakan customer
+   * yang belum mempunyai order PAID.
+   */
+
+  firstOrderOnly Boolean @default(false)
+
+  /*
+   * =========================================
+   * CUSTOMER SERING TOP UP
+   * =========================================
+   *
+   * Jumlah minimal transaksi PAID
+   * sebelumnya.
+   *
+   * Contoh:
+   *
+   * minCompletedOrders = 5
+   *
+   * berarti customer harus sudah punya
+   * minimal 5 transaksi PAID.
+   *
+   * null = tidak ada persyaratan.
+   */
+
+  minCompletedOrders Int?
+
+  /*
+   * =========================================
+   * TARGET PRODUK
+   * =========================================
+   *
+   * null:
+   * promo berlaku untuk semua produk
+   * yang lolos aturan lainnya.
+   *
+   * Jika productId diisi:
+   * promo hanya berlaku untuk produk itu.
+   */
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  /*
+   * =========================================
+   * AFFILIATE
+   * =========================================
+   *
+   * Promo dapat dihubungkan ke affiliate.
+   *
+   * null:
+   * promo biasa.
+   */
+
+  affiliateId String?
+  affiliate   Affiliate? @relation(fields: [affiliateId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([active])
+  @@index([expiresAt])
+  @@index([productId])
+  @@index([affiliateId])
+}
+
+/*
+ * ===========================================
+ * AFFILIATE
+ * ===========================================
+ *
+ * Model terpisah supaya affiliate tidak
+ * dicampur dengan aturan PromoCode.
+ *
+ * Contoh:
+ *
+ * Affiliate:
+ * Creator A
+ *
+ * Code:
+ * CREATORA
+ *
+ * PromoCode dapat dihubungkan ke affiliate.
+ *
+ * Order yang berasal dari affiliate juga
+ * menyimpan affiliateId dan snapshot komisi.
+ */
+
+model Affiliate {
+  id String @id @default(cuid())
+
+  /*
+   * Nama affiliate / creator.
+   */
+  name String
+
+  /*
+   * Kode internal affiliate.
+   *
+   * Dibuat unique supaya tidak ada
+   * dua affiliate memakai kode sama.
+   */
+  code String @unique
+
+  active Boolean @default(true)
+
+  /*
+   * =========================================
+   * KOMISI
+   * =========================================
+   *
+   * FIXED:
+   * commissionValue = Rupiah.
+   *
+   * PERCENT:
+   * commissionValue = persen.
+   *
+   * Backend nanti menghitung dan tetap
+   * memastikan order tidak menyebabkan
+   * kerugian.
+   */
+
+  commissionType String @default("FIXED")
+  commissionValue Int  @default(0)
+
+  /*
+   * Minimum margin toko yang harus tetap
+   * tersisa SETELAH diskon + komisi.
+   */
+  minimumStoreMargin Int @default(0)
+
+  /*
+   * Statistik.
+   *
+   * totalOrders:
+   * transaksi affiliate yang sudah PAID.
+   *
+   * totalCommission:
+   * total komisi yang tercatat.
+   */
+  totalOrders     Int @default(0)
+  totalCommission Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  promoCodes PromoCode[]
+  orders     Order[]
+
+  @@index([active])
+}

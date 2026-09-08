@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/digiflazz/check-pending",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
