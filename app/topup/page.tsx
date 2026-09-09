@@ -16,24 +16,20 @@ const products = [
     description:
       "Top up Diamond Free Fire cepat, aman, dan langsung diproses setelah pembayaran.",
     href: "/topup/free-fire",
-    initial: "FF",
+    image: "/images/games/freefire.jpg",
     tag: "TERPOPULER",
     price: "Mulai Rp1.000",
-    accent: "from-orange-500 via-red-500 to-rose-600",
-    glow: "bg-orange-500/20",
   },
 ];
 
 export default function TopUpPage() {
   return (
     <main className="min-h-screen bg-[#050914] text-white">
-      {/* Background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-[-220px] h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600/10 blur-[130px]" />
         <div className="absolute -right-40 top-[420px] h-[400px] w-[400px] rounded-full bg-violet-600/10 blur-[120px]" />
       </div>
 
-      {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#050914]/85 backdrop-blur-xl">
         <div className="mx-auto flex h-[74px] max-w-7xl items-center justify-between px-5 lg:px-8">
           <Link href="/" className="flex items-center gap-3">
@@ -55,19 +51,15 @@ export default function TopUpPage() {
             <Link href="/" className="transition hover:text-white">
               Beranda
             </Link>
-
             <Link href="/topup" className="text-white">
               Top Up
             </Link>
-
             <Link href="/akun" className="transition hover:text-white">
               Jual Akun
             </Link>
-
             <Link href="/rekber" className="transition hover:text-white">
               Rekber
             </Link>
-
             <Link href="/rental" className="transition hover:text-white">
               Rental
             </Link>
@@ -89,7 +81,6 @@ export default function TopUpPage() {
         </div>
       </header>
 
-      {/* HERO */}
       <section className="relative">
         <div className="mx-auto max-w-7xl px-5 pb-10 pt-14 lg:px-8 lg:pb-14 lg:pt-20">
           <div className="mx-auto max-w-3xl text-center">
@@ -110,7 +101,6 @@ export default function TopUpPage() {
               pembayaran. Pesanan diproses melalui sistem 7 April Store.
             </p>
 
-            {/* SEARCH */}
             <div className="mx-auto mt-8 flex max-w-xl items-center rounded-2xl border border-white/[0.08] bg-white/[0.045] p-2 shadow-2xl backdrop-blur-xl">
               <Search className="ml-3 text-slate-500" size={19} />
 
@@ -126,15 +116,12 @@ export default function TopUpPage() {
             </div>
           </div>
 
-          {/* TRUST */}
           <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="flex items-center justify-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
               <Zap size={18} className="text-yellow-400" />
               <div>
                 <p className="text-xs font-bold">Proses Cepat</p>
-                <p className="text-[10px] text-slate-500">
-                  Sistem otomatis
-                </p>
+                <p className="text-[10px] text-slate-500">Sistem otomatis</p>
               </div>
             </div>
 
@@ -161,7 +148,6 @@ export default function TopUpPage() {
         </div>
       </section>
 
-      {/* GAME LIST */}
       <section className="relative border-t border-white/[0.04]">
         <div className="mx-auto max-w-7xl px-5 py-12 lg:px-8 lg:py-16">
           <div className="mb-8 flex items-end justify-between">
@@ -194,21 +180,17 @@ export default function TopUpPage() {
                 href={product.href}
                 className="group relative overflow-hidden rounded-[26px] border border-white/[0.07] bg-[#0b1120] p-3 transition duration-300 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-[0_20px_70px_rgba(37,99,235,0.12)]"
               >
-                <div
-                  className={`absolute -right-16 -top-16 h-40 w-40 rounded-full ${product.glow} blur-[70px]`}
-                />
+                <div className="relative h-44 overflow-hidden rounded-[20px]">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                  />
 
-                <div
-                  className={`relative flex h-44 items-center justify-center overflow-hidden rounded-[20px] bg-gradient-to-br ${product.accent}`}
-                >
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.28),transparent_35%)]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10" />
 
-                  <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/20 px-3 py-1.5 text-[9px] font-black tracking-wider backdrop-blur-md">
+                  <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/35 px-3 py-1.5 text-[9px] font-black tracking-wider backdrop-blur-md">
                     {product.tag}
-                  </div>
-
-                  <div className="relative flex h-[90px] w-[90px] items-center justify-center rounded-[28px] border border-white/20 bg-black/20 text-3xl font-black shadow-2xl backdrop-blur-xl">
-                    {product.initial}
                   </div>
                 </div>
 
@@ -239,7 +221,6 @@ export default function TopUpPage() {
               </Link>
             ))}
 
-            {/* COMING SOON */}
             <div className="relative flex min-h-[350px] items-center justify-center overflow-hidden rounded-[26px] border border-dashed border-white/[0.08] bg-white/[0.015] p-6">
               <div className="text-center">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.035]">
@@ -259,7 +240,6 @@ export default function TopUpPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="relative">
         <div className="mx-auto max-w-7xl px-5 pb-16 lg:px-8">
           <div className="relative overflow-hidden rounded-[28px] border border-blue-500/20 bg-gradient-to-br from-blue-600/15 via-[#0b1120] to-[#0b1120] px-6 py-9 sm:px-10">
@@ -293,11 +273,9 @@ export default function TopUpPage() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer className="border-t border-white/[0.05]">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <p>© 2026 7 April Store. All rights reserved.</p>
-
           <p>Gaming Marketplace Indonesia</p>
         </div>
       </footer>
