@@ -1,14 +1,23 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  ArrowUpRight,
   BadgeCheck,
+  Camera,
   ChevronRight,
   Gamepad2,
+  Mail,
+  MessageCircle,
+  Play,
   Search,
   ShieldCheck,
   Sparkles,
   Zap,
 } from "lucide-react";
+
+import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
+
+const whatsappUrl = "https://wa.me/6285960237306";
 
 const products = [
   {
@@ -30,56 +39,7 @@ export default function TopUpPage() {
         <div className="absolute -right-40 top-[420px] h-[400px] w-[400px] rounded-full bg-violet-600/10 blur-[120px]" />
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#050914]/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-[74px] max-w-7xl items-center justify-between px-5 lg:px-8">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 font-black shadow-[0_0_30px_rgba(37,99,235,0.35)]">
-              7A
-            </div>
-
-            <div>
-              <p className="text-[15px] font-bold leading-tight">
-                7 April Store
-              </p>
-              <p className="mt-0.5 text-[11px] text-slate-500">
-                Gaming Marketplace
-              </p>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-8 text-[13px] font-medium text-slate-400 md:flex">
-            <Link href="/" className="transition hover:text-white">
-              Beranda
-            </Link>
-            <Link href="/topup" className="text-white">
-              Top Up
-            </Link>
-            <Link href="/akun" className="transition hover:text-white">
-              Jual Akun
-            </Link>
-            <Link href="/rekber" className="transition hover:text-white">
-              Rekber
-            </Link>
-            <Link href="/rental" className="transition hover:text-white">
-              Rental
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <button className="hidden h-10 w-10 items-center justify-center rounded-xl border border-white/10 text-slate-400 transition hover:bg-white/5 hover:text-white sm:flex">
-              <Search size={18} />
-            </button>
-
-            <button className="hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/5 sm:block">
-              Login
-            </button>
-
-            <button className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold transition hover:bg-blue-500">
-              Daftar
-            </button>
-          </div>
-        </div>
-      </header>
+      <PromoBannerCarousel />
 
       <section className="relative">
         <div className="mx-auto max-w-7xl px-5 pb-10 pt-14 lg:px-8 lg:pb-14 lg:pt-20">
@@ -119,6 +79,7 @@ export default function TopUpPage() {
           <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="flex items-center justify-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
               <Zap size={18} className="text-yellow-400" />
+
               <div>
                 <p className="text-xs font-bold">Proses Cepat</p>
                 <p className="text-[10px] text-slate-500">Sistem otomatis</p>
@@ -127,6 +88,7 @@ export default function TopUpPage() {
 
             <div className="flex items-center justify-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
               <ShieldCheck size={18} className="text-emerald-400" />
+
               <div>
                 <p className="text-xs font-bold">Pembayaran Aman</p>
                 <p className="text-[10px] text-slate-500">
@@ -137,6 +99,7 @@ export default function TopUpPage() {
 
             <div className="flex items-center justify-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
               <BadgeCheck size={18} className="text-blue-400" />
+
               <div>
                 <p className="text-xs font-bold">7 April Store</p>
                 <p className="text-[10px] text-slate-500">
@@ -154,6 +117,7 @@ export default function TopUpPage() {
             <div>
               <div className="mb-2 flex items-center gap-2 text-blue-400">
                 <Gamepad2 size={18} />
+
                 <span className="text-xs font-bold uppercase tracking-[0.18em]">
                   Daftar Game
                 </span>
@@ -273,10 +237,218 @@ export default function TopUpPage() {
         </div>
       </section>
 
-      <footer className="border-t border-white/[0.05]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p>© 2026 7 April Store. All rights reserved.</p>
-          <p>Gaming Marketplace Indonesia</p>
+      <footer className="border-t border-slate-800 bg-[#050b18]">
+        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-lg font-black text-white shadow-[0_0_25px_rgba(37,99,235,0.35)]">
+                  7A
+                </div>
+
+                <div>
+                  <h2 className="text-lg font-bold text-white">
+                    7 April Store
+                  </h2>
+                  <p className="text-xs text-slate-500">Gaming Marketplace</p>
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm leading-6 text-slate-400">
+                Layanan pembelian produk digital untuk kebutuhan game. Pilih
+                produk, masukkan data akun dengan benar, lalu selesaikan
+                pembayaran dengan aman.
+              </p>
+
+              <div className="mt-5 flex items-start gap-3 rounded-xl border border-emerald-500/15 bg-emerald-500/5 p-3">
+                <ShieldCheck
+                  size={18}
+                  className="mt-0.5 shrink-0 text-emerald-400"
+                />
+
+                <p className="text-xs leading-5 text-slate-400">
+                  Pastikan UID dan nominal sudah benar sebelum melakukan
+                  pembayaran produk digital.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-white">
+                Produk & Layanan
+              </h3>
+
+              <div className="mt-4 flex flex-col gap-3 text-sm">
+                <Link
+                  href="/topup"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Top Up Game
+                </Link>
+
+                <Link
+                  href="/topup/free-fire"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Top Up Free Fire
+                </Link>
+
+                <Link
+                  href="/akun"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Jual Akun
+                </Link>
+
+                <Link
+                  href="/rekber"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Rekber
+                </Link>
+
+                <Link
+                  href="/rental"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Rental
+                </Link>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-white">
+                Bantuan Pelanggan
+              </h3>
+
+              <div className="mt-4 flex flex-col gap-3 text-sm">
+                <Link
+                  href="/topup"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Cara Melakukan Top Up
+                </Link>
+
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Hubungi Customer Service
+                </a>
+
+                <a
+                  href="mailto:akun7april@gmail.com"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Email Bantuan
+                </a>
+
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 font-medium text-blue-400 transition hover:text-blue-300"
+                >
+                  Chat WhatsApp
+                  <ArrowUpRight size={14} />
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-white">Informasi</h3>
+
+              <div className="mt-4 flex flex-col gap-3 text-sm">
+                <Link
+                  href="/syarat-ketentuan"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Syarat dan Ketentuan
+                </Link>
+
+                <Link
+                  href="/kebijakan-privasi"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Kebijakan Privasi
+                </Link>
+
+                <Link
+                  href="/kebijakan-refund"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Kebijakan Refund
+                </Link>
+
+                <p className="pt-1 text-xs leading-5 text-slate-600">
+                  Produk digital yang telah berhasil diproses tidak dapat
+                  dibatalkan.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-white">
+                Ikuti 7 April Store
+              </h3>
+
+              <div className="mt-4 flex flex-col gap-3 text-sm">
+                <a
+                  href="https://www.instagram.com/falintino07"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 text-slate-400 transition hover:text-pink-400"
+                >
+                  <Camera size={17} />
+                  Instagram
+                </a>
+
+                <a
+                  href="https://www.tiktok.com/@aprilfullskin"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 text-slate-400 transition hover:text-white"
+                >
+                  <Play size={17} />
+                  TikTok
+                </a>
+
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 text-slate-400 transition hover:text-emerald-400"
+                >
+                  <MessageCircle size={17} />
+                  WhatsApp
+                </a>
+
+                <a
+                  href="mailto:akun7april@gmail.com"
+                  className="flex items-center gap-2 text-slate-400 transition hover:text-blue-400"
+                >
+                  <Mail size={17} />
+                  Email Support
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-3 border-t border-slate-800 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              © {new Date().getFullYear()} 7 April Store. Semua hak dilindungi.
+            </p>
+
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              <span>Produk Digital</span>
+              <span>•</span>
+              <span>Gaming Marketplace Indonesia</span>
+              <span>•</span>
+              <span>Transaksi melalui website 7 April Store</span>
+            </div>
+          </div>
         </div>
       </footer>
     </main>

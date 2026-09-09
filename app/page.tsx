@@ -8,6 +8,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
 import Hero from "@/components/hero/Hero";
 import QuickMenu from "@/components/quick-menu/QuickMenu";
 import ServicesGrid from "@/components/services/ServicesGrid";
@@ -18,6 +19,7 @@ const whatsappUrl = "https://wa.me/6285960237306";
 export default function Home() {
   return (
     <main className="bg-[#030712]">
+      <PromoBannerCarousel />
       <Hero />
       <QuickMenu />
       <ServicesGrid />
@@ -51,6 +53,7 @@ export default function Home() {
                   size={18}
                   className="mt-0.5 shrink-0 text-emerald-400"
                 />
+
                 <p className="text-xs leading-5 text-slate-400">
                   Pastikan UID dan nominal sudah benar sebelum melakukan
                   pembayaran produk digital.
