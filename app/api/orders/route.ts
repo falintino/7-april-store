@@ -1,78 +1,81 @@
 import { NextResponse } from "next/server";
+
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 function generateInvoice() {
   const now = new Date();
 
-  const year = now
-    .getFullYear()
-    .toString();
+  const year = now.getFullYear().toString();
 
-  const month = String(
-    now.getMonth() + 1
-  ).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, "0");
 
-  const day = String(
-    now.getDate()
-  ).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
 
-  const random =
-    Math.floor(
-      100000 +
-        Math.random() * 900000
-    );
+  const random = Math.floor(100000 + Math.random() * 900000);
 
   return `7A-${year}${month}${day}-${random}`;
 }
 
 async function createUniqueInvoice() {
-  for (
-    let attempt = 0;
-    attempt < 5;
-    attempt++
-  ) {
-    const invoice =
-      generateInvoice();
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const invoice = generateInvoice();
 
-    const existing =
-      await prisma.order.findUnique({
-        where: {
-          invoice,
-        },
+    const existing = await prisma.order.findUnique({
+      where: {
+        invoice,
+      },
 
-        select: {
-          id: true,
-        },
-      });
+      select: {
+        id: true,
+      },
+    });
 
     if (!existing) {
       return invoice;
     }
   }
 
-  throw new Error(
-    "Gagal membuat nomor invoice unik."
-  );
+  throw new Error("Gagal membuat nomor invoice unik.");
 }
 
-export async function POST(
-  request: Request
-) {
+export async function POST(request: Request) {
   try {
-    const body =
-      await request.json();
+    /*
+     * =====================================
+     * CUSTOMER LOGIN OPSIONAL
+     * =====================================
+     *
+     * Checkout tidak pernah mewajibkan login.
+     *
+     * Jika pengunjung belum login:
+     * customer akan null dan order tetap dibuat.
+     *
+     * Jika pengunjung sedang login:
+     * customerId disimpan ke order agar nanti
+     * muncul di halaman "Pesanan Saya".
+     */
+    const session = await getSession();
 
-    const uid = String(
-      body.uid ?? ""
-    ).trim();
+    const customer = session
+      ? await prisma.customer.findUnique({
+          where: {
+            id: session.id,
+          },
 
-    const whatsapp = String(
-      body.whatsapp ?? ""
-    ).trim();
+          select: {
+            id: true,
+          },
+        })
+      : null;
 
-    const productId = String(
-      body.productId ?? ""
-    ).trim();
+    const body = await request.json();
+
+    const uid = String(body.uid ?? "").trim();
+
+    const whatsapp = String(body.whatsapp ?? "").trim();
+
+    const productId = String(body.productId ?? "").trim();
 
     /*
      * =====================================
@@ -97,20 +100,15 @@ export async function POST(
      * oleh server dari database.
      */
 
-    if (
-      !uid ||
-      !whatsapp ||
-      !productId
-    ) {
+    if (!uid || !whatsapp || !productId) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Data pesanan belum lengkap.",
+          message: "Data pesanan belum lengkap.",
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -120,18 +118,15 @@ export async function POST(
      * =====================================
      */
 
-    if (
-      !/^\d{6,}$/.test(uid)
-    ) {
+    if (!/^\d{6,}$/.test(uid)) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "UID Free Fire tidak valid.",
+          message: "UID Free Fire tidak valid.",
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -141,20 +136,15 @@ export async function POST(
      * =====================================
      */
 
-    if (
-      !/^\d{10,15}$/.test(
-        whatsapp
-      )
-    ) {
+    if (!/^\d{10,15}$/.test(whatsapp)) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Nomor WhatsApp tidak valid.",
+          message: "Nomor WhatsApp tidak valid.",
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -178,23 +168,21 @@ export async function POST(
      * modal Digiflazz saat ini.
      */
 
-    const product =
-      await prisma.product.findUnique({
-        where: {
-          id: productId,
-        },
-      });
+    const product = await prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+    });
 
     if (!product) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Produk tidak ditemukan di database.",
+          message: "Produk tidak ditemukan di database.",
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -208,12 +196,11 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Produk sedang tidak aktif.",
+          message: "Produk sedang tidak aktif.",
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -232,26 +219,21 @@ export async function POST(
      * tetap dikenali sebagai Free Fire.
      */
 
-    const normalizedGame =
-      product.game
-        .trim()
-        .toLowerCase()
-        .replace(/[_-]+/g, " ")
-        .replace(/\s+/g, " ");
+    const normalizedGame = product.game
+      .trim()
+      .toLowerCase()
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ");
 
-    if (
-      normalizedGame !==
-      "free fire"
-    ) {
+    if (normalizedGame !== "free fire") {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Produk yang dipilih bukan produk Free Fire.",
+          message: "Produk yang dipilih bukan produk Free Fire.",
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -307,14 +289,11 @@ export async function POST(
      * subtotal TIDAK berubah.
      */
 
-    const subtotal =
-      product.price;
+    const subtotal = product.price;
 
-    const discountAmount =
-      0;
+    const discountAmount = 0;
 
-    const total =
-      subtotal;
+    const total = subtotal;
 
     /*
      * =====================================
@@ -348,8 +327,7 @@ export async function POST(
      * provider terbaru berubah.
      */
 
-    const providerPriceSnapshot =
-      product.providerPrice;
+    const providerPriceSnapshot = product.providerPrice;
 
     /*
      * =====================================
@@ -357,21 +335,15 @@ export async function POST(
      * =====================================
      */
 
-    if (
-      !Number.isInteger(
-        subtotal
-      ) ||
-      subtotal <= 0
-    ) {
+    if (!Number.isInteger(subtotal) || subtotal <= 0) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Harga produk tidak valid.",
+          message: "Harga produk tidak valid.",
         },
         {
           status: 500,
-        }
+        },
       );
     }
 
@@ -384,21 +356,15 @@ export async function POST(
      * sehingga harus selalu 0.
      */
 
-    if (
-      !Number.isInteger(
-        discountAmount
-      ) ||
-      discountAmount < 0
-    ) {
+    if (!Number.isInteger(discountAmount) || discountAmount < 0) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Nilai diskon tidak valid.",
+          message: "Nilai diskon tidak valid.",
         },
         {
           status: 500,
-        }
+        },
       );
     }
 
@@ -408,19 +374,15 @@ export async function POST(
      * =====================================
      */
 
-    if (
-      !Number.isInteger(total) ||
-      total <= 0
-    ) {
+    if (!Number.isInteger(total) || total <= 0) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Total pesanan tidak valid.",
+          message: "Total pesanan tidak valid.",
         },
         {
           status: 500,
-        }
+        },
       );
     }
 
@@ -431,20 +393,17 @@ export async function POST(
      */
 
     if (
-      !Number.isInteger(
-        providerPriceSnapshot
-      ) ||
+      !Number.isInteger(providerPriceSnapshot) ||
       providerPriceSnapshot <= 0
     ) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Harga provider tidak valid.",
+          message: "Harga provider tidak valid.",
         },
         {
           status: 500,
-        }
+        },
       );
     }
 
@@ -466,31 +425,22 @@ export async function POST(
      * sudah dijual rugi.
      */
 
-    if (
-      subtotal <
-      providerPriceSnapshot
-    ) {
-      console.error(
-        "CREATE ORDER BELOW PROVIDER PRICE:",
-        {
-          productId:
-            product.id,
+    if (subtotal < providerPriceSnapshot) {
+      console.error("CREATE ORDER BELOW PROVIDER PRICE:", {
+        productId: product.id,
 
-          sku:
-            product.sku,
-        }
-      );
+        sku: product.sku,
+      });
 
       return NextResponse.json(
         {
           success: false,
 
-          message:
-            "Harga produk sedang diperbarui. Silakan coba lagi.",
+          message: "Harga produk sedang diperbarui. Silakan coba lagi.",
         },
         {
           status: 409,
-        }
+        },
       );
     }
 
@@ -500,8 +450,7 @@ export async function POST(
      * =====================================
      */
 
-    const invoice =
-      await createUniqueInvoice();
+    const invoice = await createUniqueInvoice();
 
     /*
      * =====================================
@@ -513,71 +462,77 @@ export async function POST(
      *
      * Browser tidak mempunyai kesempatan
      * untuk menentukan nilai-nilai ini.
+     *
+     * customerId hanya terisi jika customer
+     * sedang login. Untuk guest checkout
+     * nilainya null dan order tetap dibuat.
      */
 
-    const order =
-      await prisma.order.create({
-        data: {
-          invoice,
+    const order = await prisma.order.create({
+      data: {
+        invoice,
 
-          uid,
+        uid,
 
-          server: null,
+        server: null,
 
-          whatsapp,
+        whatsapp,
 
-          paymentMethod:
-            "PENDING",
+        paymentMethod: "PENDING",
 
-          paymentStatus:
-            "PENDING",
+        paymentStatus: "PENDING",
 
-          providerStatus:
-            "PENDING",
+        providerStatus: "PENDING",
 
-          /*
-           * Harga jual sebelum promo.
-           */
-          subtotal,
+        /*
+         * Harga jual sebelum promo.
+         */
+        subtotal,
 
-          /*
-           * Order baru belum memiliki promo.
-           */
-          discountAmount,
+        /*
+         * Order baru belum memiliki promo.
+         */
+        discountAmount,
 
-          /*
-           * Total awal sama dengan subtotal.
-           *
-           * Jika promo diskon diterapkan
-           * nanti, backend Midtrans yang
-           * akan memperbarui total.
-           */
-          total,
+        /*
+         * Total awal sama dengan subtotal.
+         *
+         * Jika promo diskon diterapkan
+         * nanti, backend Midtrans yang
+         * akan memperbarui total.
+         */
+        total,
 
-          /*
-           * Snapshot modal provider.
-           */
-          providerPriceSnapshot,
+        /*
+         * Snapshot modal provider.
+         */
+        providerPriceSnapshot,
 
-          productId:
-            product.id,
-        },
+        /*
+         * Login bersifat opsional.
+         *
+         * customer null berarti guest checkout.
+         */
+        customerId: customer?.id,
 
-        include: {
-          product: {
-            select: {
-              id: true,
-              game: true,
-              name: true,
-              sku: true,
-              providerCode: true,
-              price: true,
-              providerPrice: true,
-              popular: true,
-            },
+        productId: product.id,
+      },
+
+      include: {
+        product: {
+          select: {
+            id: true,
+            game: true,
+            name: true,
+            sku: true,
+            providerCode: true,
+            price: true,
+            providerPrice: true,
+            popular: true,
           },
         },
-      });
+      },
+    });
 
     /*
      * =====================================
@@ -599,84 +554,65 @@ export async function POST(
       {
         success: true,
 
-        message:
-          "Pesanan berhasil dibuat.",
+        message: "Pesanan berhasil dibuat.",
 
         order: {
-          id:
-            order.id,
+          id: order.id,
 
-          invoice:
-            order.invoice,
+          invoice: order.invoice,
 
-          uid:
-            order.uid,
+          uid: order.uid,
 
-          whatsapp:
-            order.whatsapp,
+          whatsapp: order.whatsapp,
 
           /*
            * Harga sebelum promo.
            */
-          subtotal:
-            order.subtotal,
+          subtotal: order.subtotal,
 
           /*
            * Diskon awal selalu 0.
            */
-          discountAmount:
-            order.discountAmount,
+          discountAmount: order.discountAmount,
 
           /*
            * Total awal.
            */
-          total:
-            order.total,
+          total: order.total,
 
-          paymentStatus:
-            order.paymentStatus,
+          paymentStatus: order.paymentStatus,
 
-          providerStatus:
-            order.providerStatus,
+          providerStatus: order.providerStatus,
 
           product: {
-            id:
-              order.product.id,
+            id: order.product.id,
 
-            game:
-              order.product.game,
+            game: order.product.game,
 
-            name:
-              order.product.name,
+            name: order.product.name,
 
-            sku:
-              order.product.sku,
+            sku: order.product.sku,
 
-            price:
-              order.product.price,
+            price: order.product.price,
           },
         },
       },
       {
         status: 201,
-      }
+      },
     );
   } catch (error) {
-    console.error(
-      "CREATE ORDER ERROR:",
-      error
-    );
+    console.error("CREATE ORDER ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
 
-        message:
-          "Terjadi kesalahan saat membuat pesanan.",
+        message: "Terjadi kesalahan saat membuat pesanan.",
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

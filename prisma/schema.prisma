@@ -30,6 +30,46 @@ model Product {
   promoCodes PromoCode[]
 }
 
+/*
+ * =========================================
+ * CUSTOMER / AKUN PELANGGAN
+ * =========================================
+ *
+ * Data akun yang dibuat pelanggan ketika
+ * mendaftar di website.
+ *
+ * Password wajib disimpan dalam bentuk hash,
+ * bukan password asli.
+ */
+model Customer {
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  whatsapp String @unique
+  password String
+
+  /*
+   * Untuk pengembangan nanti.
+   *
+   * CUSTOMER = akun pelanggan biasa.
+   * Jangan mengubah menjadi ADMIN secara
+   * manual tanpa sistem admin yang aman.
+   */
+  role String @default("CUSTOMER")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /*
+   * Semua pesanan yang dibuat saat customer
+   * sedang login akan terhubung ke akun ini.
+   */
+  orders Order[]
+
+  @@index([whatsapp])
+  @@index([createdAt])
+}
+
 model Order {
   id             String   @id @default(cuid())
   invoice        String   @unique
@@ -76,6 +116,22 @@ model Order {
 
   productId String
   product   Product @relation(fields: [productId], references: [id])
+
+  /*
+   * =========================================
+   * CUSTOMER / AKUN PELANGGAN
+   * =========================================
+   *
+   * Nullable agar pesanan lama dan pesanan
+   * tanpa login tetap aman.
+   *
+   * Pesanan baru dari customer yang login
+   * akan menyimpan customerId di sini,
+   * sehingga dapat ditampilkan pada halaman
+   * "Pesanan Saya".
+   */
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   payment Payment?
 
@@ -147,6 +203,7 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([customerId])
   @@index([promoCodeId])
   @@index([affiliateId])
   @@index([whatsapp])

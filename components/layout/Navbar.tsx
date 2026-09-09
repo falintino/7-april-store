@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   ChevronRight,
   CircleHelp,
@@ -57,12 +58,60 @@ const additionalMenuItems = [
   },
 ];
 
-export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+type Customer = {
+  id: string;
+  name: string;
+  email: string;
+};
 
-  const closeMenu = () => {
+export default function Navbar() {
+  const pathname = usePathname();
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadCustomer() {
+      setIsLoadingCustomer(true);
+
+      try {
+        const response = await fetch("/api/auth/me", {
+          cache: "no-store",
+        });
+
+        const result = (await response.json()) as {
+          customer: Customer | null;
+        };
+
+        if (isActive) {
+          setCustomer(result.customer ?? null);
+        }
+      } catch {
+        if (isActive) {
+          setCustomer(null);
+        }
+      } finally {
+        if (isActive) {
+          setIsLoadingCustomer(false);
+        }
+      }
+    }
+
+    void loadCustomer();
+
+    return () => {
+      isActive = false;
+    };
+  }, [pathname]);
+
+  function closeMenu() {
     setIsMenuOpen(false);
-  };
+  }
+
+  const customerFirstName = customer?.name.split(" ")[0] ?? "";
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#030712]/95 backdrop-blur-xl">
@@ -123,26 +172,45 @@ export default function Navbar() {
             <ShoppingCart size={20} />
           </Button>
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="hidden text-slate-300 sm:inline-flex"
-            aria-label="Akun"
+          <Link
+            href="/profil"
+            onClick={closeMenu}
+            className="hidden h-10 w-10 items-center justify-center rounded-md text-slate-300 transition hover:bg-white/10 hover:text-white sm:inline-flex"
+            aria-label="Akun saya"
           >
             <User size={20} />
-          </Button>
+          </Link>
 
-          <Button className="hidden rounded-xl bg-blue-600 px-6 hover:bg-blue-500 md:flex">
-            Login
-          </Button>
+          {isLoadingCustomer ? (
+            <div className="hidden h-10 w-24 animate-pulse rounded-xl bg-white/[0.06] md:block" />
+          ) : customer ? (
+            <Link
+              href="/profil"
+              onClick={closeMenu}
+              className="hidden max-w-40 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500 md:inline-flex"
+            >
+              <User size={17} />
+              <span className="truncate">Halo, {customerFirstName}</span>
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                onClick={closeMenu}
+                className="hidden rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500 md:inline-flex"
+              >
+                Login
+              </Link>
 
-          <Button
-            variant="outline"
-            className="hidden rounded-xl border-blue-600 text-white hover:bg-blue-600 hover:text-white md:flex"
-          >
-            Daftar
-          </Button>
+              <Link
+                href="/daftar"
+                onClick={closeMenu}
+                className="hidden rounded-xl border border-blue-600 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-blue-600 md:inline-flex"
+              >
+                Daftar
+              </Link>
+            </>
+          )}
 
           <Button
             type="button"
@@ -177,6 +245,20 @@ export default function Navbar() {
                   <ChevronRight size={18} className="text-slate-500" />
                 </Link>
               ))}
+
+              <Link
+                href="/profil"
+                onClick={closeMenu}
+                className="flex items-center justify-between rounded-xl border border-blue-500/25 bg-blue-500/10 px-4 py-3.5 text-sm font-semibold text-blue-100 transition hover:bg-blue-500/20"
+              >
+                <span className="flex items-center gap-3">
+                  <User size={19} className="text-blue-400" />
+                  {customer
+                    ? `Halo, ${customerFirstName}`
+                    : "Akun Saya & Pesanan"}
+                </span>
+                <ChevronRight size={18} className="text-blue-300" />
+              </Link>
             </nav>
 
             <p className="mb-3 mt-6 text-xs font-bold uppercase tracking-[0.18em] text-blue-400">
@@ -237,23 +319,35 @@ export default function Navbar() {
               })}
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3 border-t border-white/[0.08] pt-5">
-              <Button
-                type="button"
-                onClick={closeMenu}
-                className="rounded-xl bg-blue-600 py-5 font-bold hover:bg-blue-500"
-              >
-                Login
-              </Button>
+            <div className="mt-5 border-t border-white/[0.08] pt-5">
+              {customer ? (
+                <Link
+                  href="/profil"
+                  onClick={closeMenu}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white transition hover:bg-blue-500"
+                >
+                  <User size={18} />
+                  Buka Akun Saya
+                </Link>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href="/login"
+                    onClick={closeMenu}
+                    className="flex items-center justify-center rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white transition hover:bg-blue-500"
+                  >
+                    Login
+                  </Link>
 
-              <Button
-                type="button"
-                variant="outline"
-                onClick={closeMenu}
-                className="rounded-xl border-blue-600 py-5 font-bold text-white hover:bg-blue-600 hover:text-white"
-              >
-                Daftar
-              </Button>
+                  <Link
+                    href="/daftar"
+                    onClick={closeMenu}
+                    className="flex items-center justify-center rounded-xl border border-blue-600 py-3.5 text-sm font-bold text-white transition hover:bg-blue-600"
+                  >
+                    Daftar
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
