@@ -16,10 +16,10 @@ export default function GameCard({
   href,
 }: GameCardProps) {
   return (
-    <motion.div whileHover={{ y: -6 }}>
+    <motion.div whileHover={{ y: -6 }} className="h-full">
       <Link
         href={href}
-        className="group block overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 transition duration-300 hover:border-blue-500 hover:shadow-[0_0_35px_rgba(37,99,235,.2)]"
+        className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 transition duration-300 hover:border-blue-500 hover:shadow-[0_0_35px_rgba(37,99,235,.2)]"
       >
         <div className="aspect-[4/5] overflow-hidden">
           <img
@@ -29,16 +29,16 @@ export default function GameCard({
           />
         </div>
 
-        <div className="p-5">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-white">
+        <div className="flex min-h-[116px] flex-col p-5">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="min-h-12 font-bold leading-6 text-white">
               {title}
             </h3>
 
-            <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-blue-500" />
+            <ArrowRight className="mt-0.5 h-5 w-5 shrink-0 text-slate-400 group-hover:text-blue-500" />
           </div>
 
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-auto pt-2 text-sm text-slate-400">
             Top Up Sekarang
           </p>
         </div>
