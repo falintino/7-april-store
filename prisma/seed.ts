@@ -78,6 +78,26 @@ async function main() {
       popular: true,
       active: true,
     },
+    {
+      game: "Free Fire",
+      name: "Membership Mingguan",
+      sku: "FF_MEMBERSHIP_WEEKLY",
+      providerCode: "FF_ID_MM",
+      price: 26000,
+      providerPrice: 25365,
+      popular: true,
+      active: true,
+    },
+    {
+      game: "Free Fire",
+      name: "Membership Bulanan",
+      sku: "FF_MEMBERSHIP_MONTHLY",
+      providerCode: "FF_ID_MB",
+      price: 77000,
+      providerPrice: 76045,
+      popular: true,
+      active: true,
+    },
   ];
 
   for (const product of products) {
@@ -108,6 +128,7 @@ async function main() {
   console.log("✅ Sinkronisasi produk Free Fire selesai.");
   console.log("✅ Histori order lama tetap aman.");
   console.log("✅ Produk 720 dan 1450 Diamond dinonaktifkan.");
+  console.log("✅ Membership Mingguan dan Bulanan sudah ditambahkan.");
 }
 
 main()

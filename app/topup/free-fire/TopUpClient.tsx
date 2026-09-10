@@ -506,17 +506,35 @@ export default function TopUpClient({
 
   const diamondProducts =
     useMemo(() => {
-      return [
-        ...products,
-      ].sort(
-        (a, b) =>
-          a.price -
-          b.price
-      );
+      return products
+        .filter(
+          (product) =>
+            !product.sku.startsWith(
+              "FF_MEMBERSHIP_"
+            )
+        )
+        .sort(
+          (a, b) =>
+            a.price -
+            b.price
+        );
     }, [products]);
 
-  const membershipProducts:
-    Product[] = [];
+  const membershipProducts =
+    useMemo(() => {
+      return products
+        .filter(
+          (product) =>
+            product.sku.startsWith(
+              "FF_MEMBERSHIP_"
+            )
+        )
+        .sort(
+          (a, b) =>
+            a.price -
+            b.price
+        );
+    }, [products]);
 
   const displayedProducts =
     activeCategory ===
@@ -694,18 +712,13 @@ export default function TopUpClient({
 
     resetPromoValidation();
 
-    if (
-      category ===
-      "membership"
-    ) {
-      setSelectedProductId(
-        ""
-      );
+    setSelectedProductId(
+      ""
+    );
 
-      setSelectedPaymentMethod(
-        null
-      );
-    }
+    setSelectedPaymentMethod(
+      null
+    );
 
     setErrorMessage("");
   }
@@ -1502,7 +1515,10 @@ try {
                     )}
 
                     <div className="text-lg">
-                      💎
+                      {activeCategory ===
+                      "membership"
+                        ? "🎟"
+                        : "💎"}
                     </div>
 
                     <p className="mt-3 text-sm font-bold text-white">
@@ -1527,8 +1543,10 @@ try {
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-white/10 py-10 text-center text-sm text-slate-500">
-            Membership segera
-            tersedia.
+            {activeCategory ===
+            "membership"
+              ? "Membership belum tersedia."
+              : "Diamond belum tersedia."}
           </div>
         )}
       </div>
