@@ -2,7 +2,9 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   Camera,
+  ExternalLink,
   Mail,
+  Newspaper,
   MessageCircle,
   Play,
   ShieldCheck,
@@ -16,6 +18,29 @@ import GamesGrid from "@/components/games/GamesGrid";
 
 const whatsappUrl = "https://wa.me/6285960237306";
 
+const ownerPress = [
+  {
+    outlet: "Liputan6",
+    title: "Bangganya Falintino Raih Silver Play Button dari YouTube",
+    href: "https://www.liputan6.com/showbiz/read/7893513/bangganya-falintino-raih-silver-play-button-dari-youtube-tepis-stigma-main-game-tak-bermanfaat",
+  },
+  {
+    outlet: "RRI",
+    title: "Kreator Asal Kalimantan Barat Nilai Ekonomi Digital Peluang Baru",
+    href: "https://rri.co.id/jakarta/ekonomi/umkm/2508921/kreator-asal-kalimantan-barat-nilai-ekonomi-digital-peluang-baru-bagi-anak-muda",
+  },
+  {
+    outlet: "Metro TV",
+    title: "Teknologi Digital Jadi Solusi Anak Muda Daerah Tanpa Merantau",
+    href: "https://www.metrotvnews.com/read/bVDCP1BJ-teknologi-digital-jadi-solusi-anak-muda-daerah-tanpa-merantau",
+  },
+  {
+    outlet: "VIVA",
+    title: "Gagal Jadi Polisi, Kini Raup Cuan dari Dunia Digital",
+    href: "https://techno.viva.co.id/platform/30678-gagal-jadi-polisi-pemuda-kalbar-ini-kini-raup-cuan-dari-dunia-digital",
+  },
+];
+
 export default function Home() {
   return (
     <main className="bg-[#030712]">
@@ -24,6 +49,58 @@ export default function Home() {
       <QuickMenu />
       <ServicesGrid />
       <GamesGrid />
+
+      <section className="border-t border-slate-800 bg-[#050b18] py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-blue-300">
+              <Newspaper size={16} />
+              Tentang Pemilik & Publikasi
+            </div>
+            <h2 className="mt-5 text-3xl font-black text-white sm:text-4xl">
+              Perjalanan Falintino di Media
+            </h2>
+            <p className="mt-4 leading-7 text-slate-400">
+              7 April Store dikelola oleh Falintino, kreator konten digital asal
+              Kabupaten Sambas. Publikasi berikut membahas perjalanan Falintino
+              sebagai kreator dan pelaku ekonomi digital.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            {ownerPress.map((article) => (
+              <a
+                key={article.href}
+                href={article.href}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex items-start justify-between gap-5 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 transition hover:border-blue-500/40 hover:bg-blue-500/5"
+              >
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-400">
+                    {article.outlet}
+                  </p>
+                  <h3 className="mt-3 font-bold leading-6 text-white">
+                    {article.title}
+                  </h3>
+                  <p className="mt-3 text-xs text-slate-500">
+                    Publikasi tentang pemilik 7 April Store
+                  </p>
+                </div>
+                <ExternalLink
+                  size={19}
+                  className="mt-1 shrink-0 text-slate-500 transition group-hover:text-blue-400"
+                />
+              </a>
+            ))}
+          </div>
+
+          <p className="mt-6 text-xs leading-5 text-slate-600">
+            Pencantuman artikel tidak berarti terdapat kerja sama atau dukungan
+            komersial antara media tersebut dan 7 April Store.
+          </p>
+        </div>
+      </section>
 
       <footer className="mt-12 border-t border-slate-800 bg-[#050b18]">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
