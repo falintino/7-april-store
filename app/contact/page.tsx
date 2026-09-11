@@ -31,7 +31,7 @@ const contactItems = [
     title: "Email Bantuan",
     value: "akun7april@gmail.com",
     description: "Sertakan nomor pesanan apabila berkaitan dengan transaksi.",
-    href: "mailto:akun7april@gmail.com",
+    href: "https://mail.google.com/mail/?view=cm&fs=1&to=akun7april@gmail.com&su=Bantuan%207%20April%20Store",
     icon: Mail,
   },
   {
