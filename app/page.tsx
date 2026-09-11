@@ -125,7 +125,9 @@ export default function Home() {
                 </Link>
 
                 <a
-                  href="mailto:akun7april@gmail.com"
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=akun7april@gmail.com&su=Bantuan%207%20April%20Store"
+                  target="_blank"
+                  rel="noreferrer"
                   className="text-slate-400 transition hover:text-blue-400"
                 >
                   Email Bantuan
@@ -219,7 +221,9 @@ export default function Home() {
                 </a>
 
                 <a
-                  href="mailto:akun7april@gmail.com"
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=akun7april@gmail.com&su=Bantuan%207%20April%20Store"
+                  target="_blank"
+                  rel="noreferrer"
                   className="flex items-center gap-2 text-slate-400 transition hover:text-blue-400"
                 >
                   <Mail size={17} />
