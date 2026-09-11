@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { processDigiflazzOrder } from "@/lib/digiflazz";
+import { processOrderDelivery } from "@/lib/order-delivery";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -64,7 +64,9 @@ async function checkPendingOrders(
         where: {
           paymentStatus: "PAID",
 
-          providerStatus: "PENDING",
+          providerStatus: {
+            in: ["PENDING", "FAILED", "REFUND_REQUIRED"],
+          },
 
           providerRefId: {
             not: null,
@@ -105,7 +107,7 @@ async function checkPendingOrders(
          * bukan membuat transaksi baru.
          */
         const result =
-          await processDigiflazzOrder(
+          await processOrderDelivery(
             order.id
           );
 
@@ -162,8 +164,9 @@ async function checkPendingOrders(
     const failedCount =
       results.filter(
         (item) =>
-          item.providerStatus ===
-          "FAILED"
+          ["FAILED", "REFUND_REQUIRED"].includes(
+            item.providerStatus
+          )
       ).length;
 
     return NextResponse.json({
