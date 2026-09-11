@@ -525,3 +525,27 @@ model Affiliate {
 
   @@index([active])
 }
+
+model AccountProduct {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  price         Int
+  discountPrice Int?
+  information   String
+  imageUrls     String[] @default([])
+  bundle        Int      @default(0)
+  evoGun        Int      @default(0)
+  emote         Int      @default(0)
+  level         Int      @default(0)
+  login         String
+  availability  String   @default("AVAILABLE")
+  active        Boolean  @default(true)
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([active])
+  @@index([availability])
+  @@index([createdAt])
+}
