@@ -104,14 +104,25 @@ async function requestRefund(orderId: string): Promise<DigiflazzProcessResult> {
     return { skipped: false, providerStatus: "REFUND_REQUIRED", refId: order.providerRefId ?? undefined, message: "Refund perlu diproses." };
   }
 
+  const serverKey = process.env.MIDTRANS_SERVER_KEY?.trim();
+  if (!serverKey) {
+    await prisma.order.updateMany({
+      where: { id: orderId, providerStatus: { in: ["FAILED", "REFUND_REQUIRED"] } },
+      data: {
+        providerStatus: "REFUND_REQUIRED",
+        providerMessage: "Refund menunggu konfigurasi Midtrans.",
+        providerUpdatedAt: new Date(),
+      },
+    });
+    return { skipped: false, providerStatus: "REFUND_REQUIRED", refId: order.providerRefId ?? undefined, message: "Refund menunggu konfigurasi Midtrans." };
+  }
+
   const claimed = await prisma.order.updateMany({
     where: { id: orderId, providerStatus: { in: ["FAILED", "REFUND_REQUIRED"] } },
     data: { providerStatus: "REFUND_PROCESSING", providerMessage: "Refund sedang diajukan.", providerUpdatedAt: new Date() },
   });
   if (claimed.count === 0) return { skipped: true, providerStatus: order.providerStatus, refId: order.providerRefId ?? undefined };
 
-  const serverKey = process.env.MIDTRANS_SERVER_KEY?.trim();
-  if (!serverKey) throw new Error("MIDTRANS_SERVER_KEY belum tersedia.");
   const production = process.env.MIDTRANS_IS_PRODUCTION?.trim() === "true";
   const refundKey = `${order.invoice}-AUTO-REFUND-1`;
 
