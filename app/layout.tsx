@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://7aprilstore.com"),
+  metadataBase: new URL("https://store.falintino.com"),
 
   title: {
     default: "7 April Store",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "7 April Store",
     description: "Marketplace Gaming Indonesia",
-    url: "https://7aprilstore.com",
+    url: "https://store.falintino.com",
     siteName: "7 April Store",
     locale: "id_ID",
     type: "website",
