@@ -299,6 +299,13 @@ export default async function AdminPage() {
             </Link>
 
             <Link
+              href="/admin/account-products"
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 px-5 text-sm font-bold text-blue-300 transition hover:bg-blue-500/20"
+            >
+              🎮 Kelola Akun Game
+            </Link>
+
+            <Link
               href="/admin/promos"
               className="inline-flex h-11 items-center justify-center rounded-xl border border-violet-500/20 bg-violet-500/10 px-5 text-sm font-bold text-violet-300 transition hover:bg-violet-500/20"
             >
