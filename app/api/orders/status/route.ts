@@ -62,6 +62,9 @@ export async function POST(
           invoice: true,
           paymentStatus: true,
           providerStatus: true,
+          providerMessage: true,
+          providerSn: true,
+          providerUpdatedAt: true,
         },
       });
 
