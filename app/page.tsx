@@ -117,14 +117,12 @@ export default function Home() {
                   Cara Melakukan Top Up
                 </Link>
 
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                <Link
+                  href="/contact"
                   className="text-slate-400 transition hover:text-blue-400"
                 >
                   Hubungi Customer Service
-                </a>
+                </Link>
 
                 <a
                   href="mailto:akun7april@gmail.com"
@@ -168,6 +166,13 @@ export default function Home() {
                   className="text-slate-400 transition hover:text-blue-400"
                 >
                   Kebijakan Refund
+                </Link>
+
+                <Link
+                  href="/contact"
+                  className="text-slate-400 transition hover:text-blue-400"
+                >
+                  Kontak & Identitas Usaha
                 </Link>
 
                 <p className="pt-1 text-xs leading-5 text-slate-600">
