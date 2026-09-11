@@ -72,6 +72,10 @@ export default function Navbar() {
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
 
   useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     let isActive = true;
 
     async function loadCustomer() {
@@ -136,6 +140,7 @@ export default function Navbar() {
             <Link
               key={item.label}
               href={item.href}
+              onClick={closeMenu}
               className="text-sm text-slate-300 transition hover:text-blue-500"
             >
               {item.label}
