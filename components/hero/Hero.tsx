@@ -24,7 +24,7 @@ export default function Hero() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm text-blue-400">
             <Star className="h-4 w-4 fill-current" />
-            Trusted Gaming Marketplace
+            Layanan Produk Digital Game
           </div>
 
           <h1 className="mt-8 text-5xl font-black leading-tight text-white md:text-7xl">
@@ -58,12 +58,12 @@ export default function Hero() {
           <div className="mt-12 flex flex-wrap gap-6 text-sm text-gray-400">
             <div className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-blue-500" />
-              24 Jam
+              Layanan Online
             </div>
 
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-blue-500" />
-              Aman
+              Bantuan Resmi
             </div>
 
             <div className="flex items-center gap-2">
@@ -71,7 +71,7 @@ export default function Hero() {
               QRIS
             </div>
 
-            <div className="flex items-center gap-2">⭐ 10.000+ Transaksi</div>
+            <div className="flex items-center gap-2">Informasi Harga Jelas</div>
           </div>
         </motion.div>
 
