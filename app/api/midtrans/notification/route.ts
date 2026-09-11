@@ -2,7 +2,8 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { assertPaymentModesMatch, processDigiflazzOrder } from "@/lib/digiflazz";
+import { assertPaymentModesMatch } from "@/lib/digiflazz";
+import { processOrderDelivery } from "@/lib/order-delivery";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -1051,7 +1052,7 @@ export async function POST(
     ) {
       try {
         digiflazzResult =
-          await processDigiflazzOrder(
+          await processOrderDelivery(
             order.id
           );
       } catch (error) {
