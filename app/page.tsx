@@ -20,24 +20,28 @@ const whatsappUrl = "https://wa.me/6285960237306";
 
 const ownerPress = [
   {
+    outlet: "Medcom.id",
+    title: "Profil dan Perjalanan Karier Falintino, Melejit Berkat Free Fire",
+    href: "https://www.medcom.id/hiburan/montase/4ba18d0b-profil-dan-perjalanan-karier-falintino-melejit-berkat-free-fire",
+    date: "7 September 2026",
+  },
+  {
+    outlet: "SINDOnews",
+    title: "Rahasia Mudah Booyah di Free Fire, Ini 10 Tips dari Falintino FF",
+    href: "https://lifestyle.sindonews.com/read/1723313/166/rahasia-mudah-booyah-di-free-fire-ini-10-tips-dari-kreator-konten-falintino-ff-1782814011",
+    date: "30 Juni 2026",
+  },
+  {
+    outlet: "Republika",
+    title: "Falintino FF Bongkar Rahasia Tingkatkan Skill Free Fire",
+    href: "https://ameera.republika.co.id/berita/thsspn425/kreator-gaming-falintino-ff-bongkar-rahasia-tingkatkan-skill-free-fire",
+    date: "7 Juli 2026",
+  },
+  {
     outlet: "Liputan6",
     title: "Bangganya Falintino Raih Silver Play Button dari YouTube",
     href: "https://www.liputan6.com/showbiz/read/7893513/bangganya-falintino-raih-silver-play-button-dari-youtube-tepis-stigma-main-game-tak-bermanfaat",
-  },
-  {
-    outlet: "RRI",
-    title: "Kreator Asal Kalimantan Barat Nilai Ekonomi Digital Peluang Baru",
-    href: "https://rri.co.id/jakarta/ekonomi/umkm/2508921/kreator-asal-kalimantan-barat-nilai-ekonomi-digital-peluang-baru-bagi-anak-muda",
-  },
-  {
-    outlet: "Metro TV",
-    title: "Teknologi Digital Jadi Solusi Anak Muda Daerah Tanpa Merantau",
-    href: "https://www.metrotvnews.com/read/bVDCP1BJ-teknologi-digital-jadi-solusi-anak-muda-daerah-tanpa-merantau",
-  },
-  {
-    outlet: "VIVA",
-    title: "Gagal Jadi Polisi, Kini Raup Cuan dari Dunia Digital",
-    href: "https://techno.viva.co.id/platform/30678-gagal-jadi-polisi-pemuda-kalbar-ini-kini-raup-cuan-dari-dunia-digital",
+    date: "18 Juni 2026",
   },
 ];
 
@@ -55,15 +59,15 @@ export default function Home() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-blue-300">
               <Newspaper size={16} />
-              Tentang Pemilik & Publikasi
+              Kreator di Balik 7 April Store
             </div>
             <h2 className="mt-5 text-3xl font-black text-white sm:text-4xl">
-              Perjalanan Falintino di Media
+              Pengalaman Gaming yang Diliput Media
             </h2>
             <p className="mt-4 leading-7 text-slate-400">
-              7 April Store dikelola oleh Falintino, kreator konten digital asal
-              Kabupaten Sambas. Publikasi berikut membahas perjalanan Falintino
-              sebagai kreator dan pelaku ekonomi digital.
+              7 April Store dikelola oleh Falintino, kreator gaming Free Fire asal
+              Kabupaten Sambas. Publikasi berikut membahas profil, pengalaman,
+              dan tips gaming Falintino di sejumlah media nasional.
             </p>
           </div>
 
@@ -84,7 +88,7 @@ export default function Home() {
                     {article.title}
                   </h3>
                   <p className="mt-3 text-xs text-slate-500">
-                    Publikasi tentang pemilik 7 April Store
+                    {article.date} · Publikasi tentang Falintino
                   </p>
                 </div>
                 <ExternalLink
