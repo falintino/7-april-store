@@ -24,12 +24,12 @@ const menus = [
   },
   {
     title: "Jual Akun",
-    href: "/jual-akun",
+    href: "/akun",
     icon: ShoppingCart,
   },
   {
     title: "Stok Akun",
-    href: "/stok-akun",
+    href: "/akun",
     icon: Boxes,
   },
   {
