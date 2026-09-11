@@ -19,11 +19,14 @@ export default function OrderAutoRefresh({
       paymentStatus === "PAID" ||
       paymentStatus === "FAILED" ||
       paymentStatus === "EXPIRED" ||
-      paymentStatus === "CANCELLED";
+      paymentStatus === "CANCELLED" ||
+      paymentStatus === "REFUNDED" ||
+      paymentStatus === "PARTIAL_REFUND";
 
     const providerFinished =
       providerStatus === "SUCCESS" ||
-      providerStatus === "FAILED";
+      providerStatus === "REFUNDED" ||
+      providerStatus === "PARTIAL_REFUND";
 
     /*
      * Kalau pembayaran dan top up sudah final,
