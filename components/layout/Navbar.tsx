@@ -52,8 +52,8 @@ const additionalMenuItems = [
   {
     label: "Bantuan",
     description: "Hubungi Customer Service",
-    href: whatsappUrl,
-    external: true,
+    href: "/contact",
+    external: false,
     icon: CircleHelp,
   },
 ];
