@@ -225,9 +225,14 @@ export default function Home() {
           </div>
 
           <div className="mt-10 flex flex-col gap-3 border-t border-slate-800 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>
-              © {new Date().getFullYear()} 7 April Store. Semua hak dilindungi.
-            </p>
+            <div>
+              <p>
+                © {new Date().getFullYear()} 7 April Store. Semua hak dilindungi.
+              </p>
+              <p className="mt-1 text-slate-600">
+                Dikelola oleh Falintino · NIB 2704260003348
+              </p>
+            </div>
 
             <div className="flex flex-wrap gap-x-4 gap-y-2">
               <span>Produk Digital</span>
