@@ -844,6 +844,20 @@ export async function POST(
           data: {
             paymentStatus,
 
+            ...(paymentStatus === "REFUNDED"
+              ? {
+                  providerStatus: "REFUNDED",
+                  providerMessage: "Dana telah dikembalikan melalui Midtrans.",
+                  providerUpdatedAt: new Date(),
+                }
+              : paymentStatus === "PARTIAL_REFUND"
+                ? {
+                    providerStatus: "PARTIAL_REFUND",
+                    providerMessage: "Sebagian dana telah dikembalikan melalui Midtrans.",
+                    providerUpdatedAt: new Date(),
+                  }
+                : {}),
+
             paymentMethod:
               paymentType ||
               order.paymentMethod,
@@ -1041,7 +1055,7 @@ export async function POST(
     let digiflazzResult:
       | Awaited<
           ReturnType<
-            typeof processDigiflazzOrder
+            typeof processOrderDelivery
           >
         >
       | null = null;
