@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { ensureAccountProductTable } from "@/lib/ensure-account-product-table";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -58,6 +59,7 @@ function readPayload(body: Record<string, unknown>) {
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ success: false }, { status: 401 });
+  await ensureAccountProductTable();
   const products = await prisma.accountProduct.findMany({ orderBy: { createdAt: "desc" } });
   return NextResponse.json({ success: true, products });
 }
@@ -65,6 +67,7 @@ export async function GET() {
 export async function POST(request: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ success: false }, { status: 401 });
   try {
+    await ensureAccountProductTable();
     const parsed = readPayload(await request.json());
     if ("error" in parsed) return NextResponse.json({ success: false, message: parsed.error }, { status: 400 });
     const product = await prisma.accountProduct.create({ data: parsed.data });
