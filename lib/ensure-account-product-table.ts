@@ -35,5 +35,27 @@ export async function ensureAccountProductTable() {
     await prisma.$executeRawUnsafe(statement);
   }
 
+  const productCount = await prisma.accountProduct.count();
+
+  if (productCount === 0) {
+    await prisma.accountProduct.create({
+      data: {
+        slug: "sultan-evo-15",
+        title: "Akun Sultan Evo 15",
+        price: 1500000,
+        information: "Akun Free Fire level 80 dengan 45 bundle, 8 Evo Gun, dan 120 emote. Konfirmasi koleksi, kondisi akun, dan metode serah terima kepada admin sebelum pembayaran.",
+        imageUrls: [],
+        bundle: 45,
+        evoGun: 8,
+        emote: 120,
+        level: 80,
+        login: "Google",
+        availability: "AVAILABLE",
+        active: true,
+        featured: true,
+      },
+    });
+  }
+
   ready = true;
 }
