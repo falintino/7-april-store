@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { ensureAccountProductTable } from "@/lib/ensure-account-product-table";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,6 +18,7 @@ function integer(value: unknown) {
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ success: false }, { status: 401 });
   try {
+    await ensureAccountProductTable();
     const { id } = await context.params;
     const body = await request.json();
     const title = String(body.title ?? "").trim();
