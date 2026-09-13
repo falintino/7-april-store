@@ -21,7 +21,7 @@ export default function ServiceCard({
 }: ServiceCardProps) {
   return (
     <motion.div
-      className="min-w-[230px] flex-none snap-start sm:min-w-[270px] lg:min-w-0"
+      className="h-full min-w-0"
       whileHover={{ y: -6 }}
       transition={{ duration: 0.2 }}
     >
@@ -31,17 +31,18 @@ export default function ServiceCard({
           group
           flex
           h-full
-          min-h-[220px]
+          min-h-[210px]
+          min-w-0
           flex-col
           justify-between
-          rounded-3xl
+          rounded-2xl
           border
-          p-5
+          p-4
           transition-all
           duration-300
-          sm:p-6
+          sm:rounded-3xl
+          sm:p-5
           lg:min-h-[250px]
-          lg:p-5
 
           ${
             featured
@@ -52,20 +53,20 @@ export default function ServiceCard({
           hover:shadow-[0_0_40px_rgba(37,99,235,.18)]
         `}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600/15">
-            <Icon className="h-6 w-6 text-blue-500 transition group-hover:scale-110" />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600/15 sm:h-12 sm:w-12 sm:rounded-2xl">
+            <Icon className="h-5 w-5 text-blue-500 transition group-hover:scale-110 sm:h-6 sm:w-6" />
           </div>
 
-          <ArrowUpRight className="h-5 w-5 text-slate-500 group-hover:text-blue-500" />
+          <ArrowUpRight className="h-4 w-4 shrink-0 text-slate-500 group-hover:text-blue-500 sm:h-5 sm:w-5" />
         </div>
 
-        <div className="mt-7">
-          <h3 className="text-xl font-bold text-white lg:text-lg xl:text-xl">
+        <div className="mt-5 min-w-0">
+          <h3 className="break-words text-base font-bold text-white sm:text-xl lg:text-lg xl:text-xl">
             {title}
           </h3>
 
-          <p className="mt-3 text-sm leading-6 text-slate-400">
+          <p className="mt-2 break-words text-xs leading-5 text-slate-400 sm:mt-3 sm:text-sm sm:leading-6">
             {description}
           </p>
         </div>
