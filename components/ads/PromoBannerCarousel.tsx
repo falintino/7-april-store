@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const banners = [
@@ -20,7 +19,7 @@ const banners = [
   },
   {
     src: "/images/banners/7-april-store-partnership.webp",
-    alt: "7 April Store terbuka untuk endorsement, banner promosi, dan partnership",
+    alt: "7 April Store terbuka untuk endorsement, affiliate, banner promosi, dan partnership",
     href: "/contact",
     position: "object-[42%_center] sm:object-center",
   },
@@ -40,16 +39,6 @@ export default function PromoBannerCarousel() {
     return () => window.clearInterval(interval);
   }, [paused]);
 
-  const showPrevious = () => {
-    setActiveIndex((current) =>
-      current === 0 ? banners.length - 1 : current - 1,
-    );
-  };
-
-  const showNext = () => {
-    setActiveIndex((current) => (current + 1) % banners.length);
-  };
-
   return (
     <section
       className="bg-[#030712] px-5 pb-3 pt-8 sm:px-8"
@@ -62,7 +51,7 @@ export default function PromoBannerCarousel() {
         onFocusCapture={() => setPaused(true)}
         onBlurCapture={() => setPaused(false)}
       >
-        <div className="group relative aspect-[2/1] overflow-hidden rounded-2xl border border-blue-400/20 bg-[#041126] shadow-[0_20px_70px_rgba(0,82,255,0.18)] sm:aspect-[5/1] sm:rounded-3xl">
+        <div className="relative aspect-[2/1] overflow-hidden rounded-2xl border border-blue-400/20 bg-[#041126] shadow-[0_20px_70px_rgba(0,82,255,0.18)] sm:aspect-[5/1] sm:rounded-3xl">
           {banners.map((banner, index) => {
             const active = index === activeIndex;
 
@@ -94,36 +83,13 @@ export default function PromoBannerCarousel() {
             );
           })}
 
-          <button
-            type="button"
-            aria-label="Banner sebelumnya"
-            onClick={showPrevious}
-            className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur transition hover:bg-black/55 sm:left-4 sm:h-10 sm:w-10"
-          >
-            <ChevronLeft size={20} />
-          </button>
-
-          <button
-            type="button"
-            aria-label="Banner berikutnya"
-            onClick={showNext}
-            className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur transition hover:bg-black/55 sm:right-4 sm:h-10 sm:w-10"
-          >
-            <ChevronRight size={20} />
-          </button>
-
-          <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2 sm:bottom-4">
+          <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2 sm:bottom-4">
             {banners.map((banner, index) => (
-              <button
+              <span
                 key={banner.src}
-                type="button"
-                aria-label={`Tampilkan banner ${index + 1}`}
-                aria-current={index === activeIndex ? "true" : undefined}
-                onClick={() => setActiveIndex(index)}
+                aria-hidden="true"
                 className={`h-2 rounded-full shadow-sm transition-all ${
-                  index === activeIndex
-                    ? "w-7 bg-white"
-                    : "w-2 bg-white/45 hover:bg-white/80"
+                  index === activeIndex ? "w-7 bg-white" : "w-2 bg-white/45"
                 }`}
               />
             ))}
