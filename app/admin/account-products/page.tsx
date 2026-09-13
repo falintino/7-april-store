@@ -2,12 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { ensureAccountProductTable } from "@/lib/ensure-account-product-table";
 import AccountProductManager from "./AccountProductManager";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminAccountProductsPage() {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");
+  await ensureAccountProductTable();
 
   const products = await prisma.accountProduct.findMany({
     orderBy: { createdAt: "desc" },
