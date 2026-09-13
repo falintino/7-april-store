@@ -21,6 +21,7 @@ export default function ServiceCard({
 }: ServiceCardProps) {
   return (
     <motion.div
+      className="min-w-[230px] flex-none snap-start sm:min-w-[270px] lg:min-w-0"
       whileHover={{ y: -6 }}
       transition={{ duration: 0.2 }}
     >
@@ -30,13 +31,17 @@ export default function ServiceCard({
           group
           flex
           h-full
+          min-h-[220px]
           flex-col
           justify-between
           rounded-3xl
           border
-          p-6
+          p-5
           transition-all
           duration-300
+          sm:p-6
+          lg:min-h-[250px]
+          lg:p-5
 
           ${
             featured
@@ -48,19 +53,19 @@ export default function ServiceCard({
         `}
       >
         <div className="flex items-center justify-between">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600/15">
-            <Icon className="h-7 w-7 text-blue-500 transition group-hover:scale-110" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600/15">
+            <Icon className="h-6 w-6 text-blue-500 transition group-hover:scale-110" />
           </div>
 
           <ArrowUpRight className="h-5 w-5 text-slate-500 group-hover:text-blue-500" />
         </div>
 
-        <div className="mt-8">
-          <h3 className="text-2xl font-bold text-white">
+        <div className="mt-7">
+          <h3 className="text-xl font-bold text-white lg:text-lg xl:text-xl">
             {title}
           </h3>
 
-          <p className="mt-3 text-sm leading-7 text-slate-400">
+          <p className="mt-3 text-sm leading-6 text-slate-400">
             {description}
           </p>
         </div>
