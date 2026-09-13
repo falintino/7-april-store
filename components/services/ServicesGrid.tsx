@@ -74,13 +74,9 @@ export default function ServicesGrid() {
             Kami menyediakan berbagai layanan untuk kebutuhan gamer,
             mulai dari top up, jual akun, rekber, hingga rental akun.
           </p>
-
-          <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-blue-400 lg:hidden">
-            Geser untuk melihat semua layanan →
-          </p>
         </div>
 
-        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-6 lg:gap-5 lg:overflow-visible lg:pb-0">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6 lg:gap-5">
           {services.map((service) => (
             <ServiceCard
               key={service.title}
