@@ -23,7 +23,7 @@ const menus = [
 export default function QuickMenu() {
   return (
     <section className="py-12 sm:py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6">
         <div className="mb-6 sm:mb-8">
           <p className="text-sm font-semibold uppercase tracking-widest text-blue-500">
             Quick Access
@@ -33,7 +33,7 @@ export default function QuickMenu() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:grid-cols-6 lg:gap-5">
+        <div className="grid grid-cols-6 gap-1.5 sm:gap-4 lg:gap-5">
           {menus.map((menu) => (
             <QuickMenuCard key={menu.title} {...menu} />
           ))}
