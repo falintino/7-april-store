@@ -59,15 +59,14 @@ const services = [
 
 export default function ServicesGrid() {
   return (
-    <section className="py-24">
-      <div className="mx-auto max-w-7xl px-6">
-
-        <div className="mb-14 text-center">
+    <section className="py-16 sm:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mb-8 text-center sm:mb-14">
           <span className="rounded-full bg-blue-600/10 px-4 py-2 text-sm font-semibold text-blue-400">
             Layanan Utama
           </span>
 
-          <h2 className="mt-5 text-4xl font-black text-white">
+          <h2 className="mt-5 text-3xl font-black text-white sm:text-4xl">
             Semua Kebutuhan Gaming Dalam Satu Tempat
           </h2>
 
@@ -75,9 +74,13 @@ export default function ServicesGrid() {
             Kami menyediakan berbagai layanan untuk kebutuhan gamer,
             mulai dari top up, jual akun, rekber, hingga rental akun.
           </p>
+
+          <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-blue-400 lg:hidden">
+            Geser untuk melihat semua layanan →
+          </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-6 lg:gap-5 lg:overflow-visible lg:pb-0">
           {services.map((service) => (
             <ServiceCard
               key={service.title}
@@ -85,7 +88,6 @@ export default function ServicesGrid() {
             />
           ))}
         </div>
-
       </div>
     </section>
   );
