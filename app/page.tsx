@@ -162,12 +162,6 @@ export default function Home() {
                   Top Up Free Fire
                 </Link>
 
-                <Link
-                  href="/akun"
-                  className="text-slate-400 transition hover:text-blue-400"
-                >
-                  Jual Akun
-                </Link>
 
                 <Link
                   href="/rekber"
