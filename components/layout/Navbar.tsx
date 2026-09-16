@@ -21,7 +21,6 @@ const whatsappUrl = "https://wa.me/6285960237306";
 const mainMenuItems = [
   { label: "Beranda", href: "/" },
   { label: "Top Up", href: "/topup" },
-  { label: "Jual Beli Akun", href: "/akun" },
   { label: "Rekber", href: "/rekber" },
   { label: "Rental", href: "/rental" },
 ];
@@ -131,7 +130,7 @@ export default function Navbar() {
 
           <div>
             <h1 className="text-lg font-bold text-white">7 April Store</h1>
-            <p className="text-xs text-slate-400">Gaming Marketplace</p>
+            <p className="text-xs text-slate-400">Gaming Digital</p>
           </div>
         </Link>
 
