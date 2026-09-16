@@ -3,8 +3,6 @@
 import {
   Diamond,
   ShieldCheck,
-  ShoppingCart,
-  Boxes,
   Gamepad2,
   MessageCircle,
 } from "lucide-react";
@@ -14,8 +12,6 @@ import QuickMenuCard from "./QuickMenuCard";
 const menus = [
   { title: "Top Up", href: "/topup", icon: Diamond },
   { title: "Rekber", href: "/rekber", icon: ShieldCheck },
-  { title: "Jual Akun", href: "/akun", icon: ShoppingCart },
-  { title: "Stok Akun", href: "/akun", icon: Boxes },
   { title: "Rental", href: "/rental", icon: Gamepad2 },
   { title: "WhatsApp", href: "/contact", icon: MessageCircle },
 ];
@@ -33,7 +29,7 @@ export default function QuickMenu() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-6 gap-1.5 sm:gap-4 lg:gap-5">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-4 lg:gap-5">
           {menus.map((menu) => (
             <QuickMenuCard key={menu.title} {...menu} />
           ))}
