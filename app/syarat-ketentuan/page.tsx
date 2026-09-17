@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Syarat dan Ketentuan | 7 April Store",
+  title: "Syarat dan Ketentuan",
   description: "Syarat dan ketentuan penggunaan layanan 7 April Store.",
 };
 
@@ -61,13 +61,13 @@ export default function SyaratKetentuanPage() {
               3. Pembayaran dan pemrosesan
             </h2>
             <p className="mt-2">
-              Pesanan diproses setelah pembayaran terkonfirmasi. Metode
-              pembayaran yang dapat digunakan adalah metode yang sedang aktif
-              dan ditampilkan pada halaman pemesanan. Waktu
-              pemrosesan dapat berbeda bergantung pada metode pembayaran,
-              status sistem, dan ketersediaan produk dari penyedia. Pelanggan
-              dapat melihat status pesanan pada halaman yang disediakan setelah
-              pembayaran dilakukan.
+              Pesanan diproses setelah pembayaran terkonfirmasi. Saat ini,
+              checkout menggunakan QRIS yang diproses melalui DOKU. Total yang
+              harus dibayar ditampilkan pada ringkasan pesanan sebelum
+              pelanggan melanjutkan pembayaran. Waktu pemrosesan dapat berbeda
+              bergantung pada status sistem pembayaran dan ketersediaan produk
+              dari penyedia. Pelanggan dapat melihat status pesanan pada
+              halaman yang disediakan setelah pembayaran dilakukan.
             </p>
           </section>
 
