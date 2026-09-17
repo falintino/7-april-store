@@ -7,10 +7,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-const whatsappUrl = "https://wa.me/6285960237306";
+const whatsappUrl = "https://wa.me/62895704041437";
 const instagramUrl = "https://www.instagram.com/falintino07";
 const tiktokUrl = "https://www.tiktok.com/@aprilfullskin";
-const supportEmail = "akun7april@gmail.com";
+const supportEmail = "falintino10@gmail.com";
 
 export default function SiteFooter() {
   return (
