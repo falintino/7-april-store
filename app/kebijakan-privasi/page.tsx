@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Kebijakan Privasi | 7 April Store",
+  title: "Kebijakan Privasi",
   description: "Kebijakan privasi 7 April Store.",
 };
 
