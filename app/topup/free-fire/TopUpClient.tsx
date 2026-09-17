@@ -128,6 +128,11 @@ export default function TopUpClient({ products }: TopUpClientProps) {
   const displayedProducts =
     activeCategory === "diamond" ? diamondProducts : membershipProducts;
 
+  // Tampilkan satu penanda unggulan saja pada setiap kategori agar katalog
+  // tetap rapi meskipun beberapa produk ditandai populer di database.
+  const featuredProductId =
+    displayedProducts.find((product) => product.popular)?.id ?? null;
+
   /*
    * ================================
    * VALIDASI FORM
@@ -427,19 +432,21 @@ export default function TopUpClient({ products }: TopUpClientProps) {
             💎 Diamond
           </button>
 
-          <button
-            type="button"
-            onClick={() => handleCategoryChange("membership")}
-            className={[
-              "rounded-xl border px-4 py-2.5 text-sm font-bold transition",
+          {membershipProducts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => handleCategoryChange("membership")}
+              className={[
+                "rounded-xl border px-4 py-2.5 text-sm font-bold transition",
 
-              activeCategory === "membership"
-                ? "border-blue-500 bg-blue-500/10 text-blue-400"
-                : "border-white/10 text-slate-400",
-            ].join(" ")}
-          >
-            🎟 Membership
-          </button>
+                activeCategory === "membership"
+                  ? "border-blue-500 bg-blue-500/10 text-blue-400"
+                  : "border-white/10 text-slate-400",
+              ].join(" ")}
+            >
+              🎟 Membership
+            </button>
+          )}
         </div>
 
         {displayedProducts.length > 0 ? (
@@ -461,7 +468,7 @@ export default function TopUpClient({ products }: TopUpClientProps) {
                       : "border-white/10 bg-[#0a1020] hover:border-blue-500/60",
                   ].join(" ")}
                 >
-                  {product.popular && (
+                  {product.id === featuredProductId && (
                     <span className="absolute right-2 top-2 rounded bg-blue-600 px-1.5 py-0.5 text-[8px] font-black">
                       POPULER
                     </span>
