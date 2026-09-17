@@ -384,13 +384,13 @@ export default function TopUpClient({
       /*
        * ================================
        * STEP 2
-       * BUAT PEMBAYARAN DOKU
+       * BUAT PEMBAYARAN MIDTRANS
        * ================================
        */
 
       const paymentResponse =
         await fetch(
-          "/api/doku/create",
+          "/api/midtrans/create",
           {
             method:
               "POST",
@@ -880,7 +880,7 @@ export default function TopUpClient({
             <div className="mt-4 border-t border-white/10 pt-4">
               <p className="text-xs leading-5 text-slate-500">
                 Jumlah di atas adalah total yang dikirim ke halaman pembayaran
-                QRIS DOKU.
+                QRIS Midtrans.
               </p>
             </div>
           </div>
