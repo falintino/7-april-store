@@ -21,7 +21,7 @@ export default function SyaratKetentuanPage() {
         </h1>
 
         <p className="mt-3 text-sm text-slate-400">
-          Terakhir diperbarui: 9 September 2026
+          Terakhir diperbarui: 17 September 2026
         </p>
 
         <div className="mt-8 space-y-8 leading-7 text-slate-300">
@@ -30,9 +30,16 @@ export default function SyaratKetentuanPage() {
               1. Tentang layanan
             </h2>
             <p className="mt-2">
-              7 April Store menyediakan layanan pembelian produk digital,
-              termasuk top up Free Fire. Produk digital diproses melalui mitra
-              penyedia setelah pembayaran pelanggan berhasil diverifikasi.
+              7 April Store menyediakan layanan top up game dan menjual produk
+              digital secara langsung kepada pelanggan, termasuk Diamond Free
+              Fire. Produk diproses melalui penyedia produk digital setelah
+              pembayaran pelanggan berhasil dikonfirmasi.
+            </p>
+            <p className="mt-3">
+              7 April Store bukan marketplace, penyelenggara pembayaran, atau
+              perantara pembayaran untuk merchant lain. Kami tidak menerima
+              maupun menyalurkan pembayaran atas nama penjual atau pihak ketiga
+              lainnya.
             </p>
           </section>
 
@@ -54,7 +61,9 @@ export default function SyaratKetentuanPage() {
               3. Pembayaran dan pemrosesan
             </h2>
             <p className="mt-2">
-              Pesanan diproses setelah pembayaran terkonfirmasi. Waktu
+              Pesanan diproses setelah pembayaran terkonfirmasi. Metode
+              pembayaran yang dapat digunakan adalah metode yang sedang aktif
+              dan ditampilkan pada halaman pemesanan. Waktu
               pemrosesan dapat berbeda bergantung pada metode pembayaran,
               status sistem, dan ketersediaan produk dari penyedia. Pelanggan
               dapat melihat status pesanan pada halaman yang disediakan setelah
@@ -86,7 +95,20 @@ export default function SyaratKetentuanPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white">6. Bantuan</h2>
+            <h2 className="text-xl font-semibold text-white">
+              6. Merek dan hubungan dengan penerbit game
+            </h2>
+            <p className="mt-2">
+              Nama, logo, dan merek game yang disebutkan di website merupakan
+              milik masing-masing pemegang hak. 7 April Store adalah layanan
+              independen dan tidak mengklaim sebagai bagian dari atau afiliasi
+              resmi penerbit game, kecuali dinyatakan berdasarkan izin
+              tertulis.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white">7. Bantuan</h2>
             <p className="mt-2">
               Untuk pertanyaan mengenai pesanan, gunakan kanal kontak yang
               tersedia di website dan sertakan nomor pesanan agar pengecekan
