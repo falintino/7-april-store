@@ -37,7 +37,8 @@ const contactItems = [
   {
     title: "Jam Pelayanan",
     value: "Setiap hari, 09.00–22.00 WIB",
-    description: "Pesan di luar jam pelayanan akan dibalas pada jam berikutnya.",
+    description:
+      "Pesan di luar jam pelayanan akan dibalas pada jam berikutnya.",
     icon: Clock3,
   },
   {
@@ -86,7 +87,9 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h2 className="font-semibold text-white">{item.title}</h2>
-                    <p className="mt-1 font-medium text-blue-300">{item.value}</p>
+                    <p className="mt-1 font-medium text-blue-300">
+                      {item.value}
+                    </p>
                     <p className="mt-2 text-sm leading-6 text-slate-400">
                       {item.description}
                     </p>
@@ -162,10 +165,7 @@ export default function ContactPage() {
           </div>
 
           <div className="mt-8 flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
-            <ShieldCheck
-              className="mt-0.5 shrink-0 text-amber-300"
-              size={20}
-            />
+            <ShieldCheck className="mt-0.5 shrink-0 text-amber-300" size={20} />
             <p className="text-sm leading-6">
               Admin tidak pernah meminta kata sandi, PIN, OTP, atau kode
               pemulihan akun pelanggan.
@@ -173,6 +173,12 @@ export default function ContactPage() {
           </div>
 
           <nav className="mt-8 flex flex-wrap gap-5 border-t border-slate-800 pt-6 text-sm">
+            <Link
+              href="/tentang-kami"
+              className="text-blue-400 hover:text-blue-300"
+            >
+              Tentang Kami
+            </Link>
             <Link
               href="/syarat-ketentuan"
               className="text-blue-400 hover:text-blue-300"
@@ -190,6 +196,12 @@ export default function ContactPage() {
               className="text-blue-400 hover:text-blue-300"
             >
               Kebijakan Refund
+            </Link>
+            <Link
+              href="/kebijakan-pengiriman"
+              className="text-blue-400 hover:text-blue-300"
+            >
+              Kebijakan Pengiriman
             </Link>
           </nav>
         </section>
