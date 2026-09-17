@@ -37,7 +37,7 @@ const paymentGroups: {
 
         name: "QRIS",
 
-        description: "Scan dari aplikasi pembayaran yang mendukung QRIS",
+        description: "QRIS aman yang diproses melalui Midtrans",
 
         icon: "QR",
       },
