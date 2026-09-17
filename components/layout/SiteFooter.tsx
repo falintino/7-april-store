@@ -25,9 +25,7 @@ export default function SiteFooter() {
 
               <div>
                 <p className="font-bold text-white">7 April Store</p>
-                <p className="text-xs text-slate-400">
-                  Layanan Top Up Game
-                </p>
+                <p className="text-xs text-slate-400">Layanan Top Up Game</p>
               </div>
             </Link>
 
@@ -69,9 +67,7 @@ export default function SiteFooter() {
           </div>
 
           <div>
-            <h2 className="text-sm font-bold text-white">
-              Bantuan Pelanggan
-            </h2>
+            <h2 className="text-sm font-bold text-white">Bantuan Pelanggan</h2>
 
             <nav className="mt-5 grid gap-3 text-sm text-slate-400">
               <Link href="/profil" className="transition hover:text-blue-400">
@@ -110,6 +106,13 @@ export default function SiteFooter() {
 
             <nav className="mt-5 grid gap-3 text-sm text-slate-400">
               <Link
+                href="/tentang-kami"
+                className="transition hover:text-blue-400"
+              >
+                Tentang Kami
+              </Link>
+
+              <Link
                 href="/syarat-ketentuan"
                 className="transition hover:text-blue-400"
               >
@@ -128,6 +131,13 @@ export default function SiteFooter() {
                 className="transition hover:text-blue-400"
               >
                 Kebijakan Refund
+              </Link>
+
+              <Link
+                href="/kebijakan-pengiriman"
+                className="transition hover:text-blue-400"
+              >
+                Kebijakan Pengiriman
               </Link>
             </nav>
 
