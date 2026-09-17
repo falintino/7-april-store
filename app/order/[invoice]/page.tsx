@@ -188,7 +188,7 @@ export default async function OrderPage({
           order.total
         : hasRecordedPaymentFee
           ? recordedGrossAmount
-          : null;
+          : order.total;
 
   return (
     <main className="min-h-screen bg-[#030712] px-6 py-12 text-white">
@@ -432,16 +432,15 @@ export default async function OrderPage({
                       Rp0
                     </p>
                   </div>
-                ) : paymentPaid ||
-                  hasRecordedPaymentFee ? (
+                ) : paymentPaid || hasRecordedPaymentFee ? (
                   <p className="font-bold text-white">
                     {formatRupiah(
                       paymentFee
                     )}
                   </p>
                 ) : (
-                  <p className="text-right text-sm text-slate-400">
-                    Dihitung saat pembayaran
+                  <p className="font-bold text-white">
+                    Rp0
                   </p>
                 )}
               </div>
@@ -458,7 +457,7 @@ export default async function OrderPage({
                     !order.paymentFeeWaived &&
                     !hasRecordedPaymentFee && (
                       <p className="mt-1 text-xs text-slate-500">
-                        Harga produk + biaya metode pembayaran
+                        Tidak ada biaya metode pembayaran tambahan
                       </p>
                     )}
                 </div>
@@ -479,7 +478,7 @@ export default async function OrderPage({
                     </p>
 
                     <p className="mt-1 text-xs text-slate-500">
-                      + biaya pembayaran
+                      Total pesanan
                     </p>
                   </div>
                 )}
@@ -501,7 +500,7 @@ export default async function OrderPage({
             <p className="mt-2 text-sm leading-6 text-slate-400">
               Klik tombol di bawah untuk
               melanjutkan pembayaran QRIS melalui
-              DOKU.
+              Midtrans.
             </p>
 
             <PayButton
