@@ -12,12 +12,6 @@ import SiteFooter from "@/components/layout/SiteFooter";
 
 const ownerPress = [
   {
-    outlet: "Medcom.id",
-    title: "Profil dan Perjalanan Karier Falintino, Melejit Berkat Free Fire",
-    href: "https://www.medcom.id/hiburan/montase/4ba18d0b-profil-dan-perjalanan-karier-falintino-melejit-berkat-free-fire",
-    date: "7 September 2026",
-  },
-  {
     outlet: "SINDOnews",
     title: "Rahasia Mudah Booyah di Free Fire, Ini 10 Tips dari Falintino FF",
     href: "https://lifestyle.sindonews.com/read/1723313/166/rahasia-mudah-booyah-di-free-fire-ini-10-tips-dari-kreator-konten-falintino-ff-1782814011",
