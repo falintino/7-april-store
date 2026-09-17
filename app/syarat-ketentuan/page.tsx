@@ -54,11 +54,11 @@ export default function SyaratKetentuanPage() {
               2. Data pelanggan
             </h2>
             <p className="mt-2">
-              Pelanggan wajib memasukkan UID atau data tujuan yang benar
-              sebelum membuat pesanan. Pastikan kembali data tersebut sebelum
-              melakukan pembayaran. Kesalahan data tujuan dari pelanggan dapat
-              membuat produk terkirim ke akun yang berbeda dan tidak selalu
-              dapat dibatalkan.
+              Pelanggan wajib memasukkan UID atau data tujuan yang benar sebelum
+              membuat pesanan. Pastikan kembali data tersebut sebelum melakukan
+              pembayaran. Kesalahan data tujuan dari pelanggan dapat membuat
+              produk terkirim ke akun yang berbeda dan tidak selalu dapat
+              dibatalkan.
             </p>
           </section>
 
@@ -72,14 +72,28 @@ export default function SyaratKetentuanPage() {
               yang harus dibayar ditampilkan pada ringkasan pesanan sebelum
               pelanggan melanjutkan pembayaran. Waktu pemrosesan dapat berbeda
               bergantung pada status sistem pembayaran dan ketersediaan produk
-              dari penyedia. Pelanggan dapat melihat status pesanan pada
-              halaman yang disediakan setelah pembayaran dilakukan.
+              dari penyedia. Pelanggan dapat melihat status pesanan pada halaman
+              yang disediakan setelah pembayaran dilakukan.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white">
-              4. Harga dan ketersediaan
+              4. Pengiriman produk digital
+            </h2>
+            <p className="mt-2">
+              Produk dikirim secara digital ke UID atau akun game yang
+              dimasukkan pelanggan. Dalam kondisi normal, pesanan selesai dalam
+              beberapa menit setelah pembayaran berhasil. Gangguan provider,
+              pemeliharaan sistem, atau antrean dapat menyebabkan proses
+              memerlukan waktu hingga 1 × 24 jam. Ketentuan selengkapnya
+              tersedia pada Kebijakan Pengiriman Produk Digital.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white">
+              5. Harga dan ketersediaan
             </h2>
             <p className="mt-2">
               Harga, nominal, dan ketersediaan produk dapat berubah mengikuti
@@ -90,7 +104,21 @@ export default function SyaratKetentuanPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white">
-              5. Penggunaan yang dilarang
+              6. Pembatalan dan refund
+            </h2>
+            <p className="mt-2">
+              Pesanan yang sudah berhasil diproses atau terkirim tidak dapat
+              dibatalkan. Pembayaran berhasil untuk pesanan yang gagal dan
+              produknya tidak terkirim dapat ditinjau untuk pemrosesan ulang
+              atau refund sesuai Kebijakan Refund. Kesalahan UID atau data
+              tujuan yang dimasukkan pelanggan bukan alasan refund setelah
+              produk terkirim.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white">
+              7. Penggunaan yang dilarang
             </h2>
             <p className="mt-2">
               Layanan tidak boleh digunakan untuk aktivitas melanggar hukum,
@@ -102,23 +130,26 @@ export default function SyaratKetentuanPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white">
-              6. Merek dan hubungan dengan penerbit game
+              8. Merek dan hubungan dengan penerbit game
             </h2>
             <p className="mt-2">
               Nama, logo, dan merek game yang disebutkan di website merupakan
               milik masing-masing pemegang hak. 7 April Store adalah layanan
               independen dan tidak mengklaim sebagai bagian dari atau afiliasi
-              resmi penerbit game, kecuali dinyatakan berdasarkan izin
-              tertulis.
+              resmi penerbit game, kecuali dinyatakan berdasarkan izin tertulis.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white">7. Bantuan</h2>
+            <h2 className="text-xl font-semibold text-white">
+              9. Keluhan dan penyelesaian
+            </h2>
             <p className="mt-2">
               Untuk pertanyaan mengenai pesanan, gunakan kanal kontak yang
               tersedia di website dan sertakan nomor pesanan agar pengecekan
-              dapat dilakukan dengan tepat.
+              dapat dilakukan dengan tepat. Kami akan memeriksa catatan
+              pembayaran dan pengiriman terlebih dahulu serta berupaya
+              menyelesaikan keluhan secara wajar melalui kanal bantuan resmi.
             </p>
           </section>
         </div>
@@ -136,6 +167,13 @@ export default function SyaratKetentuanPage() {
             className="text-blue-400 hover:text-blue-300"
           >
             Kebijakan Refund
+          </Link>
+
+          <Link
+            href="/kebijakan-pengiriman"
+            className="text-blue-400 hover:text-blue-300"
+          >
+            Kebijakan Pengiriman
           </Link>
         </nav>
       </article>
