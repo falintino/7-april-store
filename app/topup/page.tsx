@@ -23,7 +23,7 @@ const products = [
   {
     name: "Free Fire",
     description:
-      "Top up Diamond Free Fire cepat, aman, dan langsung diproses setelah pembayaran.",
+      "Top up Diamond Free Fire dengan proses yang mudah dan informasi harga yang jelas.",
     href: "/topup/free-fire",
     image: "/images/games/freefire.jpg",
     tag: "TERPOPULER",
@@ -57,7 +57,7 @@ export default function TopUpPage() {
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">
-              Pilih game favoritmu, masukkan ID, pilih nominal dan selesaikan
+              Pilih game, masukkan ID pemain, tentukan nominal, lalu selesaikan
               pembayaran. Pesanan diproses melalui sistem 7 April Store.
             </p>
 
@@ -70,7 +70,10 @@ export default function TopUpPage() {
                 className="h-11 flex-1 bg-transparent px-3 text-sm text-white outline-none placeholder:text-slate-600"
               />
 
-              <button className="h-11 rounded-xl bg-blue-600 px-5 text-sm font-bold transition hover:bg-blue-500">
+              <button
+                type="button"
+                className="h-11 rounded-xl bg-blue-600 px-5 text-sm font-bold transition hover:bg-blue-500"
+              >
                 Cari
               </button>
             </div>
@@ -81,8 +84,10 @@ export default function TopUpPage() {
               <Zap size={18} className="text-yellow-400" />
 
               <div>
-                <p className="text-xs font-bold">Proses Cepat</p>
-                <p className="text-[10px] text-slate-500">Sistem otomatis</p>
+                <p className="text-xs font-bold">Proses Mudah</p>
+                <p className="text-[10px] text-slate-500">
+                  Pesan langsung di website
+                </p>
               </div>
             </div>
 
@@ -92,7 +97,7 @@ export default function TopUpPage() {
               <div>
                 <p className="text-xs font-bold">Pembayaran Aman</p>
                 <p className="text-[10px] text-slate-500">
-                  Payment terpercaya
+                  Melalui penyedia pembayaran
                 </p>
               </div>
             </div>
@@ -103,7 +108,7 @@ export default function TopUpPage() {
               <div>
                 <p className="text-xs font-bold">7 April Store</p>
                 <p className="text-[10px] text-slate-500">
-                  Gaming marketplace
+                  Layanan top up game
                 </p>
               </div>
             </div>
@@ -133,7 +138,7 @@ export default function TopUpPage() {
             </div>
 
             <span className="hidden text-xs text-slate-600 sm:block">
-              1 Game tersedia
+              1 game tersedia
             </span>
           </div>
 
@@ -147,7 +152,7 @@ export default function TopUpPage() {
                 <div className="relative h-44 overflow-hidden rounded-[20px]">
                   <img
                     src={product.image}
-                    alt={product.name}
+                    alt={`Top Up ${product.name}`}
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                   />
 
@@ -220,7 +225,7 @@ export default function TopUpPage() {
                 </h3>
 
                 <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                  Pilih produk, masukkan data akun, lakukan pembayaran dan
+                  Pilih produk, masukkan ID pemain, lakukan pembayaran, lalu
                   pantau status pesanan langsung dari website.
                 </p>
               </div>
@@ -250,14 +255,16 @@ export default function TopUpPage() {
                   <h2 className="text-lg font-bold text-white">
                     7 April Store
                   </h2>
-                  <p className="text-xs text-slate-500">Gaming Marketplace</p>
+                  <p className="text-xs text-slate-500">
+                    Layanan Top Up Game
+                  </p>
                 </div>
               </div>
 
               <p className="mt-4 text-sm leading-6 text-slate-400">
-                Layanan pembelian produk digital untuk kebutuhan game. Pilih
-                produk, masukkan data akun dengan benar, lalu selesaikan
-                pembayaran dengan aman.
+                Layanan pembelian produk digital game. Pilih produk, masukkan
+                ID pemain dengan benar, lalu selesaikan pembayaran melalui
+                halaman pembayaran yang tersedia.
               </p>
 
               <div className="mt-5 flex items-start gap-3 rounded-xl border border-emerald-500/15 bg-emerald-500/5 p-3">
@@ -267,7 +274,7 @@ export default function TopUpPage() {
                 />
 
                 <p className="text-xs leading-5 text-slate-400">
-                  Pastikan UID dan nominal sudah benar sebelum melakukan
+                  Pastikan ID pemain dan nominal sudah benar sebelum melakukan
                   pembayaran produk digital.
                 </p>
               </div>
@@ -294,24 +301,10 @@ export default function TopUpPage() {
                 </Link>
 
                 <Link
-                  href="/akun"
+                  href="/order"
                   className="text-slate-400 transition hover:text-blue-400"
                 >
-                  Jual Akun
-                </Link>
-
-                <Link
-                  href="/rekber"
-                  className="text-slate-400 transition hover:text-blue-400"
-                >
-                  Rekber
-                </Link>
-
-                <Link
-                  href="/rental"
-                  className="text-slate-400 transition hover:text-blue-400"
-                >
-                  Rental
+                  Status Pesanan
                 </Link>
               </div>
             </div>
@@ -442,9 +435,9 @@ export default function TopUpPage() {
             </p>
 
             <div className="flex flex-wrap gap-x-4 gap-y-2">
-              <span>Produk Digital</span>
+              <span>Produk Digital Game</span>
               <span>•</span>
-              <span>Gaming Marketplace Indonesia</span>
+              <span>Layanan Top Up Game</span>
               <span>•</span>
               <span>Transaksi melalui website 7 April Store</span>
             </div>

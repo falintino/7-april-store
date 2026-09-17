@@ -6,53 +6,24 @@ import { useEffect, useState } from "react";
 import {
   ChevronRight,
   CircleHelp,
-  Handshake,
   Menu,
-  Search,
-  ShoppingCart,
   User,
   X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-const whatsappUrl = "https://wa.me/6285960237306";
-
 const mainMenuItems = [
   { label: "Beranda", href: "/" },
   { label: "Top Up", href: "/topup" },
-  { label: "Rekber", href: "/rekber" },
-  { label: "Rental", href: "/rental" },
+  { label: "Free Fire", href: "/topup/free-fire" },
 ];
 
 const additionalMenuItems = [
   {
-    label: "Promo",
-    description: "Promo terbatas dari 7 April Store",
-    comingSoon: true,
-  },
-  {
-    label: "Affiliate",
-    description: "Program affiliate 7 April Store",
-    comingSoon: true,
-  },
-  {
-    label: "Berita",
-    description: "Update dan pengumuman terbaru",
-    comingSoon: true,
-  },
-  {
-    label: "Kerja Sama",
-    description: "Endorsement, banner, dan partnership",
-    href: whatsappUrl,
-    external: true,
-    icon: Handshake,
-  },
-  {
     label: "Bantuan",
     description: "Hubungi Customer Service",
     href: "/contact",
-    external: false,
     icon: CircleHelp,
   },
 ];
@@ -130,7 +101,7 @@ export default function Navbar() {
 
           <div>
             <h1 className="text-lg font-bold text-white">7 April Store</h1>
-            <p className="text-xs text-slate-400">Gaming Digital</p>
+            <p className="text-xs text-slate-400">Layanan Top Up Game</p>
           </div>
         </Link>
 
@@ -146,36 +117,16 @@ export default function Navbar() {
             </Link>
           ))}
 
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen(true)}
+          <Link
+            href="/contact"
+            onClick={closeMenu}
             className="text-sm text-slate-300 transition hover:text-blue-500"
           >
-            Lainnya
-          </button>
+            Bantuan
+          </Link>
         </nav>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="text-slate-300"
-            aria-label="Cari"
-          >
-            <Search size={20} />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="text-slate-300"
-            aria-label="Keranjang"
-          >
-            <ShoppingCart size={20} />
-          </Button>
-
           <Link
             href="/profil"
             onClick={closeMenu}
@@ -261,56 +212,34 @@ export default function Navbar() {
                     ? `Halo, ${customerFirstName}`
                     : "Akun Saya & Pesanan"}
                 </span>
+
                 <ChevronRight size={18} className="text-blue-300" />
               </Link>
             </nav>
 
             <p className="mb-3 mt-6 text-xs font-bold uppercase tracking-[0.18em] text-blue-400">
-              Lainnya
+              Bantuan
             </p>
 
             <div className="grid gap-2">
               {additionalMenuItems.map((item) => {
                 const Icon = item.icon;
 
-                if (item.comingSoon) {
-                  return (
-                    <div
-                      key={item.label}
-                      className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5"
-                    >
-                      <div>
-                        <p className="text-sm font-semibold text-slate-300">
-                          {item.label}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-1 text-[10px] font-bold text-blue-300">
-                        Segera Hadir
-                      </span>
-                    </div>
-                  );
-                }
-
                 return (
-                  <a
+                  <Link
                     key={item.label}
                     href={item.href}
-                    target={item.external ? "_blank" : undefined}
-                    rel={item.external ? "noreferrer" : undefined}
                     onClick={closeMenu}
                     className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.025] px-4 py-3.5 transition hover:border-blue-500/40 hover:bg-blue-500/10"
                   >
                     <div className="flex items-center gap-3">
-                      {Icon && <Icon size={19} className="text-blue-400" />}
+                      <Icon size={19} className="text-blue-400" />
 
                       <div>
                         <p className="text-sm font-semibold text-slate-200">
                           {item.label}
                         </p>
+
                         <p className="mt-1 text-xs text-slate-500">
                           {item.description}
                         </p>
@@ -318,7 +247,7 @@ export default function Navbar() {
                     </div>
 
                     <ChevronRight size={18} className="text-slate-500" />
-                  </a>
+                  </Link>
                 );
               })}
             </div>

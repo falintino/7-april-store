@@ -7,25 +7,25 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://store.falintino.com"),
 
   title: {
-    default: "7 April Store",
+    default: "7 April Store – Top Up Game",
     template: "%s | 7 April Store",
   },
 
   description:
-    "Top up game dan berbagai layanan gaming terpercaya.",
+    "7 April Store menyediakan layanan top up game dan pembelian Diamond Free Fire secara online.",
 
   keywords: [
-    "Top Up Free Fire",
-    "Top Up ML",
-    "Top Up PUBG",
-    "Top Up Honor of Kings",
-    "Rekber",
     "7 April Store",
+    "Top Up Game",
+    "Top Up Free Fire",
+    "Diamond Free Fire",
+    "Top Up Game Indonesia",
   ],
 
   openGraph: {
-    title: "7 April Store",
-    description: "Layanan Produk Digital Game Indonesia",
+    title: "7 April Store – Top Up Game",
+    description:
+      "Layanan top up game dan pembelian Diamond Free Fire secara online.",
     url: "https://store.falintino.com",
     siteName: "7 April Store",
     locale: "id_ID",
@@ -34,7 +34,14 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "7 April Store",
+    title: "7 April Store – Top Up Game",
+    description:
+      "Layanan top up game dan pembelian Diamond Free Fire secara online.",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

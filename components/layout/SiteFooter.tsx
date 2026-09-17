@@ -10,6 +10,7 @@ import {
 const whatsappUrl = "https://wa.me/6285960237306";
 const instagramUrl = "https://www.instagram.com/falintino07";
 const tiktokUrl = "https://www.tiktok.com/@aprilfullskin";
+const supportEmail = "akun7april@gmail.com";
 
 export default function SiteFooter() {
   return (
@@ -24,32 +25,34 @@ export default function SiteFooter() {
 
               <div>
                 <p className="font-bold text-white">7 April Store</p>
-                <p className="text-xs text-slate-400">Gaming Marketplace</p>
+                <p className="text-xs text-slate-400">
+                  Layanan Top Up Game
+                </p>
               </div>
             </Link>
 
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">
               Layanan pembelian produk digital untuk kebutuhan top up game.
-              Pilih produk, masukkan data akun, lalu selesaikan pembayaran
-              dengan aman.
+              Pilih produk dan nominal, masukkan data akun game, lalu selesaikan
+              pembayaran melalui metode yang tersedia.
             </p>
 
             <div className="mt-6 flex max-w-sm gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
               <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-400" />
 
               <p className="text-xs leading-5 text-slate-300">
-                Pastikan UID, server, nominal, dan metode pembayaran sudah
-                benar sebelum mengonfirmasi pesanan produk digital.
+                Pastikan UID, server, nominal, dan metode pembayaran sudah benar
+                sebelum mengonfirmasi pesanan top up.
               </p>
             </div>
           </div>
 
           <div>
-            <h2 className="text-sm font-bold text-white">Produk & Layanan</h2>
+            <h2 className="text-sm font-bold text-white">Layanan Top Up</h2>
 
             <nav className="mt-5 grid gap-3 text-sm text-slate-400">
               <Link href="/topup" className="transition hover:text-blue-400">
-                Top Up Game
+                Semua Produk
               </Link>
 
               <Link
@@ -59,34 +62,32 @@ export default function SiteFooter() {
                 Top Up Free Fire
               </Link>
 
-              <Link href="/akun" className="transition hover:text-blue-400">
-                Jual Beli Akun
-              </Link>
-
-              <Link href="/rekber" className="transition hover:text-blue-400">
-                Rekber
-              </Link>
-
-              <Link href="/rental" className="transition hover:text-blue-400">
-                Rental
+              <Link href="/" className="transition hover:text-blue-400">
+                Beranda
               </Link>
             </nav>
           </div>
 
           <div>
-            <h2 className="text-sm font-bold text-white">Bantuan Pelanggan</h2>
+            <h2 className="text-sm font-bold text-white">
+              Bantuan Pelanggan
+            </h2>
 
             <nav className="mt-5 grid gap-3 text-sm text-slate-400">
               <Link href="/profil" className="transition hover:text-blue-400">
-                Akun Saya & Pesanan
+                Akun Saya
               </Link>
 
               <Link href="/login" className="transition hover:text-blue-400">
                 Login Pelanggan
               </Link>
 
+              <Link href="/contact" className="transition hover:text-blue-400">
+                Hubungi Kami
+              </Link>
+
               <a
-                href="mailto:akun7april@gmail.com"
+                href={`mailto:${supportEmail}`}
                 className="transition hover:text-blue-400"
               >
                 Email Bantuan
@@ -166,7 +167,7 @@ export default function SiteFooter() {
               </a>
 
               <a
-                href="mailto:akun7april@gmail.com"
+                href={`mailto:${supportEmail}`}
                 className="inline-flex items-center gap-2 transition hover:text-blue-400"
               >
                 <Mail className="h-4 w-4" />
@@ -182,7 +183,7 @@ export default function SiteFooter() {
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             <span>Produk Digital</span>
             <span className="hidden text-slate-700 sm:inline">•</span>
-            <span>Gaming Marketplace Indonesia</span>
+            <span>Layanan Top Up Game</span>
             <span className="hidden text-slate-700 sm:inline">•</span>
             <span>Transaksi melalui website 7 April Store</span>
           </div>

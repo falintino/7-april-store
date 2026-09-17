@@ -34,8 +34,8 @@ export default function Hero() {
           </h1>
 
           <p className="mt-8 text-lg leading-8 text-gray-400">
-            Top Up Game, Jual Akun, Rekber dan Rental dengan proses super
-            cepat, aman, dan harga terbaik.
+            Top up game dengan proses cepat, aman, harga transparan, dan
+            dukungan pelanggan.
           </p>
 
           <div className="mt-10 flex flex-wrap gap-4">
@@ -63,15 +63,17 @@ export default function Hero() {
 
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-blue-500" />
-              Bantuan Resmi
+              Dukungan Pelanggan
             </div>
 
             <div className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-blue-500" />
-              QRIS
+              Pembayaran Praktis
             </div>
 
-            <div className="flex items-center gap-2">Informasi Harga Jelas</div>
+            <div className="flex items-center gap-2">
+              Informasi Harga Jelas
+            </div>
           </div>
         </motion.div>
 

@@ -1,22 +1,43 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = "https://store.falintino.com";
+
   return [
     {
-      url: "https://7aprilstore.com",
+      url: baseUrl,
+      changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: "https://7aprilstore.com/topup",
+      url: `${baseUrl}/topup`,
+      changeFrequency: "daily",
+      priority: 0.9,
     },
     {
-      url: "https://7aprilstore.com/jual-akun",
+      url: `${baseUrl}/topup/free-fire`,
+      changeFrequency: "daily",
+      priority: 0.9,
     },
     {
-      url: "https://7aprilstore.com/rekber",
+      url: `${baseUrl}/contact`,
+      changeFrequency: "monthly",
+      priority: 0.6,
     },
     {
-      url: "https://7aprilstore.com/rental",
+      url: `${baseUrl}/syarat-ketentuan`,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/kebijakan-privasi`,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/kebijakan-refund`,
+      changeFrequency: "monthly",
+      priority: 0.5,
     },
   ];
 }
