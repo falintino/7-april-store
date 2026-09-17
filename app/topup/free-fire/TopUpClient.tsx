@@ -108,38 +108,6 @@ const paymentGroups: {
         icon: "G",
       },
 
-      {
-        id: "dana",
-
-        name: "DANA",
-
-        description:
-          "DANA",
-
-        icon: "D",
-      },
-
-      {
-        id: "ovo",
-
-        name: "OVO",
-
-        description:
-          "OVO",
-
-        icon: "O",
-      },
-
-      {
-        id: "shopeepay",
-
-        name: "ShopeePay",
-
-        description:
-          "ShopeePay",
-
-        icon: "S",
-      },
     ],
   },
 
