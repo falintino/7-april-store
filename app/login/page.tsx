@@ -63,7 +63,7 @@ export default function LoginPage() {
 
               <div>
                 <p className="font-bold text-white">7 April Store</p>
-                <p className="text-xs text-slate-400">Gaming Marketplace</p>
+                <p className="text-xs text-slate-400">Layanan Top Up Game</p>
               </div>
             </Link>
 
