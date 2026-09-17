@@ -17,12 +17,6 @@ const banners = [
     href: "/profil",
     position: "object-[38%_center] sm:object-center",
   },
-  {
-    src: "/images/banners/7-april-store-partnership.webp",
-    alt: "7 April Store terbuka untuk endorsement, affiliate, banner promosi, dan partnership",
-    href: "/contact",
-    position: "object-[42%_center] sm:object-center",
-  },
 ];
 
 export default function PromoBannerCarousel() {
