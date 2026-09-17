@@ -17,13 +17,14 @@ export default function PayButton({
       setLoading(true);
       setErrorMessage("");
 
-      const response = await fetch("/api/doku/create", {
+      const response = await fetch("/api/midtrans/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           invoice,
+          paymentMethod: "qris",
         }),
       });
 
@@ -31,12 +32,12 @@ export default function PayButton({
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Gagal membuat pembayaran DOKU."
+          data.message || "Gagal membuat pembayaran Midtrans."
         );
       }
 
       if (!data.redirectUrl) {
-        throw new Error("URL pembayaran DOKU tidak ditemukan.");
+        throw new Error("URL pembayaran Midtrans tidak ditemukan.");
       }
 
       window.location.href = data.redirectUrl;
@@ -76,7 +77,7 @@ export default function PayButton({
       </button>
 
       <p className="mt-3 text-center text-xs text-slate-500">
-        Pembayaran aman diproses melalui DOKU.
+        Pembayaran aman diproses melalui Midtrans.
       </p>
     </>
   );
