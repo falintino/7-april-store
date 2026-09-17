@@ -137,7 +137,7 @@ export default function ContactPage() {
                 <div>
                   <dt className="text-slate-500">Jenis layanan</dt>
                   <dd className="mt-1 font-medium">
-                    Produk digital dan layanan game
+                    Layanan top up game dan penjualan Diamond Free Fire
                   </dd>
                 </div>
               </dl>
