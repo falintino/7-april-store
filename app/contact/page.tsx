@@ -17,21 +17,21 @@ export const metadata: Metadata = {
 };
 
 const whatsappUrl =
-  "https://wa.me/6285960237306?text=Halo%207%20April%20Store%2C%20saya%20memerlukan%20bantuan.";
+  "https://wa.me/62895704041437?text=Halo%207%20April%20Store%2C%20saya%20memerlukan%20bantuan.";
 
 const contactItems = [
   {
     title: "WhatsApp Customer Service",
-    value: "0859-6023-7306",
+    value: "0895-7040-41437",
     description: "Untuk bantuan pesanan dan informasi layanan.",
     href: whatsappUrl,
     icon: MessageCircle,
   },
   {
     title: "Email Bantuan",
-    value: "akun7april@gmail.com",
+    value: "falintino10@gmail.com",
     description: "Sertakan nomor pesanan apabila berkaitan dengan transaksi.",
-    href: "https://mail.google.com/mail/?view=cm&fs=1&to=akun7april@gmail.com&su=Bantuan%207%20April%20Store",
+    href: "https://mail.google.com/mail/?view=cm&fs=1&to=falintino10@gmail.com&su=Bantuan%207%20April%20Store",
     icon: Mail,
   },
   {
@@ -42,8 +42,10 @@ const contactItems = [
   },
   {
     title: "Lokasi Usaha",
-    value: "Selakau, Kabupaten Sambas, Kalimantan Barat",
-    description: "Layanan dilakukan secara online melalui website resmi.",
+    value:
+      "Dusun Harapan, Desa Semelagi Besar, Kecamatan Selakau, Kabupaten Sambas, Kalimantan Barat",
+    description:
+      "Alamat usaha sesuai data Nomor Induk Berusaha. Layanan dilakukan secara online.",
     icon: MapPin,
   },
 ];
@@ -131,13 +133,28 @@ export default function ContactPage() {
                   <dd className="mt-1 font-medium">Falintino</dd>
                 </div>
                 <div>
+                  <dt className="text-slate-500">Nama pelaku usaha</dt>
+                  <dd className="mt-1 font-medium">FALINTINO</dd>
+                </div>
+                <div>
                   <dt className="text-slate-500">Nomor Induk Berusaha</dt>
                   <dd className="mt-1 font-medium">2704260003348</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Skala usaha</dt>
+                  <dd className="mt-1 font-medium">Usaha Mikro</dd>
                 </div>
                 <div>
                   <dt className="text-slate-500">Jenis layanan</dt>
                   <dd className="mt-1 font-medium">
                     Layanan top up game dan penjualan Diamond Free Fire
+                  </dd>
+                </div>
+                <div className="sm:col-span-2">
+                  <dt className="text-slate-500">Alamat usaha</dt>
+                  <dd className="mt-1 font-medium">
+                    Dusun Harapan, Desa Semelagi Besar, Kecamatan Selakau,
+                    Kabupaten Sambas, Kalimantan Barat
                   </dd>
                 </div>
               </dl>
