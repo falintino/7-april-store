@@ -41,6 +41,12 @@ export default function SyaratKetentuanPage() {
               maupun menyalurkan pembayaran atas nama penjual atau pihak ketiga
               lainnya.
             </p>
+            <p className="mt-3">
+              Layanan ini dioperasikan oleh FALINTINO sebagai pelaku Usaha Mikro
+              dengan NIB 2704260003348, beralamat di Dusun Harapan, Desa
+              Semelagi Besar, Kecamatan Selakau, Kabupaten Sambas, Kalimantan
+              Barat.
+            </p>
           </section>
 
           <section>
