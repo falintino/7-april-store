@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Kebijakan Refund | 7 April Store",
+  title: "Kebijakan Refund",
   description: "Kebijakan refund 7 April Store.",
 };
 
