@@ -62,8 +62,8 @@ export default function SyaratKetentuanPage() {
             </h2>
             <p className="mt-2">
               Pesanan diproses setelah pembayaran terkonfirmasi. Saat ini,
-              checkout menggunakan QRIS yang diproses melalui DOKU. Total yang
-              harus dibayar ditampilkan pada ringkasan pesanan sebelum
+              checkout menggunakan QRIS yang diproses melalui Midtrans. Total
+              yang harus dibayar ditampilkan pada ringkasan pesanan sebelum
               pelanggan melanjutkan pembayaran. Waktu pemrosesan dapat berbeda
               bergantung pada status sistem pembayaran dan ketersediaan produk
               dari penyedia. Pelanggan dapat melihat status pesanan pada
