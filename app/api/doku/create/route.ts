@@ -40,20 +40,6 @@ function getAppUrl() {
   ).replace(/\/$/, "");
 }
 
-function normalizePhone(value: string) {
-  const phone = value.replace(/\D/g, "");
-
-  if (phone.startsWith("62")) {
-    return phone;
-  }
-
-  if (phone.startsWith("0")) {
-    return `62${phone.slice(1)}`;
-  }
-
-  return phone;
-}
-
 function generateDigest(body: string) {
   return createHash("sha256")
     .update(body)
@@ -196,60 +182,23 @@ export async function POST(request: Request) {
 
     const requestId = randomUUID();
     const requestTimestamp =
-      new Date().toISOString();
+      new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
     const requestPayload = {
       order: {
         amount,
         invoice_number: order.invoice,
         currency: "IDR",
-
         callback_url:
           `${appUrl}/payment/finish`,
-
         callback_url_result:
           `${appUrl}/payment/finish`,
-
         auto_redirect: true,
-
-        line_items: [
-          {
-            id: String(
-              order.product.sku
-            ).substring(0, 64),
-
-            name: String(
-              order.product.name
-            ).substring(0, 255),
-
-            quantity: 1,
-            price: amount,
-
-            sku: String(
-              order.product.sku
-            ).substring(0, 64),
-
-            category: "digital-product",
-          },
-        ],
       },
 
       payment: {
         payment_due_date: 60,
-      },
-
-      customer: {
-        id: String(
-          order.id
-        ).substring(0, 50),
-
-        name: "Pelanggan",
-
-        phone: normalizePhone(
-          order.whatsapp
-        ),
-
-        country: "ID",
+        payment_method_types: ["QRIS"],
       },
 
       additional_info: {
