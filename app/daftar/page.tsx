@@ -184,7 +184,7 @@ export default function DaftarPage() {
                     type="tel"
                     value={whatsapp}
                     onChange={(event) => setWhatsapp(event.target.value)}
-                    placeholder="Contoh: 085960237306"
+                    placeholder="Contoh: 0895704041437"
                     autoComplete="tel"
                     required
                     className="h-12 w-full rounded-xl border border-white/10 bg-slate-900 pl-12 pr-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
