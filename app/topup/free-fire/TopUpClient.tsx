@@ -1220,7 +1220,7 @@ try {
 
       const paymentResponse =
         await fetch(
-          "/api/midtrans/create",
+          "/api/doku/create",
           {
             method:
               "POST",

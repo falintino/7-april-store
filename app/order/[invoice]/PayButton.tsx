@@ -10,58 +10,42 @@ export default function PayButton({
   invoice,
 }: PayButtonProps) {
   const [loading, setLoading] = useState(false);
-
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handlePayment() {
     try {
       setLoading(true);
       setErrorMessage("");
 
-      const response = await fetch(
-        "/api/midtrans/create",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify({
-            invoice,
-          }),
-        }
-      );
+      const response = await fetch("/api/doku/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          invoice,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.message ||
-            "Gagal membuat pembayaran."
+          data.message || "Gagal membuat pembayaran DOKU."
         );
       }
 
       if (!data.redirectUrl) {
-        throw new Error(
-          "URL pembayaran tidak ditemukan."
-        );
+        throw new Error("URL pembayaran DOKU tidak ditemukan.");
       }
 
-      /*
-       * Arahkan pelanggan ke halaman
-       * pembayaran resmi Midtrans.
-       */
       window.location.href = data.redirectUrl;
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage(
-          "Terjadi kesalahan saat membuat pembayaran."
-        );
-      }
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan saat membuat pembayaran."
+      );
 
       setLoading(false);
     }
@@ -92,7 +76,7 @@ export default function PayButton({
       </button>
 
       <p className="mt-3 text-center text-xs text-slate-500">
-        Pembayaran diproses melalui Midtrans.
+        Pembayaran aman diproses melalui DOKU.
       </p>
     </>
   );
