@@ -81,7 +81,7 @@ export default function DaftarPage() {
 
               <div>
                 <p className="font-bold text-white">7 April Store</p>
-                <p className="text-xs text-blue-100">Gaming Marketplace</p>
+                <p className="text-xs text-blue-100">Layanan Top Up Game</p>
               </div>
             </Link>
 
