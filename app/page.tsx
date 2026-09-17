@@ -18,6 +18,13 @@ const ownerPress = [
     date: "30 Juni 2026",
   },
   {
+    outlet: "Warta Kota",
+    title:
+      "Kreator Gaming Falintino Ungkap 7 Cara Meningkatkan Skill yang Wajib Dicoba Pemula",
+    href: "https://wartakota.tribunnews.com/news/894167/kreator-gaming-falintino-ungkap-7-cara-meningkatkan-skill-yang-wajib-dicoba-pemula",
+    date: "1 Juli 2026",
+  },
+  {
     outlet: "Republika",
     title: "Falintino FF Bongkar Rahasia Tingkatkan Skill Free Fire",
     href: "https://ameera.republika.co.id/berita/thsspn425/kreator-gaming-falintino-ff-bongkar-rahasia-tingkatkan-skill-free-fire",
