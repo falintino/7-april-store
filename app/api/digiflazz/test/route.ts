@@ -10,6 +10,20 @@ type DigiflazzResponse = {
   message?: string;
 };
 
+function isAuthorized(request: Request) {
+  const cronSecret =
+    process.env.CRON_SECRET?.trim();
+
+  if (!cronSecret) {
+    return false;
+  }
+
+  return (
+    request.headers.get("authorization") ===
+    `Bearer ${cronSecret}`
+  );
+}
+
 function postDigiflazz(
   body: Record<string, unknown>
 ): Promise<{
@@ -83,7 +97,19 @@ function postDigiflazz(
   });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Unauthorized.",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
   try {
     const username =
       process.env.DIGIFLAZZ_USERNAME?.trim();
