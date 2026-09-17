@@ -51,17 +51,17 @@ export default function Home() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-blue-300">
               <Newspaper size={16} />
-              Kreator di Balik 7 April Store
+              Tentang Pengelola 7 April Store
             </div>
 
             <h2 className="mt-5 text-3xl font-black text-white sm:text-4xl">
-              Pengalaman Gaming yang Diliput Media
+              Profil Pengelola di Media
             </h2>
 
             <p className="mt-4 leading-7 text-slate-400">
               7 April Store dikelola oleh Falintino, kreator gaming Free Fire
-              asal Kabupaten Sambas. Publikasi berikut membahas profil,
-              pengalaman, dan tips gaming Falintino di sejumlah media nasional.
+              asal Kabupaten Sambas. Berikut beberapa publikasi media yang
+              membahas profil dan pengalaman Falintino.
             </p>
           </div>
 
@@ -71,7 +71,7 @@ export default function Home() {
                 key={article.href}
                 href={article.href}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="group flex items-start justify-between gap-5 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 transition hover:border-blue-500/40 hover:bg-blue-500/5"
               >
                 <div>
@@ -97,8 +97,8 @@ export default function Home() {
           </div>
 
           <p className="mt-6 text-xs leading-5 text-slate-600">
-            Pencantuman artikel tidak berarti terdapat kerja sama atau dukungan
-            komersial antara media tersebut dan 7 April Store.
+            Pencantuman artikel tidak menunjukkan adanya kerja sama, afiliasi,
+            atau dukungan komersial dari media tersebut terhadap 7 April Store.
           </p>
         </div>
       </section>
