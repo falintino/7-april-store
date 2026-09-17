@@ -25,6 +25,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      url: `${baseUrl}/tentang-kami`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
       url: `${baseUrl}/syarat-ketentuan`,
       changeFrequency: "monthly",
       priority: 0.5,
@@ -36,6 +41,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/kebijakan-refund`,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/kebijakan-pengiriman`,
       changeFrequency: "monthly",
       priority: 0.5,
     },
