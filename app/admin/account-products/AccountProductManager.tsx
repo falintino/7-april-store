@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { Check, ImagePlus, Pencil, Plus, Save, Trash2, X } from "lucide-react";
+import { ImagePlus, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 
 type Product = {
   id: string; slug: string; title: string; price: number; discountPrice: number | null;
