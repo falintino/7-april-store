@@ -43,8 +43,8 @@ export default function KebijakanRefundPage() {
             <p className="mt-2">
               Permohonan refund dapat ditinjau apabila pembayaran pelanggan
               berhasil, tetapi pesanan gagal diproses dan produk tidak terkirim.
-              Kami juga akan meninjau laporan pembayaran ganda apabila
-              pelanggan menyertakan bukti transaksi yang sesuai.
+              Kami juga akan meninjau laporan pembayaran ganda apabila pelanggan
+              menyertakan bukti transaksi yang sesuai.
             </p>
           </section>
 
@@ -80,7 +80,21 @@ export default function KebijakanRefundPage() {
             <p className="mt-2">
               Setiap laporan ditinjau berdasarkan status pembayaran dan catatan
               transaksi. Bila refund disetujui, metode dan waktu pengembalian
-              akan diinformasikan melalui kanal bantuan yang digunakan.
+              akan diinformasikan melalui kanal bantuan yang digunakan. Refund
+              diajukan melalui penyedia pembayaran dan umumnya memerlukan waktu
+              hingga 14 hari kerja setelah disetujui, tergantung metode
+              pembayaran, bank, dan proses Midtrans.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white">
+              6. Batas pengajuan
+            </h2>
+            <p className="mt-2">
+              Laporan pesanan gagal atau pembayaran ganda sebaiknya diajukan
+              paling lambat 7 hari kalender sejak transaksi agar data pembayaran
+              dan pengiriman dapat diverifikasi dengan baik.
             </p>
           </section>
         </div>
@@ -98,6 +112,13 @@ export default function KebijakanRefundPage() {
             className="text-blue-400 hover:text-blue-300"
           >
             Kebijakan Privasi
+          </Link>
+
+          <Link
+            href="/kebijakan-pengiriman"
+            className="text-blue-400 hover:text-blue-300"
+          >
+            Kebijakan Pengiriman
           </Link>
         </nav>
       </article>
