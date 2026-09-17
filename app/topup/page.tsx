@@ -17,7 +17,8 @@ import {
 
 import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
 
-const whatsappUrl = "https://wa.me/6285960237306";
+const whatsappUrl = "https://wa.me/62895704041437";
+const supportEmail = "falintino10@gmail.com";
 
 const products = [
   {
@@ -302,7 +303,7 @@ export default function TopUpPage() {
                 </a>
 
                 <a
-                  href="mailto:akun7april@gmail.com"
+                  href={`mailto:${supportEmail}`}
                   className="text-slate-400 transition hover:text-blue-400"
                 >
                   Email Bantuan
@@ -389,7 +390,7 @@ export default function TopUpPage() {
                 </a>
 
                 <a
-                  href="mailto:akun7april@gmail.com"
+                  href={`mailto:${supportEmail}`}
                   className="flex items-center gap-2 text-slate-400 transition hover:text-blue-400"
                 >
                   <Mail size={17} />
