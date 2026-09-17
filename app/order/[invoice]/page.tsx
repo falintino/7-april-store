@@ -500,8 +500,8 @@ export default async function OrderPage({
 
             <p className="mt-2 text-sm leading-6 text-slate-400">
               Klik tombol di bawah untuk
-              melanjutkan pembayaran melalui
-              Midtrans Sandbox.
+              melanjutkan pembayaran QRIS melalui
+              DOKU.
             </p>
 
             <PayButton
