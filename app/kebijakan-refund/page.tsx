@@ -21,7 +21,7 @@ export default function KebijakanRefundPage() {
         </h1>
 
         <p className="mt-3 text-sm text-slate-400">
-          Terakhir diperbarui: 9 September 2026
+          Terakhir diperbarui: 17 September 2026
         </p>
 
         <div className="mt-8 space-y-8 leading-7 text-slate-300">
