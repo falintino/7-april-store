@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -9,7 +10,6 @@ import {
   Mail,
   MessageCircle,
   Play,
-  Search,
   ShieldCheck,
   Sparkles,
   Zap,
@@ -27,7 +27,7 @@ const products = [
     href: "/topup/free-fire",
     image: "/images/games/freefire.jpg",
     tag: "TERPOPULER",
-    price: "Mulai Rp1.000",
+    price: "Mulai Rp750",
   },
 ];
 
@@ -46,37 +46,20 @@ export default function TopUpPage() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-xs font-semibold text-blue-300">
               <Sparkles size={14} />
-              Top Up Game Cepat & Aman
+              Top Up Free Fire
             </div>
 
             <h1 className="text-4xl font-black tracking-[-0.04em] sm:text-5xl lg:text-6xl">
-              Top Up Game
+              Top Up Free Fire
               <span className="block bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 bg-clip-text text-transparent">
                 Tanpa Ribet.
               </span>
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">
-              Pilih game, masukkan ID pemain, tentukan nominal, lalu selesaikan
+              Pilih nominal, masukkan ID pemain, lalu selesaikan
               pembayaran. Pesanan diproses melalui sistem 7 April Store.
             </p>
-
-            <div className="mx-auto mt-8 flex max-w-xl items-center rounded-2xl border border-white/[0.08] bg-white/[0.045] p-2 shadow-2xl backdrop-blur-xl">
-              <Search className="ml-3 text-slate-500" size={19} />
-
-              <input
-                type="text"
-                placeholder="Cari game..."
-                className="h-11 flex-1 bg-transparent px-3 text-sm text-white outline-none placeholder:text-slate-600"
-              />
-
-              <button
-                type="button"
-                className="h-11 rounded-xl bg-blue-600 px-5 text-sm font-bold transition hover:bg-blue-500"
-              >
-                Cari
-              </button>
-            </div>
           </div>
 
           <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
@@ -124,16 +107,16 @@ export default function TopUpPage() {
                 <Gamepad2 size={18} />
 
                 <span className="text-xs font-bold uppercase tracking-[0.18em]">
-                  Daftar Game
+                  Produk Tersedia
                 </span>
               </div>
 
               <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
-                Pilih Game Favoritmu
+                Top Up Free Fire
               </h2>
 
               <p className="mt-2 text-sm text-slate-500">
-                Game lainnya akan segera tersedia.
+                Harga dan nominal ditampilkan jelas sebelum pembayaran.
               </p>
             </div>
 
@@ -150,9 +133,11 @@ export default function TopUpPage() {
                 className="group relative overflow-hidden rounded-[26px] border border-white/[0.07] bg-[#0b1120] p-3 transition duration-300 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-[0_20px_70px_rgba(37,99,235,0.12)]"
               >
                 <div className="relative h-44 overflow-hidden rounded-[20px]">
-                  <img
+                  <Image
                     src={product.image}
                     alt={`Top Up ${product.name}`}
+                    fill
+                    sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                   />
 
@@ -190,21 +175,6 @@ export default function TopUpPage() {
               </Link>
             ))}
 
-            <div className="relative flex min-h-[350px] items-center justify-center overflow-hidden rounded-[26px] border border-dashed border-white/[0.08] bg-white/[0.015] p-6">
-              <div className="text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.035]">
-                  <Gamepad2 size={23} className="text-slate-600" />
-                </div>
-
-                <p className="mt-4 text-sm font-bold text-slate-400">
-                  Game Lainnya
-                </p>
-
-                <p className="mt-1 text-xs text-slate-600">
-                  Segera hadir di 7 April Store
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
