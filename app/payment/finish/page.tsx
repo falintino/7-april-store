@@ -165,7 +165,7 @@ export default async function PaymentFinishPage({
             </p>
 
             <p className="text-xs text-slate-500">
-              Gaming Marketplace
+              Layanan Top Up Game
             </p>
           </div>
         </div>
