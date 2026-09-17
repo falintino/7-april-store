@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://7aprilstore.com/sitemap.xml",
+    sitemap: "https://store.falintino.com/sitemap.xml",
   };
 }
