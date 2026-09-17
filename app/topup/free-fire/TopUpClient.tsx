@@ -128,11 +128,6 @@ export default function TopUpClient({ products }: TopUpClientProps) {
   const displayedProducts =
     activeCategory === "diamond" ? diamondProducts : membershipProducts;
 
-  // Tampilkan satu penanda unggulan saja pada setiap kategori agar katalog
-  // tetap rapi meskipun beberapa produk ditandai populer di database.
-  const featuredProductId =
-    displayedProducts.find((product) => product.popular)?.id ?? null;
-
   /*
    * ================================
    * VALIDASI FORM
@@ -468,12 +463,6 @@ export default function TopUpClient({ products }: TopUpClientProps) {
                       : "border-white/10 bg-[#0a1020] hover:border-blue-500/60",
                   ].join(" ")}
                 >
-                  {product.id === featuredProductId && (
-                    <span className="absolute right-2 top-2 rounded bg-blue-600 px-1.5 py-0.5 text-[8px] font-black">
-                      POPULER
-                    </span>
-                  )}
-
                   <div className="text-lg">
                     {activeCategory === "membership" ? "🎟" : "💎"}
                   </div>
