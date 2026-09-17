@@ -88,8 +88,8 @@ export default function KebijakanPrivasiPage() {
             </h2>
             <p className="mt-2">
               Jika memiliki pertanyaan terkait data pesanan, hubungi kami
-              melalui kanal kontak yang tersedia di website dan sertakan nomor
-              pesanan bila ada.
+              melalui email falintino10@gmail.com atau kanal kontak yang
+              tersedia di website dan sertakan nomor pesanan bila ada.
             </p>
           </section>
         </div>
