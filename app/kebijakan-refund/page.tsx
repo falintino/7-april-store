@@ -65,10 +65,11 @@ export default function KebijakanRefundPage() {
               4. Cara mengajukan bantuan
             </h2>
             <p className="mt-2">
-              Hubungi kami melalui kanal kontak pada website. Sertakan nomor
-              pesanan, waktu transaksi, metode pembayaran, dan bukti pembayaran
-              agar tim dapat melakukan pengecekan. Jangan mengirimkan kata
-              sandi, PIN, atau kode rahasia kepada siapa pun.
+              Hubungi kami melalui email falintino10@gmail.com atau kanal kontak
+              pada website. Sertakan nomor pesanan, waktu transaksi, metode
+              pembayaran, dan bukti pembayaran agar tim dapat melakukan
+              pengecekan. Jangan mengirimkan kata sandi, PIN, atau kode rahasia
+              kepada siapa pun.
             </p>
           </section>
 
