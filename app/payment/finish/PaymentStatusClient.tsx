@@ -20,29 +20,19 @@ export default function PaymentStatusClient({
 }: Props) {
   const router = useRouter();
 
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   const [checking, setChecking] = useState(false);
 
-  const remaining = Math.max(
-    0,
-    expiresAt - now
-  );
+  const remaining = Math.max(0, now === 0 ? 0 : expiresAt - now);
 
   const time = useMemo(() => {
-    const totalSeconds = Math.floor(
-      remaining / 1000
-    );
+    const totalSeconds = Math.floor(remaining / 1000);
 
-    const hours = Math.floor(
-      totalSeconds / 3600
-    );
+    const hours = Math.floor(totalSeconds / 3600);
 
-    const minutes = Math.floor(
-      (totalSeconds % 3600) / 60
-    );
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
 
-    const seconds =
-      totalSeconds % 60;
+    const seconds = totalSeconds % 60;
 
     return {
       hours,
@@ -103,9 +93,7 @@ export default function PaymentStatusClient({
   return (
     <>
       <div className="mt-6">
-        <p className="text-xs text-slate-500">
-          Batas waktu pembayaran
-        </p>
+        <p className="text-xs text-slate-500">Batas waktu pembayaran</p>
 
         <div className="mt-4 flex items-center justify-center gap-4">
           <div>
@@ -113,37 +101,27 @@ export default function PaymentStatusClient({
               {pad(time.hours)}
             </div>
 
-            <p className="mt-1 text-[10px] text-slate-500">
-              Jam
-            </p>
+            <p className="mt-1 text-[10px] text-slate-500">Jam</p>
           </div>
 
-          <span className="mb-5 font-black text-slate-600">
-            :
-          </span>
+          <span className="mb-5 font-black text-slate-600">:</span>
 
           <div>
             <div className="flex h-12 min-w-14 items-center justify-center rounded-xl bg-[#060b16] text-lg font-black">
               {pad(time.minutes)}
             </div>
 
-            <p className="mt-1 text-[10px] text-slate-500">
-              Menit
-            </p>
+            <p className="mt-1 text-[10px] text-slate-500">Menit</p>
           </div>
 
-          <span className="mb-5 font-black text-slate-600">
-            :
-          </span>
+          <span className="mb-5 font-black text-slate-600">:</span>
 
           <div>
             <div className="flex h-12 min-w-14 items-center justify-center rounded-xl bg-[#060b16] text-lg font-black text-blue-400">
               {pad(time.seconds)}
             </div>
 
-            <p className="mt-1 text-[10px] text-slate-500">
-              Detik
-            </p>
+            <p className="mt-1 text-[10px] text-slate-500">Detik</p>
           </div>
         </div>
       </div>
@@ -154,9 +132,7 @@ export default function PaymentStatusClient({
         onClick={handleCheckStatus}
         className="mt-6 h-11 w-full rounded-xl border border-white/10 bg-white/5 text-xs font-bold text-white transition hover:bg-white/10 disabled:opacity-50"
       >
-        {checking
-          ? "Mengecek Status..."
-          : "Cek Status Pembayaran"}
+        {checking ? "Mengecek Status..." : "Cek Status Pembayaran"}
       </button>
 
       <p className="mt-3 break-all text-[10px] text-slate-600">
