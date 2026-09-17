@@ -21,7 +21,7 @@ export default function KebijakanPrivasiPage() {
         </h1>
 
         <p className="mt-3 text-sm text-slate-400">
-          Terakhir diperbarui: 9 September 2026
+          Terakhir diperbarui: 17 September 2026
         </p>
 
         <div className="mt-8 space-y-8 leading-7 text-slate-300">
@@ -54,9 +54,10 @@ export default function KebijakanPrivasiPage() {
             </h2>
             <p className="mt-2">
               Untuk menyelesaikan transaksi, data yang diperlukan dapat
-              diteruskan secara terbatas kepada penyedia pembayaran dan
-              penyedia produk digital. Data hanya dikirim sejauh diperlukan
-              untuk menjalankan transaksi yang diminta pelanggan.
+              diteruskan secara terbatas kepada Midtrans sebagai penyedia
+              pembayaran dan Digiflazz sebagai penyedia produk digital. Data
+              hanya dikirim sejauh diperlukan untuk menjalankan transaksi yang
+              diminta pelanggan.
             </p>
           </section>
 
