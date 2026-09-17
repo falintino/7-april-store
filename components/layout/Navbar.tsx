@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  ChevronRight,
-  CircleHelp,
-  Menu,
-  User,
-  X,
-} from "lucide-react";
+import { ChevronRight, CircleHelp, Menu, User, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -40,10 +34,6 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
-
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     let isActive = true;
@@ -90,11 +80,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#030712]/95 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6">
-        <Link
-          href="/"
-          onClick={closeMenu}
-          className="flex items-center gap-3"
-        >
+        <Link href="/" onClick={closeMenu} className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white shadow-lg shadow-blue-600/30">
             7A
           </div>
