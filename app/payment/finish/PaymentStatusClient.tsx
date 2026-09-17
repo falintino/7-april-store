@@ -68,7 +68,7 @@ export default function PaymentStatusClient({
   /*
    * Saat payment masih pending,
    * refresh data server setiap 5 detik.
-   * Jika webhook Midtrans sudah mengubah
+   * Jika notifikasi pembayaran sudah mengubah
    * status menjadi PAID, halaman otomatis
    * ikut berubah.
    */
