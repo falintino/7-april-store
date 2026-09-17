@@ -497,9 +497,8 @@ export async function POST(request: Request) {
         /*
          * Total awal sama dengan subtotal.
          *
-         * Jika promo diskon diterapkan
-         * nanti, backend Midtrans yang
-         * akan memperbarui total.
+         * Total ini menjadi nominal yang
+         * dikirim ke penyedia pembayaran.
          */
         total,
 
