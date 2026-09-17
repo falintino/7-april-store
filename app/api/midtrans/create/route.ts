@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { assertPaymentModesMatch } from "@/lib/digiflazz";
 
 type PaymentMethod =
   | "qris"
@@ -72,7 +73,7 @@ function getAppUrl() {
 
   return (
     process.env.NEXT_PUBLIC_APP_URL ||
-    "https://7-april-store.vercel.app"
+    "https://store.falintino.com"
   ).replace(/\/$/, "");
 }
 
@@ -220,9 +221,8 @@ export async function POST(
 
     if (
       !paymentMethod ||
-      !isPaymentMethod(
-        paymentMethod
-      )
+      !isPaymentMethod(paymentMethod) ||
+      paymentMethod !== "qris"
     ) {
       return NextResponse.json(
         {
@@ -260,6 +260,21 @@ export async function POST(
         },
         {
           status: 500,
+        }
+      );
+    }
+
+    try {
+      assertPaymentModesMatch();
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Konfigurasi mode pembayaran dan penyedia produk tidak sesuai.",
+        },
+        {
+          status: 503,
         }
       );
     }
@@ -1195,11 +1210,6 @@ export async function POST(
      * gopay
      */
 
-    const paymentFeeType =
-      paymentMethod === "qris"
-        ? "gopay"
-        : enabledPayment;
-
     const appUrl =
       getAppUrl();
 
@@ -1212,24 +1222,9 @@ export async function POST(
      * =========================================
      */
 
-    const customerImposedPaymentFee =
-      paymentFeeWaived
-        ? {
-            enable: false,
-          }
-        : {
-            enable: true,
-
-            payment_fee_configs: [
-              {
-                payment_type:
-                  paymentFeeType,
-
-                customer_percentage:
-                  100,
-              },
-            ],
-          };
+    const customerImposedPaymentFee = {
+      enable: false,
+    };
 
     /*
      * =========================================
@@ -1457,8 +1452,7 @@ export async function POST(
 
       paymentFeeWaived,
 
-      automaticPaymentFee:
-        !paymentFeeWaived,
+      automaticPaymentFee: false,
     });
   } catch (error) {
     console.error(
