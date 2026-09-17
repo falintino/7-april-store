@@ -31,8 +31,9 @@ export default function KebijakanPrivasiPage() {
             </h2>
             <p className="mt-2">
               Saat pelanggan membuat pesanan, kami dapat memproses data seperti
-              UID atau data tujuan, nomor WhatsApp, produk yang dipilih, nomor
-              pesanan, serta status pembayaran. Data tersebut digunakan untuk
+              nama akun pelanggan, alamat email, nomor WhatsApp, UID atau data
+              tujuan, produk yang dipilih, nomor pesanan, alamat IP, serta
+              status pembayaran dan pengiriman. Data tersebut digunakan untuk
               menjalankan dan membantu pesanan pelanggan.
             </p>
           </section>
@@ -43,8 +44,8 @@ export default function KebijakanPrivasiPage() {
             </h2>
             <p className="mt-2">
               Data digunakan untuk memverifikasi pembayaran, memproses produk
-              digital, menampilkan status pesanan, mencegah penyalahgunaan,
-              dan memberikan bantuan apabila pelanggan menghubungi kami.
+              digital, menampilkan status pesanan, mencegah penyalahgunaan, dan
+              memberikan bantuan apabila pelanggan menghubungi kami.
             </p>
           </section>
 
@@ -65,9 +66,8 @@ export default function KebijakanPrivasiPage() {
             <h2 className="text-xl font-semibold text-white">4. Keamanan</h2>
             <p className="mt-2">
               Kami berupaya menjaga data transaksi dengan pembatasan akses dan
-              penggunaan koneksi aman. Pelanggan juga perlu menjaga
-              kerahasiaan perangkat, akun, dan bukti pembayaran miliknya
-              sendiri.
+              penggunaan koneksi aman. Pelanggan juga perlu menjaga kerahasiaan
+              perangkat, akun, dan bukti pembayaran miliknya sendiri.
             </p>
           </section>
 
@@ -84,7 +84,30 @@ export default function KebijakanPrivasiPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white">
-              6. Pertanyaan privasi
+              6. Hak pelanggan
+            </h2>
+            <p className="mt-2">
+              Pelanggan dapat meminta informasi, pembaruan, atau penghapusan
+              data pribadi yang berada dalam penguasaan kami, sepanjang tidak
+              bertentangan dengan kebutuhan pencatatan transaksi, keamanan,
+              penyelesaian sengketa, dan kewajiban hukum yang berlaku.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white">
+              7. Cookie dan data teknis
+            </h2>
+            <p className="mt-2">
+              Website dapat menggunakan cookie yang diperlukan untuk sesi akun,
+              keamanan, dan fungsi utama layanan. Log teknis dapat dicatat untuk
+              mencegah penyalahgunaan dan mendiagnosis gangguan sistem.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white">
+              8. Pertanyaan privasi
             </h2>
             <p className="mt-2">
               Jika memiliki pertanyaan terkait data pesanan, hubungi kami
@@ -107,6 +130,13 @@ export default function KebijakanPrivasiPage() {
             className="text-blue-400 hover:text-blue-300"
           >
             Kebijakan Refund
+          </Link>
+
+          <Link
+            href="/kebijakan-pengiriman"
+            className="text-blue-400 hover:text-blue-300"
+          >
+            Kebijakan Pengiriman
           </Link>
         </nav>
       </article>
