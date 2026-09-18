@@ -488,7 +488,7 @@ async function main() {
       price: 110025,
       providerPrice: 110025,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -498,7 +498,7 @@ async function main() {
       price: 158000,
       providerPrice: 158000,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -508,7 +508,7 @@ async function main() {
       price: 156025,
       providerPrice: 156025,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -518,7 +518,7 @@ async function main() {
       price: 232850,
       providerPrice: 232850,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -528,7 +528,7 @@ async function main() {
       price: 250813,
       providerPrice: 250813,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -538,7 +538,7 @@ async function main() {
       price: 234025,
       providerPrice: 234025,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -548,7 +548,7 @@ async function main() {
       price: 272406,
       providerPrice: 272406,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -558,7 +558,7 @@ async function main() {
       price: 315268,
       providerPrice: 315268,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -568,7 +568,7 @@ async function main() {
       price: 417515,
       providerPrice: 417515,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -578,7 +578,7 @@ async function main() {
       price: 461134,
       providerPrice: 461134,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -588,7 +588,7 @@ async function main() {
       price: 836531,
       providerPrice: 836531,
       popular: false,
-      active: true,
+      active: false,
     },
     {
       game: "Free Fire",
@@ -637,7 +637,7 @@ async function main() {
   }
 
   console.log("");
-  console.log(`✅ ${products.length} produk Free Fire aktif.`);
+  console.log("✅ Katalog disinkronkan: maksimal 1000 Diamond dan membership aktif.");
   console.log("✅ Histori order lama tetap aman.");
 }
 
