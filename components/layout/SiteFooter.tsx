@@ -82,6 +82,10 @@ export default function SiteFooter() {
                 Hubungi Kami
               </Link>
 
+              <Link href="/faq" className="transition hover:text-blue-400">
+                Pertanyaan Umum (FAQ)
+              </Link>
+
               <a
                 href={`mailto:${supportEmail}`}
                 className="transition hover:text-blue-400"
