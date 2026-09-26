@@ -6,6 +6,8 @@ import OrderStatusCheck from "./OrderStatusCheck";
 import RecentOrders from "./RecentOrders";
 import TopUpClient from "./TopUpClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function FreeFireTopUpPage() {
   const products = await prisma.product.findMany({
     where: {
