@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 const mainMenuItems = [
   { label: "Beranda", href: "/" },
   { label: "Top Up", href: "/topup" },
-  { label: "Free Fire", href: "/topup/free-fire" },
+  { label: "Jual Akun", href: "/jual-akun" },
+  { label: "Rekber", href: "/rekber" },
+  { label: "ID Cantik", href: "/id-cantik" },
+  { label: "Rental", href: "/rental" },
 ];
 
 const additionalMenuItems = [
