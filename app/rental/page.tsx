@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import MarketplacePage from "@/components/marketplace/MarketplacePage";
 
-export default function RentalPage() {
-  redirect("/topup");
+export default function Page() {
+  return <MarketplacePage type="rental" />;
 }
