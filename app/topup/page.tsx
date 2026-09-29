@@ -203,7 +203,7 @@ export default function TopUpPage() {
 
               <Link
                 href="/topup/free-fire"
-                className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-slate-200"
+                className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black !text-slate-950 transition hover:bg-slate-200"
               >
                 Mulai Top Up
                 <ArrowRight size={16} />
