@@ -6,7 +6,39 @@ import { processOrderDelivery } from "@/lib/order-delivery";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function isAuthorized(request: Request) {
+/*
+ * =========================================
+ * BATAS WAKTU TRANSAKSI RC70
+ * =========================================
+ *
+ * RC70 = Timeout Dari Biller.
+ *
+ * Selama belum melewati batas:
+ *
+ * PAID
+ * ->
+ * PENDING
+ * ->
+ * cek ulang setiap 1 menit
+ *
+ * Setelah 10 menit sejak order dibuat:
+ *
+ * RC70
+ * ->
+ * FAILED
+ * ->
+ * REFUND_REQUIRED
+ *
+ * atau refund otomatis jika:
+ *
+ * AUTO_REFUND_FAILED_ORDERS=true
+ */
+const MAX_RC70_WAIT_MS =
+  10 * 60 * 1000;
+
+function isAuthorized(
+  request: Request
+) {
   const cronSecret =
     process.env.CRON_SECRET?.trim();
 
@@ -15,7 +47,9 @@ function isAuthorized(request: Request) {
   }
 
   const authorization =
-    request.headers.get("authorization");
+    request.headers.get(
+      "authorization"
+    );
 
   return (
     authorization ===
@@ -23,24 +57,36 @@ function isAuthorized(request: Request) {
   );
 }
 
+function isRc70Expired(
+  createdAt: Date
+) {
+  const age =
+    Date.now() -
+    createdAt.getTime();
+
+  return age >=
+    MAX_RC70_WAIT_MS;
+}
+
 async function checkPendingOrders(
   request: Request
 ) {
   try {
     /*
-     * Vercel Cron otomatis mengirim:
-     *
-     * Authorization:
-     * Bearer <CRON_SECRET>
-     *
-     * Route juga tetap bisa dites
-     * manual menggunakan header yang sama.
+     * =====================================
+     * AUTH
+     * =====================================
      */
-    if (!isAuthorized(request)) {
+
+    if (
+      !isAuthorized(request)
+    ) {
       return NextResponse.json(
         {
           success: false,
-          message: "Unauthorized.",
+
+          message:
+            "Unauthorized.",
         },
         {
           status: 401,
@@ -49,23 +95,35 @@ async function checkPendingOrders(
     }
 
     /*
-     * Hanya ambil order yang:
+     * =====================================
+     * AMBIL ORDER
+     * =====================================
      *
-     * - pembayaran sudah PAID
-     * - provider masih PENDING
-     * - sudah pernah dikirim ke Digiflazz
+     * Hanya order:
      *
-     * providerRefId wajib ada supaya
-     * order lama yang belum pernah dikirim
-     * tidak tiba-tiba ikut diproses.
+     * PAID
+     *
+     * dan provider:
+     *
+     * PENDING
+     * FAILED
+     * REFUND_REQUIRED
+     *
+     * serta sudah memiliki ref_id.
      */
+
     const pendingOrders =
       await prisma.order.findMany({
         where: {
-          paymentStatus: "PAID",
+          paymentStatus:
+            "PAID",
 
           providerStatus: {
-            in: ["PENDING", "FAILED", "REFUND_REQUIRED"],
+            in: [
+              "PENDING",
+              "FAILED",
+              "REFUND_REQUIRED",
+            ],
           },
 
           providerRefId: {
@@ -74,38 +132,203 @@ async function checkPendingOrders(
         },
 
         orderBy: {
-          providerUpdatedAt: "asc",
+          providerUpdatedAt:
+            "asc",
         },
 
         take: 20,
 
         select: {
           id: true,
+
           invoice: true,
-          providerRefId: true,
-          providerUpdatedAt: true,
+
+          providerRefId:
+            true,
+
+          providerUpdatedAt:
+            true,
+
+          providerStatus:
+            true,
+
+          providerRc:
+            true,
+
+          providerMessage:
+            true,
+
+          createdAt:
+            true,
         },
       });
 
     const results: Array<{
       invoice: string;
+
       providerStatus: string;
+
       refId?: string;
+
       rc?: string;
+
       message?: string;
+
       error?: string;
+
+      timeout?: boolean;
     }> = [];
 
-    for (const order of pendingOrders) {
+    /*
+     * =====================================
+     * PROSES SATU PER SATU
+     * =====================================
+     */
+
+    for (
+      const order of pendingOrders
+    ) {
       try {
         /*
-         * processDigiflazzOrder memakai
-         * providerRefId / invoice yang sama.
+         * ===================================
+         * RC70 TIMEOUT LIMIT
+         * ===================================
          *
-         * Jadi transaksi PENDING dicek
-         * menggunakan ref_id yang sama,
-         * bukan membuat transaksi baru.
+         * Jangan terus mengecek RC70
+         * selamanya.
          */
+
+        if (
+          order.providerRc ===
+            "70" &&
+          isRc70Expired(
+            order.createdAt
+          )
+        ) {
+          /*
+           * Atomic claim:
+           *
+           * hanya order yang masih
+           * PENDING + RC70 yang boleh
+           * diubah oleh proses ini.
+           */
+
+          const claimed =
+            await prisma.order.updateMany(
+              {
+                where: {
+                  id:
+                    order.id,
+
+                  paymentStatus:
+                    "PAID",
+
+                  providerStatus:
+                    "PENDING",
+
+                  providerRc:
+                    "70",
+                },
+
+                data: {
+                  providerStatus:
+                    "FAILED",
+
+                  providerMessage:
+                    "Biller timeout lebih dari 10 menit. Transaksi dihentikan dan masuk proses refund.",
+
+                  providerUpdatedAt:
+                    new Date(),
+                },
+              }
+            );
+
+          if (
+            claimed.count ===
+            1
+          ) {
+            /*
+             * Jalankan alur delivery sekali lagi.
+             *
+             * Karena status sekarang FAILED,
+             * lib/order-delivery.ts akan:
+             *
+             * - menggunakan fallback bila ada
+             * - atau masuk requestRefund()
+             *
+             * Jika AUTO_REFUND_FAILED_ORDERS
+             * belum aktif, status akhir:
+             *
+             * REFUND_REQUIRED
+             */
+
+            const result =
+              await processOrderDelivery(
+                order.id
+              );
+
+            results.push({
+              invoice:
+                order.invoice,
+
+              providerStatus:
+                result.providerStatus,
+
+              refId:
+                result.refId ??
+                order.providerRefId ??
+                undefined,
+
+              rc:
+                result.rc ??
+                "70",
+
+              message:
+                result.message ??
+                "RC70 timeout lebih dari 10 menit.",
+
+              timeout:
+                true,
+            });
+
+            continue;
+          }
+
+          /*
+           * Kalau claim gagal, berarti proses
+           * lain sedang mengubah order.
+           */
+
+          results.push({
+            invoice:
+              order.invoice,
+
+            providerStatus:
+              "PENDING",
+
+            refId:
+              order.providerRefId ??
+              undefined,
+
+            rc:
+              "70",
+
+            message:
+              "Transaksi sedang diproses oleh proses lain.",
+
+            timeout:
+              true,
+          });
+
+          continue;
+        }
+
+        /*
+         * ===================================
+         * PROSES NORMAL
+         * ===================================
+         */
+
         const result =
           await processOrderDelivery(
             order.id
@@ -128,6 +351,12 @@ async function checkPendingOrders(
             result.message,
         });
       } catch (error) {
+        /*
+         * Error jaringan / server
+         * tidak boleh membuat order
+         * langsung gagal.
+         */
+
         results.push({
           invoice:
             order.invoice,
@@ -147,6 +376,12 @@ async function checkPendingOrders(
       }
     }
 
+    /*
+     * =====================================
+     * STATISTIK
+     * =====================================
+     */
+
     const successCount =
       results.filter(
         (item) =>
@@ -164,7 +399,12 @@ async function checkPendingOrders(
     const failedCount =
       results.filter(
         (item) =>
-          ["FAILED", "REFUND_REQUIRED"].includes(
+          [
+            "FAILED",
+            "REFUND_REQUIRED",
+            "REFUND_PENDING",
+            "REFUND_PROCESSING",
+          ].includes(
             item.providerStatus
           )
       ).length;
@@ -176,8 +416,13 @@ async function checkPendingOrders(
         pendingOrders.length,
 
       successCount,
+
       pendingCount,
+
       failedCount,
+
+      maxRc70WaitMinutes:
+        10,
 
       results,
     });
@@ -202,22 +447,24 @@ async function checkPendingOrders(
 }
 
 /*
- * Vercel Cron memanggil endpoint
- * menggunakan GET.
+ * Vercel Cron / VPS Cron menggunakan GET.
  */
 export async function GET(
   request: Request
 ) {
-  return checkPendingOrders(request);
+  return checkPendingOrders(
+    request
+  );
 }
 
 /*
- * POST tetap dipertahankan supaya
- * kita masih bisa menjalankan checker
- * secara manual dari PowerShell.
+ * POST tetap dipertahankan
+ * untuk testing manual.
  */
 export async function POST(
   request: Request
 ) {
-  return checkPendingOrders(request);
+  return checkPendingOrders(
+    request
+  );
 }
