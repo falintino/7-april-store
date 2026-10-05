@@ -1223,14 +1223,7 @@ export async function POST(
      */
 
     const customerImposedPaymentFee = {
-  enable: true,
-
-  payment_fee_configs: [
-    {
-      payment_type: "other_qris",
-      customer_percentage: 100,
-    },
-  ],
+  enable: false,
 };
 
     /*
