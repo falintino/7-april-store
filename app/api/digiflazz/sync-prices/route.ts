@@ -4,7 +4,9 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import {
-  calculateSellingPrice,
+  calculateBaseSellingPrice,
+  enforceMinimumSellingPrice,
+  getDiamondAmount,
 } from "@/lib/pricing";
 
 export const runtime = "nodejs";
@@ -151,6 +153,69 @@ function requestPriceList(
   );
 }
 
+function sortProducts(
+  products: Array<{
+    id: string;
+    name: string;
+    sku: string;
+    providerCode: string;
+    price: number;
+    providerPrice: number;
+  }>,
+) {
+  return [...products].sort(
+    (a, b) => {
+      const amountA =
+        getDiamondAmount(
+          a.name,
+          a.sku,
+        );
+
+      const amountB =
+        getDiamondAmount(
+          b.name,
+          b.sku,
+        );
+
+      /*
+       * Diamond selalu ditaruh
+       * sebelum membership.
+       */
+      if (
+        amountA !== null &&
+        amountB === null
+      ) {
+        return -1;
+      }
+
+      if (
+        amountA === null &&
+        amountB !== null
+      ) {
+        return 1;
+      }
+
+      /*
+       * Membership dibandingkan
+       * berdasarkan SKU.
+       */
+      if (
+        amountA === null &&
+        amountB === null
+      ) {
+        return a.sku.localeCompare(
+          b.sku,
+        );
+      }
+
+      return (
+        (amountA ?? 0) -
+        (amountB ?? 0)
+      );
+    },
+  );
+}
+
 async function syncPrices(
   request: Request,
 ) {
@@ -227,12 +292,6 @@ async function syncPrices(
      * =========================================
      * AMBIL PRODUK FREE FIRE AKTIF
      * =========================================
-     *
-     * Produk lokal tidak dibuat baru.
-     *
-     * Harga supplier dan harga jual
-     * akan disinkronkan berdasarkan
-     * pricing engine.
      */
 
     const localProducts =
@@ -282,10 +341,8 @@ async function syncPrices(
 
     /*
      * =========================================
-     * SIGN PRICELIST
+     * SIGN
      * =========================================
-     *
-     * md5(username + apiKey + pricelist)
      */
 
     const sign =
@@ -295,7 +352,7 @@ async function syncPrices(
 
     /*
      * =========================================
-     * REQUEST KE GATEWAY
+     * REQUEST PRICE LIST
      * =========================================
      */
 
@@ -333,12 +390,6 @@ async function syncPrices(
       );
     }
 
-    /*
-     * =========================================
-     * HTTP ERROR
-     * =========================================
-     */
-
     if (
       result.statusCode <
         200 ||
@@ -365,7 +416,7 @@ async function syncPrices(
 
     /*
      * =========================================
-     * DIGIFLAZZ ERROR RESPONSE
+     * CEK RESPONSE DIGIFLAZZ
      * =========================================
      */
 
@@ -409,7 +460,7 @@ async function syncPrices(
 
     /*
      * =========================================
-     * LOOKUP SKU PROVIDER
+     * BUAT LOOKUP PROVIDER SKU
      * =========================================
      */
 
@@ -444,7 +495,43 @@ async function syncPrices(
 
     /*
      * =========================================
-     * HASIL
+     * URUTKAN BERDASARKAN JUMLAH DIAMOND
+     * =========================================
+     *
+     * 5
+     * 10
+     * 12
+     * 20
+     * 25
+     * 30
+     * 40
+     * 50
+     * 55
+     * 70
+     * 75
+     * ...
+     */
+
+    const sortedProducts =
+      sortProducts(
+        localProducts,
+      );
+
+    /*
+     * Harga terakhir Diamond.
+     *
+     * Digunakan supaya:
+     *
+     * 75 DM tidak boleh lebih murah
+     * dari 70 DM.
+     */
+    let previousDiamondSellingPrice:
+      | number
+      | null = null;
+
+    /*
+     * =========================================
+     * RESULT
      * =========================================
      */
 
@@ -452,6 +539,10 @@ async function syncPrices(
       name: string;
 
       providerCode: string;
+
+      diamondAmount:
+        | number
+        | null;
 
       oldProviderPrice: number;
 
@@ -473,14 +564,20 @@ async function syncPrices(
 
     /*
      * =========================================
-     * SYNC SATU PER SATU
+     * PROCESS PRODUK
      * =========================================
      */
 
     for (
       const product
-      of localProducts
+      of sortedProducts
     ) {
+      const diamondAmount =
+        getDiamondAmount(
+          product.name,
+          product.sku,
+        );
+
       const code =
         product.providerCode
           .trim()
@@ -492,7 +589,9 @@ async function syncPrices(
         );
 
       /*
+       * =======================================
        * SKU TIDAK DITEMUKAN
+       * =======================================
        */
 
       if (!providerProduct) {
@@ -502,6 +601,8 @@ async function syncPrices(
 
           providerCode:
             product.providerCode,
+
+          diamondAmount,
 
           oldProviderPrice:
             product.providerPrice,
@@ -520,7 +621,9 @@ async function syncPrices(
       }
 
       /*
-       * PRODUK PROVIDER TIDAK AKTIF
+       * =======================================
+       * PROVIDER NONAKTIF
+       * =======================================
        */
 
       const providerActive =
@@ -539,6 +642,8 @@ async function syncPrices(
           providerCode:
             product.providerCode,
 
+          diamondAmount,
+
           oldProviderPrice:
             product.providerPrice,
 
@@ -556,9 +661,9 @@ async function syncPrices(
       }
 
       /*
-       * =========================================
+       * =======================================
        * HARGA PROVIDER TERBARU
-       * =========================================
+       * =======================================
        */
 
       const newPrice =
@@ -581,6 +686,8 @@ async function syncPrices(
           providerCode:
             product.providerCode,
 
+          diamondAmount,
+
           oldProviderPrice:
             product.providerPrice,
 
@@ -598,25 +705,20 @@ async function syncPrices(
       }
 
       /*
-       * =========================================
-       * HITUNG HARGA JUAL BARU
-       * =========================================
+       * =======================================
+       * HARGA DASAR
+       * =======================================
        *
-       * 1-49 DM:
-       *   profit 0%
+       * Aturan:
        *
-       * 50-70 DM:
-       *   profit 1%
-       *
-       * 71+ DM:
-       *   profit 3%
-       *
-       * Membership:
-       *   profit 3%
+       * 1-49  = 0%
+       * 50-70 = 1%
+       * 71+   = 3%
+       * Membership = 3%
        */
 
-      const newSellingPrice =
-        calculateSellingPrice({
+      const calculatedPrice =
+        calculateBaseSellingPrice({
           name:
             product.name,
 
@@ -628,11 +730,41 @@ async function syncPrices(
         });
 
       /*
-       * =========================================
-       * HITUNG PERSENTASE PROFIT UNTUK HASIL
-       * =========================================
+       * =======================================
+       * HARGA FINAL DIAMOND
+       * =======================================
        *
-       * Hanya untuk informasi dashboard/log.
+       * Harga Diamond harus tidak turun.
+       *
+       * Jadi:
+       *
+       * calculatedPrice
+       * dibandingkan dengan harga
+       * Diamond sebelumnya.
+       */
+
+      let newSellingPrice =
+        calculatedPrice;
+
+      if (
+        diamondAmount !== null
+      ) {
+        newSellingPrice =
+          enforceMinimumSellingPrice({
+            calculatedPrice,
+
+            previousSellingPrice:
+              previousDiamondSellingPrice,
+          });
+
+        previousDiamondSellingPrice =
+          newSellingPrice;
+      }
+
+      /*
+       * =======================================
+       * PROFIT AKTUAL
+       * =======================================
        */
 
       const profitPercent =
@@ -650,9 +782,9 @@ async function syncPrices(
           : 0;
 
       /*
-       * =========================================
+       * =======================================
        * TIDAK ADA PERUBAHAN
-       * =========================================
+       * =======================================
        */
 
       if (
@@ -668,6 +800,8 @@ async function syncPrices(
           providerCode:
             product.providerCode,
 
+          diamondAmount,
+
           oldProviderPrice:
             product.providerPrice,
 
@@ -677,8 +811,7 @@ async function syncPrices(
           oldSellingPrice:
             product.price,
 
-          newSellingPrice:
-            newSellingPrice,
+          newSellingPrice,
 
           profitPercent,
 
@@ -690,16 +823,9 @@ async function syncPrices(
       }
 
       /*
-       * =========================================
+       * =======================================
        * UPDATE DATABASE
-       * =========================================
-       *
-       * providerPrice:
-       *   modal terbaru Digiflazz
-       *
-       * price:
-       *   harga jual terbaru berdasarkan
-       *   pricing engine
+       * =======================================
        */
 
       await prisma.product.update({
@@ -724,6 +850,8 @@ async function syncPrices(
         providerCode:
           product.providerCode,
 
+        diamondAmount,
+
         oldProviderPrice:
           product.providerPrice,
 
@@ -733,8 +861,7 @@ async function syncPrices(
         oldSellingPrice:
           product.price,
 
-        newSellingPrice:
-          newSellingPrice,
+        newSellingPrice,
 
         profitPercent,
 
@@ -793,19 +920,22 @@ async function syncPrices(
 
       skipped,
 
-      profitRules: {
+      pricingRules: {
         "1-49 DM":
-          "0%",
+          "0% profit",
 
         "50-70 DM":
-          "1%",
+          "1% minimum profit",
 
         "71+ DM":
-          "3%",
+          "3% minimum profit",
 
         membership:
-          "3%",
+          "3% profit",
       },
+
+      priceOrder:
+        "Diamond harga tidak boleh turun ketika nominal Diamond bertambah.",
 
       results,
     });
@@ -831,23 +961,11 @@ async function syncPrices(
   }
 }
 
-/*
- * =========================================
- * GET
- * =========================================
- */
-
 export async function GET(
   request: Request,
 ) {
   return syncPrices(request);
 }
-
-/*
- * =========================================
- * POST
- * =========================================
- */
 
 export async function POST(
   request: Request,

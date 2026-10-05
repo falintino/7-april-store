@@ -5,6 +5,14 @@ function roundUpRp10(value: number) {
   return Math.ceil(value / 10) * 10;
 }
 
+/*
+ * Ambil jumlah Diamond dari nama / SKU.
+ *
+ * Contoh:
+ * 5 Diamond  -> 5
+ * 50 Diamond -> 50
+ * FF500      -> 500
+ */
 export function getDiamondAmount(
   name: string,
   sku: string,
@@ -25,6 +33,15 @@ export function getDiamondAmount(
     : null;
 }
 
+/*
+ * Aturan profit:
+ *
+ * 1–49 DM   = 0%
+ * 50–70 DM  = 1%
+ * 71+ DM    = 3%
+ *
+ * Membership = 3%
+ */
 export function getProfitPercent(
   diamondAmount: number | null,
 ) {
@@ -45,7 +62,19 @@ export function getProfitPercent(
   return 3;
 }
 
-export function calculateSellingPrice({
+/*
+ * Hitung harga dasar dari modal Digiflazz.
+ *
+ * Catatan:
+ * Fungsi ini TIDAK menentukan apakah
+ * harga harus lebih tinggi dari nominal
+ * sebelumnya.
+ *
+ * Aturan harga berjenjang akan dilakukan
+ * oleh sync-prices setelah semua produk
+ * diurutkan berdasarkan jumlah Diamond.
+ */
+export function calculateBaseSellingPrice({
   name,
   sku,
   providerPrice,
@@ -85,11 +114,7 @@ export function calculateSellingPrice({
 
   /*
    * 1–49 DM:
-   * PROFIT BENAR-BENAR 0%.
-   *
-   * Jangan dibulatkan karena
-   * harga harus persis sama
-   * dengan modal provider.
+   * benar-benar 0% profit.
    */
   if (
     diamondAmount !== null &&
@@ -118,4 +143,83 @@ export function calculateSellingPrice({
   return roundUpRp10(
     providerPrice * 1.03,
   );
+}
+
+/*
+ * Menjamin harga nominal berikutnya
+ * tidak lebih murah dari nominal
+ * Diamond yang lebih kecil.
+ *
+ * Contoh harga dasar:
+ *
+ * 70 DM  = 7.070
+ * 75 DM  = 6.180
+ *
+ * Fungsi ini akan membuat:
+ *
+ * 75 DM >= 7.070
+ *
+ * sehingga harga tidak turun.
+ *
+ * Nilai ini DIKUNCI ke kelipatan Rp10
+ * supaya tampilan tetap rapi.
+ */
+export function enforceMinimumSellingPrice({
+  calculatedPrice,
+  previousSellingPrice,
+}: {
+  calculatedPrice: number;
+  previousSellingPrice: number | null;
+}) {
+  if (
+    !Number.isInteger(calculatedPrice) ||
+    calculatedPrice <= 0
+  ) {
+    throw new Error(
+      "Harga jual hasil perhitungan tidak valid.",
+    );
+  }
+
+  if (
+    previousSellingPrice === null
+  ) {
+    return calculatedPrice;
+  }
+
+  if (
+    !Number.isInteger(
+      previousSellingPrice,
+    ) ||
+    previousSellingPrice <= 0
+  ) {
+    return calculatedPrice;
+  }
+
+  return Math.max(
+    calculatedPrice,
+    previousSellingPrice,
+  );
+}
+
+/*
+ * Backward compatibility:
+ *
+ * File lain yang sebelumnya memakai
+ * calculateSellingPrice tetap bisa
+ * menggunakannya.
+ */
+export function calculateSellingPrice({
+  name,
+  sku,
+  providerPrice,
+}: {
+  name: string;
+  sku: string;
+  providerPrice: number;
+}) {
+  return calculateBaseSellingPrice({
+    name,
+    sku,
+    providerPrice,
+  });
 }
