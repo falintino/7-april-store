@@ -18,9 +18,6 @@ type SafeFlow = {
   providerCode: string;
   maxPrice: number;
   refId: string;
-  refundAttempts?: number;
-  refundKey?: string;
-  refundResponse?: unknown;
 };
 
 type DigiflazzData = {
@@ -31,25 +28,6 @@ type DigiflazzData = {
   sn?: string;
   price?: number;
   buyer_last_saldo?: number;
-};
-
-type StoredProviderResponse = {
-  _recoveryAttempt?: number;
-
-  _safeFlow?: SafeFlow;
-
-  digiflazz?: {
-    data?: {
-      rc?: string;
-      status?: string;
-      message?: string;
-      ref_id?: string;
-      sn?: string;
-      price?: number;
-    };
-  };
-
-  previousProviderResponse?: unknown;
 };
 
 function json(
@@ -72,7 +50,9 @@ function readFlow(
   }
 
   const root =
-    value as StoredProviderResponse;
+    value as {
+      _safeFlow?: unknown;
+    };
 
   const flow =
     root._safeFlow;
@@ -110,73 +90,6 @@ function readFlow(
   }
 
   return data as unknown as SafeFlow;
-}
-
-function readStoredRc(
-  value: unknown
-): string | null {
-  if (
-    !value ||
-    typeof value !== "object" ||
-    Array.isArray(value)
-  ) {
-    return null;
-  }
-
-  const root =
-    value as StoredProviderResponse;
-
-  const directRc =
-    root.digiflazz?.data?.rc;
-
-  if (
-    typeof directRc ===
-    "string"
-  ) {
-    return directRc
-      .trim();
-  }
-
-  const previous =
-    root.previousProviderResponse;
-
-  if (
-    previous &&
-    typeof previous ===
-      "object" &&
-    !Array.isArray(previous)
-  ) {
-    const nestedRc =
-      readStoredRc(
-        previous
-      );
-
-    if (nestedRc) {
-      return nestedRc;
-    }
-  }
-
-  return null;
-}
-
-function hasRecoveryAttempt(
-  value: unknown
-) {
-  if (
-    !value ||
-    typeof value !== "object" ||
-    Array.isArray(value)
-  ) {
-    return false;
-  }
-
-  const root =
-    value as StoredProviderResponse;
-
-  return (
-    root._recoveryAttempt ===
-    1
-  );
 }
 
 function fallbackFor(
@@ -241,11 +154,10 @@ function fallbackFor(
 function normalize(
   status?: string
 ) {
-  const value = String(
-    status ?? ""
-  )
-    .trim()
-    .toLowerCase();
+  const value =
+    String(status ?? "")
+      .trim()
+      .toLowerCase();
 
   if (
     value === "sukses"
@@ -381,14 +293,12 @@ async function requestRefund(
   }
 
   /*
-   * Kalau Auto Refund belum diaktifkan,
-   * jangan kirim refund otomatis.
+   * Auto refund hanya berjalan jika
+   * AUTO_REFUND_FAILED_ORDERS=true.
    *
-   * Status REFUND_REQUIRED berarti:
-   *
-   * - pembayaran customer sudah PAID
-   * - provider gagal
-   * - refund menunggu tindakan/verifikasi
+   * Jika belum aktif, simpan sebagai
+   * REFUND_REQUIRED agar tidak ada
+   * refund otomatis yang berbahaya.
    */
 
   if (
@@ -612,14 +522,9 @@ async function requestRefund(
 
           providerResponse:
             json({
-              _safeFlow: {
-                ...(readFlow(
-                  order.providerResponse
-                ) ?? {}),
-                refundKey,
-                refundResponse:
-                  responseBody,
-              },
+              refundKey,
+              refundResponse:
+                responseBody,
             }),
 
           providerUpdatedAt:
@@ -732,7 +637,7 @@ async function processFallback(
           flow.refId,
 
         providerMessage:
-          "Mencoba seller cadangan satu kali.",
+          "Mencoba seller cadangan.",
 
         providerUpdatedAt:
           new Date(),
@@ -819,18 +724,25 @@ async function processFallback(
       );
 
     /*
-     * Penting:
-     *
-     * Setelah recovery/fallback gagal,
-     * SafeFlow TIDAK disimpan lagi sebagai
-     * attempt 1.
-     *
-     * Ini mencegah retry tanpa batas.
+     * Jika seller cadangan masih PENDING,
+     * simpan SafeFlow agar checker berikutnya
+     * memakai ref_id yang SAMA.
      */
 
-    const shouldKeepRetryFlow =
-      providerStatus !==
-      "FAILED";
+    const providerResponse =
+      providerStatus ===
+      "PENDING"
+        ? {
+            _safeFlow:
+              flow,
+
+            digiflazz:
+              response,
+          }
+        : {
+            digiflazz:
+              response,
+          };
 
     await prisma.order.update({
       where: {
@@ -869,33 +781,14 @@ async function processFallback(
             : null,
 
         providerResponse:
-          shouldKeepRetryFlow
-            ? json({
-                _safeFlow:
-                  flow,
-
-                digiflazz:
-                  response,
-              })
-            : json({
-                _recoveryAttempt:
-                  1,
-
-                digiflazz:
-                  response,
-              }),
+          json(
+            providerResponse
+          ),
 
         providerUpdatedAt:
           new Date(),
       },
     });
-
-    /*
-     * Kalau gagal setelah percobaan
-     * recovery/fallback:
-     *
-     * jangan ulang terus.
-     */
 
     if (
       providerStatus ===
@@ -931,7 +824,7 @@ async function processFallback(
     const message =
       error instanceof Error
         ? error.message
-        : "Gangguan saat mengecek seller cadangan.";
+        : "Gangguan saat menghubungi seller cadangan.";
 
     await prisma.order.update({
       where: {
@@ -947,15 +840,6 @@ async function processFallback(
 
         providerMessage:
           message,
-
-        /*
-         * Tetap simpan SafeFlow attempt 1
-         * karena error jaringan belum berarti
-         * transaksi provider gagal.
-         *
-         * Checker berikutnya memakai ref_id
-         * yang sama.
-         */
 
         providerResponse:
           json({
@@ -993,9 +877,7 @@ export async function processOrderDelivery(
   }
 
   /*
-   * =========================================
-   * PEMBAYARAN HARUS PAID
-   * =========================================
+   * Pembayaran harus sudah PAID.
    */
 
   if (
@@ -1014,9 +896,7 @@ export async function processOrderDelivery(
   }
 
   /*
-   * =========================================
-   * SUCCESS ADALAH FINAL
-   * =========================================
+   * SUCCESS dan status refund adalah final.
    */
 
   if (
@@ -1050,13 +930,33 @@ export async function processOrderDelivery(
       message:
         order.providerMessage ??
         undefined,
+
+      price:
+        order.providerActualPrice ??
+        undefined,
     };
   }
 
   /*
-   * =========================================
-   * FLOW FALLBACK
-   * =========================================
+   * REFUND_REQUIRED tidak boleh dibuat
+   * menjadi transaksi baru.
+   */
+
+  if (
+    order.providerStatus ===
+    "REFUND_REQUIRED"
+  ) {
+    return requestRefund(
+      orderId
+    );
+  }
+
+  /*
+   * Kalau ada SafeFlow, berarti ini
+   * seller cadangan yang masih PENDING.
+   *
+   * Checker berikutnya mengirim ulang
+   * dengan ref_id yang SAMA.
    */
 
   const flow =
@@ -1080,265 +980,19 @@ export async function processOrderDelivery(
   }
 
   /*
-   * =========================================
-   * RECOVERY UNTUK RC02 YANG SUDAH TERLANJUR
-   * REFUND_REQUIRED
-   * =========================================
+   * Jika transaksi utama FAILED:
    *
-   * Kasus:
+   * 1. Gunakan fallback bila dikonfigurasi.
+   * 2. Kalau tidak ada fallback,
+   *    langsung masuk refund flow.
    *
-   * order lama sudah:
-   *
-   * RC02
-   * ->
-   * REFUND_REQUIRED
-   *
-   * Tetapi AUTO_REFUND belum aktif.
-   *
-   * Kita beri satu kesempatan recovery.
-   *
-   * Recovery menggunakan ref_id BARU:
-   *
-   * invoice-R1
-   *
-   * bukan mengulang ref_id yang sama.
-   */
-
-  if (
-    order.providerStatus ===
-    "REFUND_REQUIRED"
-  ) {
-    const storedRc =
-      readStoredRc(
-        order.providerResponse
-      );
-
-    const alreadyRecovered =
-      hasRecoveryAttempt(
-        order.providerResponse
-      );
-
-    if (
-      storedRc === "02" &&
-      !alreadyRecovered
-    ) {
-      const recoveryRefId =
-        `${order.invoice}-R1`;
-
-      const claimed =
-        await prisma.order.updateMany({
-          where: {
-            id: orderId,
-
-            providerStatus:
-              "REFUND_REQUIRED",
-          },
-
-          data: {
-            providerStatus:
-              "PENDING",
-
-            providerRefId:
-              recoveryRefId,
-
-            providerMessage:
-              "Provider sebelumnya mengembalikan RC02. Mencoba recovery satu kali dengan ref_id baru.",
-
-            providerResponse:
-              json({
-                _recoveryAttempt:
-                  1,
-
-                previousProviderResponse:
-                  order.providerResponse,
-              }),
-
-            providerUpdatedAt:
-              new Date(),
-          },
-        });
-
-      if (
-        claimed.count === 0
-      ) {
-        return {
-          skipped: true,
-
-          providerStatus:
-            order.providerStatus,
-
-          refId:
-            order.providerRefId ??
-            undefined,
-
-          rc:
-            order.providerRc ??
-            undefined,
-
-          message:
-            "Recovery sedang diproses.",
-        };
-      }
-
-      /*
-       * Jangan kirim transaksi kedua
-       * secara langsung dalam request yang sama.
-       *
-       * Biarkan checker berikutnya yang
-       * menjalankannya setelah jeda.
-       */
-
-      return {
-        skipped: false,
-
-        providerStatus:
-          "PENDING",
-
-        refId:
-          recoveryRefId,
-
-        rc:
-          "02",
-
-        message:
-          "Recovery disiapkan. Menunggu checker berikutnya.",
-      };
-    }
-
-    /*
-     * Kalau bukan RC02, atau recovery sudah
-     * pernah dilakukan, jangan ulang lagi.
-     */
-
-    return requestRefund(
-      orderId
-    );
-  }
-
-  /*
-   * =========================================
-   * FAILED
-   * =========================================
-   *
-   * RC02:
-   *
-   * transaksi provider memang GAGAL.
-   *
-   * Kita beri satu recovery saja.
-   *
-   * Recovery menggunakan ref_id baru.
+   * Tidak membuat ref_id -R1.
    */
 
   if (
     order.providerStatus ===
     "FAILED"
   ) {
-    const alreadyRecovered =
-      hasRecoveryAttempt(
-        order.providerResponse
-      );
-
-    const isRc02 =
-      order.providerRc ===
-      "02";
-
-    if (
-      isRc02 &&
-      !alreadyRecovered
-    ) {
-      const recoveryRefId =
-        `${order.invoice}-R1`;
-
-      const claimed =
-        await prisma.order.updateMany({
-          where: {
-            id: orderId,
-
-            providerStatus:
-              "FAILED",
-          },
-
-          data: {
-            providerStatus:
-              "PENDING",
-
-            providerRefId:
-              recoveryRefId,
-
-            providerMessage:
-              "Digiflazz mengembalikan RC02. Mencoba recovery satu kali dengan ref_id baru.",
-
-            providerResponse:
-              json({
-                _recoveryAttempt:
-                  1,
-
-                previousProviderResponse:
-                  order.providerResponse,
-              }),
-
-            providerUpdatedAt:
-              new Date(),
-          },
-        });
-
-      if (
-        claimed.count === 0
-      ) {
-        return {
-          skipped: true,
-
-          providerStatus:
-            order.providerStatus,
-
-          refId:
-            order.providerRefId ??
-            undefined,
-
-          rc:
-            order.providerRc ??
-            undefined,
-
-          message:
-            "Recovery sedang diproses.",
-        };
-      }
-
-      return {
-        skipped: false,
-
-        providerStatus:
-          "PENDING",
-
-        refId:
-          recoveryRefId,
-
-        rc:
-          "02",
-
-        message:
-          "Recovery disiapkan. Menunggu checker berikutnya.",
-      };
-    }
-
-    /*
-     * Kalau recovery sudah pernah dilakukan,
-     * jangan mengulang lagi.
-     */
-
-    if (
-      alreadyRecovered
-    ) {
-      return requestRefund(
-        orderId
-      );
-    }
-
-    /*
-     * Fallback seller hanya digunakan
-     * jika memang dikonfigurasi.
-     */
-
     const fallback =
       fallbackFor(
         order.product.sku,
@@ -1367,34 +1021,54 @@ export async function processOrderDelivery(
           `${order.invoice}-F1`,
       };
 
-    await prisma.order.updateMany({
-      where: {
-        id: orderId,
+    const claimed =
+      await prisma.order.updateMany({
+        where: {
+          id: orderId,
+
+          providerStatus:
+            "FAILED",
+        },
+
+        data: {
+          providerStatus:
+            "PENDING",
+
+          providerRefId:
+            nextFlow.refId,
+
+          providerMessage:
+            "Seller utama gagal. Menyiapkan seller cadangan.",
+
+          providerResponse:
+            json({
+              _safeFlow:
+                nextFlow,
+            }),
+
+          providerUpdatedAt:
+            new Date(),
+        },
+      });
+
+    if (
+      claimed.count === 0
+    ) {
+      return {
+        skipped: true,
 
         providerStatus:
-          "FAILED",
-      },
+          order.providerStatus,
 
-      data: {
-        providerStatus:
-          "PENDING",
+        refId:
+          order.providerRefId ??
+          undefined,
 
-        providerRefId:
-          nextFlow.refId,
-
-        providerMessage:
-          "Seller utama gagal. Menyiapkan seller cadangan.",
-
-        providerResponse:
-          json({
-            _safeFlow:
-              nextFlow,
-          }),
-
-        providerUpdatedAt:
-          new Date(),
-      },
-    });
+        rc:
+          order.providerRc ??
+          undefined,
+      };
+    }
 
     return {
       skipped: false,
@@ -1406,23 +1080,12 @@ export async function processOrderDelivery(
         nextFlow.refId,
 
       message:
-        "Seller cadangan disiapkan.",
+        "Seller cadangan disiapkan. Menunggu checker berikutnya.",
     };
   }
 
   /*
-   * =========================================
-   * PROCESS NORMAL / PENDING
-   * =========================================
-   *
-   * Kalau status PENDING:
-   *
-   * providerRefId tetap dipakai.
-   *
-   * Untuk timeout/network error,
-   * checker akan melakukan request ulang
-   * dengan ref_id yang sama sesuai mekanisme
-   * cek status Digiflazz.
+   * PROCESSING sedang dikerjakan proses lain.
    */
 
   if (
@@ -1450,8 +1113,17 @@ export async function processOrderDelivery(
 
   /*
    * =========================================
-   * KIRIM / CEK TRANSAKSI UTAMA
+   * TRANSAKSI UTAMA
    * =========================================
+   *
+   * Kalau status sebelumnya PENDING:
+   *
+   * processDigiflazzOrder()
+   * akan menggunakan providerRefId
+   * yang sama.
+   *
+   * Itu sesuai mekanisme Cek Status
+   * Digiflazz.
    */
 
   const result =
@@ -1460,11 +1132,12 @@ export async function processOrderDelivery(
     );
 
   /*
-   * Kalau provider memberikan FAILED,
-   * jalankan logic recovery di atas.
+   * Kalau provider berubah menjadi FAILED,
+   * masuk ke fallback/refund flow.
    *
    * Kalau PENDING:
-   * tunggu checker berikutnya.
+   * berhenti di sini dan cron berikutnya
+   * akan mengecek lagi dengan ref_id sama.
    */
 
   if (
