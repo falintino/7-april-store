@@ -3,6 +3,9 @@ import https from "https";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import {
+  calculateSellingPrice,
+} from "@/lib/pricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,7 +50,7 @@ function isAuthorized(request: Request) {
 
   const authorization =
     request.headers.get(
-      "authorization"
+      "authorization",
     );
 
   return (
@@ -57,7 +60,7 @@ function isAuthorized(request: Request) {
 }
 
 function requestPriceList(
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
 ): Promise<{
   statusCode: number;
   body: string;
@@ -89,7 +92,7 @@ function requestPriceList(
 
               "Content-Length":
                 Buffer.byteLength(
-                  body
+                  body,
                 ),
             },
           },
@@ -99,7 +102,7 @@ function requestPriceList(
               "";
 
             res.setEncoding(
-              "utf8"
+              "utf8",
             );
 
             res.on(
@@ -107,7 +110,7 @@ function requestPriceList(
               (chunk) => {
                 responseBody +=
                   chunk;
-              }
+              },
             );
 
             res.on(
@@ -121,14 +124,14 @@ function requestPriceList(
                   body:
                     responseBody,
                 });
-              }
+              },
             );
-          }
+          },
         );
 
       req.on(
         "error",
-        reject
+        reject,
       );
 
       req.setTimeout(
@@ -136,25 +139,26 @@ function requestPriceList(
         () => {
           req.destroy(
             new Error(
-              "Timeout saat mengambil pricelist Digiflazz."
-            )
+              "Timeout saat mengambil pricelist Digiflazz.",
+            ),
           );
-        }
+        },
       );
 
       req.write(body);
       req.end();
-    }
+    },
   );
 }
 
 async function syncPrices(
-  request: Request
+  request: Request,
 ) {
   try {
     /*
-     * Route sinkronisasi tidak boleh
-     * dipanggil sembarang orang.
+     * =========================================
+     * AUTHORIZATION
+     * =========================================
      */
     if (!isAuthorized(request)) {
       return NextResponse.json(
@@ -165,9 +169,15 @@ async function syncPrices(
         },
         {
           status: 401,
-        }
+        },
       );
     }
+
+    /*
+     * =========================================
+     * DIGIFLAZZ CONFIG
+     * =========================================
+     */
 
     const username =
       process.env
@@ -209,16 +219,22 @@ async function syncPrices(
         },
         {
           status: 500,
-        }
+        },
       );
     }
 
     /*
-     * Ambil HANYA produk Free Fire
-     * aktif yang sudah ada di database.
+     * =========================================
+     * AMBIL PRODUK FREE FIRE AKTIF
+     * =========================================
      *
-     * Tidak membuat produk baru.
+     * Produk lokal tidak dibuat baru.
+     *
+     * Harga supplier dan harga jual
+     * akan disinkronkan berdasarkan
+     * pricing engine.
      */
+
     const localProducts =
       await prisma.product.findMany({
         where: {
@@ -231,30 +247,22 @@ async function syncPrices(
 
         select: {
           id: true,
+
           name: true,
+
           sku: true,
+
           providerCode: true,
 
-          /*
-           * price tetap diambil supaya
-           * bisa ditampilkan di hasil sync.
-           *
-           * PENTING:
-           * price TIDAK akan diubah oleh
-           * proses sinkronisasi Digiflazz.
-           */
           price: true,
 
-          /*
-           * providerPrice adalah modal
-           * terbaru dari Digiflazz.
-           */
           providerPrice: true,
         },
       });
 
     if (
-      localProducts.length === 0
+      localProducts.length ===
+      0
     ) {
       return NextResponse.json({
         success: true,
@@ -263,21 +271,40 @@ async function syncPrices(
           "Tidak ada produk Free Fire aktif untuk disinkronkan.",
 
         checked: 0,
+
         updated: 0,
+
         unchanged: 0,
+
         skipped: 0,
       });
     }
 
+    /*
+     * =========================================
+     * SIGN PRICELIST
+     * =========================================
+     *
+     * md5(username + apiKey + pricelist)
+     */
+
     const sign =
       md5(
-        `${username}${apiKey}pricelist`
+        `${username}${apiKey}pricelist`,
       );
+
+    /*
+     * =========================================
+     * REQUEST KE GATEWAY
+     * =========================================
+     */
 
     const result =
       await requestPriceList({
         cmd: "prepaid",
+
         username,
+
         sign,
       });
 
@@ -287,7 +314,7 @@ async function syncPrices(
     try {
       response =
         JSON.parse(
-          result.body
+          result.body,
         ) as DigiflazzResponse;
     } catch {
       return NextResponse.json(
@@ -302,13 +329,21 @@ async function syncPrices(
         },
         {
           status: 502,
-        }
+        },
       );
     }
 
+    /*
+     * =========================================
+     * HTTP ERROR
+     * =========================================
+     */
+
     if (
-      result.statusCode < 200 ||
-      result.statusCode >= 300
+      result.statusCode <
+        200 ||
+      result.statusCode >=
+        300
     ) {
       return NextResponse.json(
         {
@@ -324,13 +359,19 @@ async function syncPrices(
         },
         {
           status: 502,
-        }
+        },
       );
     }
 
+    /*
+     * =========================================
+     * DIGIFLAZZ ERROR RESPONSE
+     * =========================================
+     */
+
     if (
       !Array.isArray(
-        response.data
+        response.data,
       )
     ) {
       const errorData =
@@ -349,8 +390,7 @@ async function syncPrices(
             null,
 
           message:
-            errorData
-              ?.message ??
+            errorData?.message ??
             response.message ??
             "Pricelist Digiflazz tidak tersedia.",
         },
@@ -360,7 +400,7 @@ async function syncPrices(
             "83"
               ? 429
               : 502,
-        }
+        },
       );
     }
 
@@ -368,9 +408,11 @@ async function syncPrices(
       response.data as DigiflazzProduct[];
 
     /*
-     * Buat lookup berdasarkan
-     * buyer_sku_code.
+     * =========================================
+     * LOOKUP SKU PROVIDER
+     * =========================================
      */
+
     const providerMap =
       new Map<
         string,
@@ -378,14 +420,14 @@ async function syncPrices(
       >();
 
     for (
-      const product
+      const providerProduct
       of priceList
     ) {
       const providerCode =
         String(
-          product
+          providerProduct
             .buyer_sku_code ??
-            ""
+            "",
         )
           .trim()
           .toLowerCase();
@@ -396,28 +438,30 @@ async function syncPrices(
 
       providerMap.set(
         providerCode,
-        product
+        providerProduct,
       );
     }
 
     /*
-     * Hasil sinkronisasi.
-     *
-     * oldPrice / newPrice di sini
-     * mengacu pada MODAL PROVIDER,
-     * bukan harga jual website.
-     *
-     * sellingPrice adalah harga
-     * yang dilihat customer.
+     * =========================================
+     * HASIL
+     * =========================================
      */
+
     const results: Array<{
       name: string;
+
       providerCode: string;
 
-      oldPrice: number;
-      newPrice?: number;
+      oldProviderPrice: number;
 
-      sellingPrice: number;
+      newProviderPrice?: number;
+
+      oldSellingPrice: number;
+
+      newSellingPrice?: number;
+
+      profitPercent?: number;
 
       status:
         | "UPDATED"
@@ -426,6 +470,12 @@ async function syncPrices(
 
       reason?: string;
     }> = [];
+
+    /*
+     * =========================================
+     * SYNC SATU PER SATU
+     * =========================================
+     */
 
     for (
       const product
@@ -438,8 +488,12 @@ async function syncPrices(
 
       const providerProduct =
         providerMap.get(
-          code
+          code,
         );
+
+      /*
+       * SKU TIDAK DITEMUKAN
+       */
 
       if (!providerProduct) {
         results.push({
@@ -449,10 +503,10 @@ async function syncPrices(
           providerCode:
             product.providerCode,
 
-          oldPrice:
+          oldProviderPrice:
             product.providerPrice,
 
-          sellingPrice:
+          oldSellingPrice:
             product.price,
 
           status:
@@ -464,6 +518,10 @@ async function syncPrices(
 
         continue;
       }
+
+      /*
+       * PRODUK PROVIDER TIDAK AKTIF
+       */
 
       const providerActive =
         providerProduct
@@ -481,10 +539,10 @@ async function syncPrices(
           providerCode:
             product.providerCode,
 
-          oldPrice:
+          oldProviderPrice:
             product.providerPrice,
 
-          sellingPrice:
+          oldSellingPrice:
             product.price,
 
           status:
@@ -497,15 +555,22 @@ async function syncPrices(
         continue;
       }
 
+      /*
+       * =========================================
+       * HARGA PROVIDER TERBARU
+       * =========================================
+       */
+
       const newPrice =
         Number(
-          providerProduct.price ??
-            0
+          providerProduct
+            .price ??
+            0,
         );
 
       if (
         !Number.isInteger(
-          newPrice
+          newPrice,
         ) ||
         newPrice <= 0
       ) {
@@ -516,10 +581,10 @@ async function syncPrices(
           providerCode:
             product.providerCode,
 
-          oldPrice:
+          oldProviderPrice:
             product.providerPrice,
 
-          sellingPrice:
+          oldSellingPrice:
             product.price,
 
           status:
@@ -533,29 +598,68 @@ async function syncPrices(
       }
 
       /*
-       * ==================================================
-       * PENTING:
-       * ==================================================
+       * =========================================
+       * HITUNG HARGA JUAL BARU
+       * =========================================
        *
-       * Sinkronisasi Digiflazz HANYA membandingkan
-       * providerPrice.
+       * 1-49 DM:
+       *   profit 0%
        *
-       * product.price adalah HARGA JUAL TOKO.
+       * 50-70 DM:
+       *   profit 1%
        *
-       * Jadi contoh:
+       * 71+ DM:
+       *   profit 3%
        *
-       * providerPrice = 750
-       * price         = 780
-       *
-       * Jika Digiflazz masih menjual Rp750,
-       * status tetap UNCHANGED.
-       *
-       * Harga jual Rp780 TIDAK dianggap sebagai
-       * perbedaan yang perlu diperbaiki.
+       * Membership:
+       *   profit 3%
        */
+
+      const newSellingPrice =
+        calculateSellingPrice({
+          name:
+            product.name,
+
+          sku:
+            product.sku,
+
+          providerPrice:
+            newPrice,
+        });
+
+      /*
+       * =========================================
+       * HITUNG PERSENTASE PROFIT UNTUK HASIL
+       * =========================================
+       *
+       * Hanya untuk informasi dashboard/log.
+       */
+
+      const profitPercent =
+        newPrice > 0
+          ? Number(
+              (
+                ((newSellingPrice -
+                  newPrice) /
+                  newPrice) *
+                100
+              ).toFixed(
+                2,
+              ),
+            )
+          : 0;
+
+      /*
+       * =========================================
+       * TIDAK ADA PERUBAHAN
+       * =========================================
+       */
+
       if (
         product.providerPrice ===
-          newPrice
+          newPrice &&
+        product.price ===
+          newSellingPrice
       ) {
         results.push({
           name:
@@ -564,13 +668,19 @@ async function syncPrices(
           providerCode:
             product.providerCode,
 
-          oldPrice:
+          oldProviderPrice:
             product.providerPrice,
 
-          newPrice,
+          newProviderPrice:
+            newPrice,
 
-          sellingPrice:
+          oldSellingPrice:
             product.price,
+
+          newSellingPrice:
+            newSellingPrice,
+
+          profitPercent,
 
           status:
             "UNCHANGED",
@@ -580,44 +690,18 @@ async function syncPrices(
       }
 
       /*
-       * ==================================================
-       * STRATEGI HARGA TOKO
-       * ==================================================
+       * =========================================
+       * UPDATE DATABASE
+       * =========================================
        *
-       * providerPrice =
-       * modal Digiflazz.
+       * providerPrice:
+       *   modal terbaru Digiflazz
        *
-       * price =
-       * harga jual 7 April Store.
-       *
-       * Fee pembayaran =
-       * dihitung terpisah saat checkout.
-       *
-       * Promo =
-       * dihitung terpisah oleh sistem promo.
-       *
-       * Karena itu sinkronisasi provider
-       * DILARANG mengubah product.price.
-       *
-       * Contoh:
-       *
-       * Sebelum:
-       *
-       * providerPrice = 750
-       * price         = 780
-       *
-       * Digiflazz naik menjadi:
-       *
-       * providerPrice = 760
-       *
-       * Setelah sync:
-       *
-       * providerPrice = 760
-       * price         = 780
-       *
-       * Dengan demikian harga jual toko
-       * tetap berada di bawah kendali kita.
+       * price:
+       *   harga jual terbaru berdasarkan
+       *   pricing engine
        */
+
       await prisma.product.update({
         where: {
           id:
@@ -625,18 +709,11 @@ async function syncPrices(
         },
 
         data: {
-          /*
-           * HANYA update modal provider.
-           *
-           * Jangan tambahkan:
-           *
-           * price: newPrice
-           *
-           * karena itu akan menimpa
-           * harga jual website.
-           */
           providerPrice:
             newPrice,
+
+          price:
+            newSellingPrice,
         },
       });
 
@@ -647,39 +724,57 @@ async function syncPrices(
         providerCode:
           product.providerCode,
 
-        oldPrice:
+        oldProviderPrice:
           product.providerPrice,
 
-        newPrice,
+        newProviderPrice:
+          newPrice,
 
-        sellingPrice:
+        oldSellingPrice:
           product.price,
+
+        newSellingPrice:
+          newSellingPrice,
+
+        profitPercent,
 
         status:
           "UPDATED",
       });
     }
 
+    /*
+     * =========================================
+     * STATISTIK
+     * =========================================
+     */
+
     const updated =
       results.filter(
         (item) =>
           item.status ===
-          "UPDATED"
+          "UPDATED",
       ).length;
 
     const unchanged =
       results.filter(
         (item) =>
           item.status ===
-          "UNCHANGED"
+          "UNCHANGED",
       ).length;
 
     const skipped =
       results.filter(
         (item) =>
           item.status ===
-          "SKIPPED"
+          "SKIPPED",
       ).length;
+
+    /*
+     * =========================================
+     * RESPONSE
+     * =========================================
+     */
 
     return NextResponse.json({
       success: true,
@@ -693,25 +788,31 @@ async function syncPrices(
         localProducts.length,
 
       updated,
+
       unchanged,
+
       skipped,
 
-      /*
-       * results sekarang memperlihatkan:
-       *
-       * oldPrice     = modal provider sebelumnya
-       * newPrice     = modal provider terbaru
-       * sellingPrice = harga jual website
-       *
-       * Jadi kita bisa memastikan bahwa
-       * harga jual tidak ikut berubah.
-       */
+      profitRules: {
+        "1-49 DM":
+          "0%",
+
+        "50-70 DM":
+          "1%",
+
+        "71+ DM":
+          "3%",
+
+        membership:
+          "3%",
+      },
+
       results,
     });
   } catch (error) {
     console.error(
       "DIGIFLAZZ PRICE SYNC ERROR:",
-      error
+      error,
     );
 
     return NextResponse.json(
@@ -725,26 +826,31 @@ async function syncPrices(
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
 
 /*
- * Bisa dipanggil otomatis.
+ * =========================================
+ * GET
+ * =========================================
  */
+
 export async function GET(
-  request: Request
+  request: Request,
 ) {
   return syncPrices(request);
 }
 
 /*
- * Bisa juga dites manual
- * menggunakan PowerShell.
+ * =========================================
+ * POST
+ * =========================================
  */
+
 export async function POST(
-  request: Request
+  request: Request,
 ) {
   return syncPrices(request);
 }
