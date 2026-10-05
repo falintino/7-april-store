@@ -9,13 +9,18 @@ export function getDiamondAmount(
   name: string,
   sku: string,
 ) {
-  const match = `${name} ${sku}`.match(/\b(\d{1,4})\b/);
+  const match = `${name} ${sku}`.match(
+    /\b(\d{1,4})\b/,
+  );
 
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
 
   const amount = Number(match[1]);
 
-  return Number.isInteger(amount) && amount > 0
+  return Number.isInteger(amount) &&
+    amount > 0
     ? amount
     : null;
 }
@@ -53,17 +58,64 @@ export function calculateSellingPrice({
     !Number.isInteger(providerPrice) ||
     providerPrice <= 0
   ) {
-    throw new Error("Harga provider tidak valid.");
+    throw new Error(
+      "Harga provider tidak valid.",
+    );
   }
 
-  if (sku.startsWith("FF_MEMBERSHIP_")) {
-    return roundUpRp10(providerPrice * 1.03);
+  /*
+   * Membership:
+   * profit 3%.
+   */
+  if (
+    sku.startsWith(
+      "FF_MEMBERSHIP_",
+    )
+  ) {
+    return roundUpRp10(
+      providerPrice * 1.03,
+    );
   }
 
-  const diamondAmount = getDiamondAmount(name, sku);
-  const profitPercent = getProfitPercent(diamondAmount);
+  const diamondAmount =
+    getDiamondAmount(
+      name,
+      sku,
+    );
 
+  /*
+   * 1–49 DM:
+   * PROFIT BENAR-BENAR 0%.
+   *
+   * Jangan dibulatkan karena
+   * harga harus persis sama
+   * dengan modal provider.
+   */
+  if (
+    diamondAmount !== null &&
+    diamondAmount <= ZERO_PROFIT_MAX
+  ) {
+    return providerPrice;
+  }
+
+  /*
+   * 50–70 DM:
+   * profit 1%.
+   */
+  if (
+    diamondAmount !== null &&
+    diamondAmount <= ONE_PERCENT_MAX
+  ) {
+    return roundUpRp10(
+      providerPrice * 1.01,
+    );
+  }
+
+  /*
+   * 71 DM ke atas:
+   * profit 3%.
+   */
   return roundUpRp10(
-    providerPrice * (1 + profitPercent / 100),
+    providerPrice * 1.03,
   );
 }
