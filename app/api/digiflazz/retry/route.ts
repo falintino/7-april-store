@@ -12,163 +12,361 @@ type RequestBody = {
 };
 
 /*
- * Order khusus yang harga seller Digiflazz naik
- * dari Rp750 menjadi Rp795.
+ * Order khusus lama:
  *
- * Customer tetap membayar Rp750.
- * Selisih Rp45 ditanggung toko.
+ * Customer sudah membayar.
+ * Retry ini hanya digunakan untuk
+ * pemulihan transaksi provider.
  */
-const SPECIAL_RETRY_INVOICE = "7A-20261005-665076";
+const SPECIAL_RETRY_INVOICE =
+  "7A-20261005-665076";
+
 const SPECIAL_RETRY_MAX_PRICE = 795;
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request
+) {
   try {
-    if (!(await isAdminAuthenticated())) {
+    /*
+     * =========================================
+     * ADMIN AUTH
+     * =========================================
+     */
+
+    if (
+      !(await isAdminAuthenticated())
+    ) {
       return NextResponse.json(
         {
           success: false,
-          message: "Akses ditolak.",
+
+          message:
+            "Akses ditolak.",
         },
-        { status: 401 },
+        {
+          status: 401,
+        }
       );
     }
 
-    const body = (await request.json()) as RequestBody;
-    const invoice = String(body.invoice ?? "").trim();
+    /*
+     * =========================================
+     * INPUT
+     * =========================================
+     */
 
-    if (!/^7A-\d{8}-\d{6}$/.test(invoice)) {
+    const body =
+      (await request.json()) as RequestBody;
+
+    const invoice =
+      String(
+        body.invoice ?? ""
+      ).trim();
+
+    if (
+      !/^7A-\d{8}-\d{6}$/.test(
+        invoice
+      )
+    ) {
       return NextResponse.json(
         {
           success: false,
-          message: "Format invoice tidak valid.",
+
+          message:
+            "Format invoice tidak valid.",
         },
-        { status: 400 },
+        {
+          status: 400,
+        }
       );
     }
 
-    const order = await prisma.order.findUnique({
-      where: { invoice },
-      select: {
-        id: true,
-        invoice: true,
-        paymentStatus: true,
-        providerStatus: true,
-        providerRc: true,
-        providerRefId: true,
-        providerMessage: true,
-        providerPriceSnapshot: true,
-      },
-    });
+    /*
+     * =========================================
+     * AMBIL ORDER
+     * =========================================
+     */
+
+    const order =
+      await prisma.order.findUnique({
+        where: {
+          invoice,
+        },
+
+        select: {
+          id: true,
+
+          invoice: true,
+
+          paymentStatus: true,
+
+          providerStatus: true,
+
+          providerRc: true,
+
+          providerRefId: true,
+
+          providerMessage: true,
+
+          providerPriceSnapshot:
+            true,
+        },
+      });
 
     if (!order) {
       return NextResponse.json(
         {
           success: false,
-          message: "Order tidak ditemukan.",
-        },
-        { status: 404 },
-      );
-    }
 
-    if (order.paymentStatus !== "PAID") {
-      return NextResponse.json(
+          message:
+            "Order tidak ditemukan.",
+        },
         {
-          success: false,
-          message: "Order belum berstatus PAID.",
-        },
-        { status: 409 },
+          status: 404,
+        }
       );
     }
 
-    const providerRc = String(
-      order.providerRc ?? "",
-    ).trim();
-
     /*
-     * RC 41 = signature invalid.
-     * RC 45 = IP belum dikenali.
-     *
-     * Keduanya boleh di-retry setelah konfigurasi
-     * diperbaiki.
+     * =========================================
+     * PAYMENT HARUS PAID
+     * =========================================
      */
-    const normalRetry =
-      ["41", "45"].includes(providerRc);
-
-    /*
-     * RC 69 khusus untuk order ini.
-     *
-     * Harga seller Digiflazz terdeteksi Rp795,
-     * sedangkan snapshot awal order Rp750.
-     */
-    const specialPriceRetry =
-      order.invoice === SPECIAL_RETRY_INVOICE &&
-      providerRc === "69";
 
     if (
-      order.providerStatus !== "REFUND_REQUIRED" ||
-      (!normalRetry && !specialPriceRetry)
+      order.paymentStatus !==
+      "PAID"
     ) {
       return NextResponse.json(
         {
           success: false,
+
+          message:
+            "Order belum berstatus PAID.",
+        },
+        {
+          status: 409,
+        }
+      );
+    }
+
+    const providerRc =
+      String(
+        order.providerRc ??
+          ""
+      ).trim();
+
+    /*
+     * =========================================
+     * JENIS RETRY
+     * =========================================
+     *
+     * RC41:
+     * signature invalid.
+     *
+     * RC45:
+     * IP belum dikenali.
+     *
+     * RC69:
+     * harga seller lebih tinggi.
+     *
+     * RC70:
+     * Timeout Dari Biller.
+     *
+     * RC70 berbeda:
+     *
+     * Jangan langsung kirim request lagi.
+     *
+     * Kita ubah kembali menjadi PENDING
+     * dan biarkan cron 1 menit kemudian
+     * melakukan pengecekan dengan ref_id
+     * yang sama.
+     */
+
+    const normalRetry =
+      ["41", "45", "70"].includes(
+        providerRc
+      );
+
+    /*
+     * RC69 khusus order lama
+     * 7A-20261005-665076.
+     */
+
+    const specialPriceRetry =
+      order.invoice ===
+        SPECIAL_RETRY_INVOICE &&
+      providerRc ===
+        "69";
+
+    if (
+      order.providerStatus !==
+        "REFUND_REQUIRED" ||
+      (!normalRetry &&
+        !specialPriceRetry)
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+
           message:
             "Order tidak memenuhi syarat retry Digiflazz.",
+
           providerStatus:
             order.providerStatus,
+
           providerRc:
-            order.providerRc ?? null,
+            order.providerRc ??
+            null,
         },
-        { status: 409 },
+        {
+          status: 409,
+        }
       );
     }
 
     /*
-     * ref_id harus tetap sama.
+     * =========================================
+     * REF ID HARUS TETAP SAMA
+     * =========================================
      */
+
     const refId =
       order.providerRefId ||
       order.invoice;
 
     /*
      * =========================================
-     * ATOMIC CLAIM
+     * RC70
      * =========================================
      *
-     * Untuk RC69 khusus order ini:
+     * Jangan request provider dalam
+     * request admin ini.
      *
-     * providerPriceSnapshot:
-     * Rp750 -> Rp795
+     * Cukup kembalikan ke PENDING.
      *
-     * sehingga processDigiflazzOrder()
-     * akan mengirim:
-     *
-     * max_price = 795
-     *
-     * Customer tetap membayar Rp750.
+     * Cron VPS akan mengambilnya
+     * pada siklus berikutnya.
      */
+
+    if (
+      providerRc ===
+      "70"
+    ) {
+      const claimed =
+        await prisma.order.updateMany({
+          where: {
+            id:
+              order.id,
+
+            paymentStatus:
+              "PAID",
+
+            providerStatus:
+              "REFUND_REQUIRED",
+
+            providerRc:
+              "70",
+          },
+
+          data: {
+            providerStatus:
+              "PENDING",
+
+            providerRefId:
+              refId,
+
+            providerMessage:
+              "Biller timeout. Transaksi dikembalikan ke PENDING untuk pengecekan ulang menggunakan ref_id yang sama.",
+
+            providerUpdatedAt:
+              new Date(),
+          },
+        });
+
+      if (
+        claimed.count !==
+        1
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+
+            message:
+              "Order sedang berubah status atau sudah diproses.",
+          },
+          {
+            status: 409,
+          }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+
+        deferred:
+          true,
+
+        message:
+          "RC70 dipulihkan menjadi PENDING. Checker berikutnya akan mengecek transaksi menggunakan ref_id yang sama.",
+
+        invoice:
+          order.invoice,
+
+        providerStatus:
+          "PENDING",
+
+        refId,
+
+        rc:
+          "70",
+
+        nextAction:
+          "WAIT_CRON",
+      });
+    }
+
+    /*
+     * =========================================
+     * ATOMIC CLAIM
+     * =========================================
+     */
+
     const claimed =
       await prisma.order.updateMany({
         where: {
           id: order.id,
-          paymentStatus: "PAID",
-          providerStatus: "REFUND_REQUIRED",
+
+          paymentStatus:
+            "PAID",
+
+          providerStatus:
+            "REFUND_REQUIRED",
+
           ...(specialPriceRetry
             ? {
-                providerRc: "69",
+                providerRc:
+                  "69",
+
                 invoice:
                   SPECIAL_RETRY_INVOICE,
               }
             : {
                 providerRc: {
-                  in: ["41", "45"],
+                  in: [
+                    "41",
+                    "45",
+                  ],
                 },
               }),
         },
 
         data: {
-          providerStatus: "PENDING",
+          providerStatus:
+            "PENDING",
 
-          providerRefId: refId,
+          providerRefId:
+            refId,
 
           ...(specialPriceRetry
             ? {
@@ -188,25 +386,46 @@ export async function POST(request: Request) {
         },
       });
 
-    if (claimed.count !== 1) {
+    if (
+      claimed.count !==
+      1
+    ) {
       return NextResponse.json(
         {
           success: false,
+
           message:
             "Order sedang berubah status atau sudah diproses. Silakan cek status order.",
         },
-        { status: 409 },
+        {
+          status: 409,
+        }
       );
     }
+
+    /*
+     * =========================================
+     * RC41 / RC45 / RC69
+     * =========================================
+     *
+     * Untuk retry manual yang memang sudah
+     * diperbolehkan, proses sekarang.
+     *
+     * RC70 sudah ditangani di atas dan
+     * sengaja tidak masuk ke sini.
+     */
 
     try {
       const result =
         await processOrderDelivery(
-          order.id,
+          order.id
         );
 
       return NextResponse.json({
         success: true,
+
+        deferred:
+          false,
 
         message:
           specialPriceRetry
@@ -264,7 +483,7 @@ export async function POST(request: Request) {
             error instanceof Error
               ? error.message
               : error,
-        },
+        }
       );
 
       return NextResponse.json(
@@ -281,13 +500,15 @@ export async function POST(request: Request) {
 
           refId,
         },
-        { status: 502 },
+        {
+          status: 502,
+        }
       );
     }
   } catch (error) {
     console.error(
       "DIGIFLAZZ RETRY ENDPOINT ERROR:",
-      error,
+      error
     );
 
     return NextResponse.json(
@@ -299,7 +520,9 @@ export async function POST(request: Request) {
             ? error.message
             : "Gagal menjalankan retry Digiflazz.",
       },
-      { status: 500 },
+      {
+        status: 500,
+      }
     );
   }
 }
