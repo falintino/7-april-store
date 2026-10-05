@@ -76,15 +76,17 @@ export async function POST(request: Request) {
      * dan Digiflazz menyatakan transaksi
      * belum terbentuk.
      */
-    if (
-      order.providerStatus !== "REFUND_REQUIRED" ||
-      String(order.providerRc ?? "").trim() !== "41"
-    ) {
+    const retryableRc = ["41", "45"];
+
+if (
+  order.providerStatus !== "REFUND_REQUIRED" ||
+  !retryableRc.includes(String(order.providerRc ?? "").trim())
+) {
       return NextResponse.json(
         {
           success: false,
           message:
-            "Order tidak memenuhi syarat retry Digiflazz. Hanya REFUND_REQUIRED dengan RC 41 yang dapat di-retry.",
+  "Order tidak memenuhi syarat retry Digiflazz. Hanya REFUND_REQUIRED dengan RC 41 atau 45 yang dapat di-retry.",
           providerStatus: order.providerStatus,
           providerRc: order.providerRc ?? null,
         },
@@ -107,7 +109,9 @@ export async function POST(request: Request) {
         id: order.id,
         paymentStatus: "PAID",
         providerStatus: "REFUND_REQUIRED",
-        providerRc: "41",
+        providerRc: {
+  in: ["41", "45"],
+},
       },
       data: {
         providerStatus: "PENDING",
