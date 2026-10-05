@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { assertPaymentModesMatch } from "@/lib/digiflazz";
+import { getCustomerTotal } from "@/lib/payment-fees";
+import { getDiamondAmount } from "@/lib/pricing";
 
 type PaymentMethod =
   | "qris"
@@ -20,14 +22,11 @@ type MidtransResponse = {
   error_messages?: string[];
 };
 
-const FREE_PAYMENT_FEE =
-  "FREE_PAYMENT_FEE";
+const FREE_PAYMENT_FEE = "FREE_PAYMENT_FEE";
 
-const FIXED_DISCOUNT =
-  "FIXED_DISCOUNT";
+const FIXED_DISCOUNT = "FIXED_DISCOUNT";
 
-const PERCENT_DISCOUNT =
-  "PERCENT_DISCOUNT";
+const PERCENT_DISCOUNT = "PERCENT_DISCOUNT";
 
 const paymentMethodMap: Record<
   PaymentMethod,
@@ -45,8 +44,7 @@ const paymentMethodMap: Record<
   mandiri_va: "echannel",
 };
 
-const BANK_VA_MINIMUM =
-  50_000;
+const BANK_VA_MINIMUM = 50_000;
 
 const bankTransferMethods =
   new Set<PaymentMethod>([
@@ -1200,14 +1198,52 @@ export async function POST(
 
     /*
      * =========================================
-     * QRIS AUTOMATIC FEE FIX
+     * HITUNG FEE QRIS
      * =========================================
      *
-     * enabled_payments:
-     * other_qris
+     * 1–49 DM:
+     *   Tidak ada fee.
      *
-     * payment_fee_configs:
-     * gopay
+     * 50+ DM:
+     *   Fee QRIS 0,7%.
+     *
+     * Promo FREE_PAYMENT_FEE:
+     *   Fee tetap Rp0.
+     */
+
+    const diamondAmount =
+      getDiamondAmount(
+        order.product.name,
+        order.product.sku
+      );
+
+    let paymentFee = 0;
+    let customerTotal =
+      originalAmount;
+
+    if (!paymentFeeWaived) {
+      const paymentTotal =
+        getCustomerTotal({
+          productPrice:
+            originalAmount,
+
+          diamondAmount,
+
+          paymentMethod:
+            paymentMethod,
+        });
+
+      paymentFee =
+        paymentTotal.paymentFee;
+
+      customerTotal =
+        paymentTotal.customerTotal;
+    }
+
+    /*
+     * =========================================
+     * CUSTOMER / CHECKOUT URL
+     * =========================================
      */
 
     const appUrl =
@@ -1218,13 +1254,57 @@ export async function POST(
 
     /*
      * =========================================
-     * AUTOMATIC PAYMENT FEE
+     * ITEM DETAILS
      * =========================================
+     *
+     * Harga produk tetap dicatat sebagai
+     * item pertama.
+     *
+     * Kalau ada fee QRIS, fee dimasukkan
+     * sebagai item kedua.
+     *
+     * Dengan begitu:
+     *
+     * product price + QRIS fee
+     * =
+     * gross amount
      */
 
-    const customerImposedPaymentFee = {
-  enable: false,
-};
+    const itemDetails = [
+      {
+        id:
+          order.product.sku,
+
+        price:
+          originalAmount,
+
+        quantity: 1,
+
+        name:
+          order.product.name
+            .substring(
+              0,
+              50
+            ),
+      },
+
+      ...(paymentFee > 0
+        ? [
+            {
+              id:
+                "PAYMENT_FEE_QRIS",
+
+              price:
+                paymentFee,
+
+              quantity: 1,
+
+              name:
+                "Biaya Pembayaran QRIS",
+            },
+          ]
+        : []),
+    ];
 
     /*
      * =========================================
@@ -1256,29 +1336,11 @@ export async function POST(
                   midtransOrderId,
 
                 gross_amount:
-                  originalAmount,
+                  customerTotal,
               },
 
-              item_details: [
-                {
-                  id:
-                    order.product
-                      .sku,
-
-                  price:
-                    originalAmount,
-
-                  quantity: 1,
-
-                  name:
-                    order.product
-                      .name
-                      .substring(
-                        0,
-                        50
-                      ),
-                },
-              ],
+              item_details:
+                itemDetails,
 
               customer_details: {
                 first_name:
@@ -1291,9 +1353,6 @@ export async function POST(
               enabled_payments: [
                 enabledPayment,
               ],
-
-              customer_imposed_payment_fee:
-                customerImposedPaymentFee,
 
               callbacks: {
                 finish:
@@ -1376,6 +1435,9 @@ export async function POST(
      * =========================================
      * PAYMENT DATABASE
      * =========================================
+     *
+     * grossAmount menyimpan nominal yang
+     * benar-benar dibayar pelanggan.
      */
 
     await prisma.payment.upsert({
@@ -1395,7 +1457,7 @@ export async function POST(
           "PENDING",
 
         grossAmount:
-          originalAmount,
+          customerTotal,
       },
 
       create: {
@@ -1412,7 +1474,7 @@ export async function POST(
           "PENDING",
 
         grossAmount:
-          originalAmount,
+          customerTotal,
       },
     });
 
@@ -1444,6 +1506,10 @@ export async function POST(
         order.discountAmount,
 
       originalAmount,
+
+      paymentFee,
+
+      customerTotal,
 
       promoApplied:
         Boolean(

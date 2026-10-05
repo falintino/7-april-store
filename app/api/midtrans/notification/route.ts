@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { assertPaymentModesMatch } from "@/lib/digiflazz";
 import { processOrderDelivery } from "@/lib/order-delivery";
+import { getCustomerTotal } from "@/lib/payment-fees";
+import { getDiamondAmount } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -195,6 +197,35 @@ function parseAmount(
   return amount;
 }
 
+/*
+ * =====================================
+ * NORMALISASI PAYMENT METHOD
+ * =====================================
+ *
+ * Di sisi checkout kita menggunakan:
+ *
+ * qris
+ *
+ * Sedangkan Midtrans dapat mengirim:
+ *
+ * other_qris
+ *
+ * Helper payment-fees menggunakan
+ * "qris", jadi keduanya harus disamakan.
+ */
+function normalizePaymentMethodForFee(
+  paymentType: string
+) {
+  if (
+    paymentType ===
+    "other_qris"
+  ) {
+    return "qris";
+  }
+
+  return paymentType;
+}
+
 export async function POST(
   request: Request
 ) {
@@ -349,21 +380,34 @@ export async function POST(
 
     /*
      * =====================================
-     * AMBIL ORDER
+     * VALIDASI MODE PEMBAYARAN
      * =====================================
      */
 
-    // Konfigurasi keliru ditolak sebelum status pembayaran diubah.
-    // HTTP 503 membuat kegagalan ini terlihat, bukan diakui sebagai sukses.
     try {
       assertPaymentModesMatch();
     } catch {
-      console.error("MIDTRANS NOTIFICATION: mode pembayaran tidak sesuai.");
+      console.error(
+        "MIDTRANS NOTIFICATION: mode pembayaran tidak sesuai."
+      );
+
       return NextResponse.json(
-        { success: false, message: "Konfigurasi mode pembayaran tidak sesuai." },
-        { status: 503 }
+        {
+          success: false,
+          message:
+            "Konfigurasi mode pembayaran tidak sesuai.",
+        },
+        {
+          status: 503,
+        }
       );
     }
+
+    /*
+     * =====================================
+     * AMBIL ORDER
+     * =====================================
+     */
 
     const order =
       await prisma.order.findUnique({
@@ -377,6 +421,9 @@ export async function POST(
             true,
 
           promoCode:
+            true,
+
+          product:
             true,
         },
       });
@@ -399,21 +446,8 @@ export async function POST(
      * VERIFIKASI NOMINAL
      * =====================================
      *
-     * order.total sekarang adalah
-     * harga produk FINAL.
-     *
-     * Jika tidak ada diskon:
-     *
-     * subtotal = total.
-     *
-     * Jika ada FIXED_DISCOUNT atau
-     * PERCENT_DISCOUNT:
-     *
-     * total =
-     * subtotal - discountAmount.
-     *
-     * Nilai inilah yang menjadi
-     * original_amount di Midtrans.
+     * order.total adalah harga produk
+     * FINAL setelah diskon.
      */
 
     const midtransAmount =
@@ -455,16 +489,9 @@ export async function POST(
      * AUTOMATIC PAYMENT FEE INFO
      * =====================================
      *
-     * Midtrans dapat mengirim data ini
-     * melalui dua bentuk:
-     *
-     * metadata.extra_info.gross_amount_info
-     *
-     * atau:
-     *
-     * extra_info.gross_amount_info
-     *
-     * Keduanya tetap didukung.
+     * Tetap dibaca untuk kompatibilitas
+     * transaksi lama / bentuk notification
+     * Midtrans tertentu.
      */
 
     const grossAmountInfo =
@@ -496,20 +523,12 @@ export async function POST(
 
     /*
      * =====================================
-     * ORDER PAKAI PROMO BEBAS FEE
+     * PROMO BEBAS FEE
      * =====================================
      *
-     * paymentFeeWaived = true
-     *
-     * berarti customer harus membayar
-     * persis order.total.
-     *
-     * Promo ini tidak memberikan diskon
-     * terhadap harga produk.
-     *
-     * Yang dihapus hanya biaya pembayaran
-     * yang biasanya dibebankan kepada
-     * customer.
+     * Kalau promo FREE_PAYMENT_FEE,
+     * customer wajib membayar tepat
+     * order.total.
      */
 
     if (
@@ -545,12 +564,6 @@ export async function POST(
         );
       }
 
-      /*
-       * Kalau Midtrans mengirim
-       * original_amount juga,
-       * nilainya harus cocok.
-       */
-
       if (
         originalAmountFromMidtrans !==
           null &&
@@ -585,28 +598,118 @@ export async function POST(
     } else {
       /*
        * ===================================
-       * ORDER NORMAL + AUTOMATIC FEE
+       * HITUNG TOTAL YANG SEHARUSNYA
        * ===================================
        *
-       * Bagian ini berlaku untuk:
+       * Sekarang fee QRIS ditambahkan
+       * manual sebagai item Midtrans.
        *
-       * - order tanpa promo
-       * - FIXED_DISCOUNT
-       * - PERCENT_DISCOUNT
+       * Jadi notification Midtrans:
        *
-       * Untuk promo diskon produk,
-       * order.total sudah merupakan
-       * harga SETELAH diskon.
+       * gross_amount
        *
-       * Bila extra_info tersedia,
-       * original_amount harus sama dengan
-       * order.total.
+       * harus sama persis dengan:
        *
-       * gross_amount boleh lebih besar
-       * karena sudah termasuk fee.
+       * order.total + QRIS fee
+       *
+       * untuk 50+ DM.
+       *
+       * Untuk 1–49 DM:
+       *
+       * fee = 0
+       *
+       * sehingga:
+       *
+       * gross_amount = order.total
        */
 
-      if (grossAmountInfo) {
+      const normalizedPaymentMethod =
+        normalizePaymentMethodForFee(
+          paymentType
+        );
+
+      const diamondAmount =
+        getDiamondAmount(
+          order.product.name,
+          order.product.sku
+        );
+
+      const expectedPayment =
+        getCustomerTotal({
+          productPrice:
+            order.total,
+
+          diamondAmount,
+
+          paymentMethod:
+            normalizedPaymentMethod,
+        });
+
+      const expectedCustomerTotal =
+        expectedPayment.customerTotal;
+
+      const expectedPaymentFee =
+        expectedPayment.paymentFee;
+
+      /*
+       * ===================================
+       * VALIDASI GROSS AMOUNT
+       * ===================================
+       */
+
+      if (
+        midtransAmount !==
+        expectedCustomerTotal
+      ) {
+        console.error(
+          "MIDTRANS CUSTOMER TOTAL MISMATCH:",
+          {
+            invoice:
+              order.invoice,
+
+            orderTotal:
+              order.total,
+
+            diamondAmount,
+
+            paymentType,
+
+            normalizedPaymentMethod,
+
+            expectedPaymentFee,
+
+            expectedCustomerTotal,
+
+            midtransTotal:
+              midtransAmount,
+          }
+        );
+
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              "Nominal pembayaran tidak sesuai dengan harga pesanan.",
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+
+      /*
+       * ===================================
+       * VALIDASI INFO DARI MIDTRANS
+       * ===================================
+       *
+       * Kalau Midtrans tetap mengirim
+       * gross_amount_info, semua nilainya
+       * harus tetap konsisten.
+       */
+
+      if (
+        grossAmountInfo
+      ) {
         if (
           originalAmountFromMidtrans ===
             null ||
@@ -642,12 +745,6 @@ export async function POST(
           );
         }
 
-        /*
-         * gross_amount pada extra_info
-         * jika tersedia harus cocok dengan
-         * gross_amount utama notification.
-         */
-
         if (
           grossAmountFromInfo !==
             null &&
@@ -680,10 +777,6 @@ export async function POST(
           );
         }
 
-        /*
-         * Payment fee tidak boleh negatif.
-         */
-
         if (
           customerPaymentFee !==
             null &&
@@ -694,93 +787,6 @@ export async function POST(
               success: false,
               message:
                 "Biaya pembayaran tidak valid.",
-            },
-            {
-              status: 400,
-            }
-          );
-        }
-
-        /*
-         * Setelah fee ditambahkan,
-         * customer tidak boleh membayar
-         * lebih rendah daripada harga
-         * produk FINAL.
-         *
-         * Untuk order promo diskon:
-         *
-         * order.total sudah merupakan
-         * harga setelah diskon.
-         */
-
-        if (
-          midtransAmount <
-          order.total
-        ) {
-          console.error(
-            "MIDTRANS TOTAL BELOW ORIGINAL:",
-            {
-              invoice:
-                order.invoice,
-
-              original:
-                order.total,
-
-              gross:
-                midtransAmount,
-            }
-          );
-
-          return NextResponse.json(
-            {
-              success: false,
-              message:
-                "Total pembayaran lebih rendah dari harga produk.",
-            },
-            {
-              status: 400,
-            }
-          );
-        }
-      } else {
-        /*
-         * Fallback untuk transaksi lama
-         * atau transaksi yang ternyata
-         * tidak mendapat Automatic Fee.
-         *
-         * Tanpa gross_amount_info kita
-         * hanya menerima nominal yang
-         * persis sama dengan order.total.
-         *
-         * Kalau jumlahnya lebih besar,
-         * kita tidak punya bukti aman
-         * bahwa selisih tersebut benar
-         * berasal dari fee Midtrans.
-         */
-
-        if (
-          midtransAmount !==
-          order.total
-        ) {
-          console.error(
-            "MIDTRANS AMOUNT WITHOUT FEE INFO MISMATCH:",
-            {
-              invoice:
-                order.invoice,
-
-              databaseTotal:
-                order.total,
-
-              midtransTotal:
-                midtransAmount,
-            }
-          );
-
-          return NextResponse.json(
-            {
-              success: false,
-              message:
-                "Informasi nominal pembayaran tidak lengkap.",
             },
             {
               status: 400,
@@ -802,8 +808,8 @@ export async function POST(
         fraudStatus
       );
 
-    // Diisi dari status terbaru setelah row lock diperoleh.
-    let paymentStatus = "PENDING";
+    let paymentStatus =
+      "PENDING";
 
     /*
      * =====================================
@@ -813,66 +819,98 @@ export async function POST(
 
     await prisma.$transaction(
       async (tx) => {
-        // Query berparameter; invoice tidak digabungkan ke string SQL.
-        // Notifikasi untuk invoice yang sama menunggu giliran sampai commit.
+        /*
+         * Lock row order agar webhook
+         * yang datang bersamaan tidak
+         * menyebabkan status / promo
+         * diproses ganda.
+         */
+
         await tx.$queryRaw`
-          SELECT "id" FROM "Order"
+          SELECT "id"
+          FROM "Order"
           WHERE "invoice" = ${orderId}
           FOR UPDATE
         `;
 
-        const order = await tx.order.findUnique({
-          where: { invoice: orderId },
-          include: { payment: true, promoCode: true },
-        });
+        const lockedOrder =
+          await tx.order.findUnique({
+            where: {
+              invoice:
+                orderId,
+            },
 
-        if (!order) {
-          throw new Error("Order tidak ditemukan saat mengunci pembayaran.");
+            include: {
+              payment:
+                true,
+
+              promoCode:
+                true,
+            },
+          });
+
+        if (!lockedOrder) {
+          throw new Error(
+            "Order tidak ditemukan saat mengunci pembayaran."
+          );
         }
 
-        paymentStatus = getStablePaymentStatus(
-          order.paymentStatus,
-          incomingPaymentStatus
-        );
+        paymentStatus =
+          getStablePaymentStatus(
+            lockedOrder.paymentStatus,
+            incomingPaymentStatus
+          );
 
         await tx.order.update({
           where: {
             id:
-              order.id,
+              lockedOrder.id,
           },
 
           data: {
             paymentStatus,
 
-            ...(paymentStatus === "REFUNDED"
+            ...(paymentStatus ===
+            "REFUNDED"
               ? {
-                  providerStatus: "REFUNDED",
-                  providerMessage: "Dana telah dikembalikan melalui Midtrans.",
-                  providerUpdatedAt: new Date(),
+                  providerStatus:
+                    "REFUNDED",
+
+                  providerMessage:
+                    "Dana telah dikembalikan melalui Midtrans.",
+
+                  providerUpdatedAt:
+                    new Date(),
                 }
-              : paymentStatus === "PARTIAL_REFUND"
+              : paymentStatus ===
+                "PARTIAL_REFUND"
                 ? {
-                    providerStatus: "PARTIAL_REFUND",
-                    providerMessage: "Sebagian dana telah dikembalikan melalui Midtrans.",
-                    providerUpdatedAt: new Date(),
+                    providerStatus:
+                      "PARTIAL_REFUND",
+
+                    providerMessage:
+                      "Sebagian dana telah dikembalikan melalui Midtrans.",
+
+                    providerUpdatedAt:
+                      new Date(),
                   }
                 : {}),
 
             paymentMethod:
               paymentType ||
-              order.paymentMethod,
+              lockedOrder.paymentMethod,
           },
         });
 
         await tx.payment.upsert({
           where: {
             orderId:
-              order.id,
+              lockedOrder.id,
           },
 
           create: {
             orderId:
-              order.id,
+              lockedOrder.id,
 
             transactionId:
               transactionId ||
@@ -884,24 +922,6 @@ export async function POST(
 
             status:
               paymentStatus,
-
-            /*
-             * Simpan TOTAL yang benar-benar
-             * ditagihkan Midtrans.
-             *
-             * Normal:
-             *
-             * harga produk + payment fee.
-             *
-             * FIXED/PERCENT:
-             *
-             * harga produk setelah diskon
-             * + payment fee.
-             *
-             * FREE_PAYMENT_FEE:
-             *
-             * harga produk saja.
-             */
 
             grossAmount:
               midtransAmount,
@@ -916,13 +936,13 @@ export async function POST(
           update: {
             transactionId:
               transactionId ||
-              order.payment
+              lockedOrder.payment
                 ?.transactionId ||
               null,
 
             paymentType:
               paymentType ||
-              order.payment
+              lockedOrder.payment
                 ?.paymentType ||
               null,
 
@@ -932,18 +952,15 @@ export async function POST(
             grossAmount:
               midtransAmount,
 
-            /*
-             * paidAt tidak boleh hilang
-             * karena webhook duplikat.
-             */
-
             paidAt:
               paymentStatus ===
               "PAID"
-                ? order.payment
+                ? lockedOrder
+                    .payment
                     ?.paidAt ??
                   new Date()
-                : order.payment
+                : lockedOrder
+                    .payment
                     ?.paidAt ??
                   null,
           },
@@ -951,57 +968,23 @@ export async function POST(
 
         /*
          * ===================================
-         * REDEEM PROMO TEPAT SATU KALI
+         * REDEEM PROMO SATU KALI
          * ===================================
-         *
-         * Berlaku untuk SEMUA jenis promo:
-         *
-         * - FREE_PAYMENT_FEE
-         * - FIXED_DISCOUNT
-         * - PERCENT_DISCOUNT
-         *
-         * Promo hanya dihitung sebagai
-         * penggunaan setelah pembayaran
-         * benar-benar PAID.
-         *
-         * promoRedeemedAt bertindak sebagai
-         * atomic claim:
-         *
-         * null -> waktu sekarang
-         *
-         * Webhook PAID kedua untuk order
-         * yang sama tidak dapat claim lagi.
-         *
-         * Karena itu usedCount hanya
-         * bertambah SATU KALI per order.
          */
 
         if (
           paymentStatus ===
             "PAID" &&
-          order.promoCodeId
+          lockedOrder.promoCodeId
         ) {
           const promoClaim =
             await tx.order.updateMany({
               where: {
                 id:
-                  order.id,
+                  lockedOrder.id,
 
                 promoCodeId:
-                  order.promoCodeId,
-
-                /*
-                 * PENTING:
-                 *
-                 * Tidak ada lagi syarat:
-                 *
-                 * paymentFeeWaived: true
-                 *
-                 * Karena FIXED_DISCOUNT
-                 * dan PERCENT_DISCOUNT
-                 * memang menggunakan
-                 * paymentFeeWaived = false.
-                 */
+                  lockedOrder.promoCodeId,
 
                 promoRedeemedAt:
                   null,
@@ -1013,19 +996,13 @@ export async function POST(
               },
             });
 
-          /*
-           * Hanya proses yang berhasil
-           * claim promoRedeemedAt yang
-           * boleh menaikkan usedCount.
-           */
-
           if (
             promoClaim.count === 1
           ) {
             await tx.promoCode.update({
               where: {
                 id:
-                  order.promoCodeId,
+                  lockedOrder.promoCodeId,
               },
 
               data: {
@@ -1037,7 +1014,17 @@ export async function POST(
           }
         }
       },
-      { isolationLevel: "ReadCommitted", maxWait: 5000, timeout: 10000 }
+
+      {
+        isolationLevel:
+          "ReadCommitted",
+
+        maxWait:
+          5000,
+
+        timeout:
+          10000,
+      }
     );
 
     /*
@@ -1045,11 +1032,8 @@ export async function POST(
      * DIGIFLAZZ
      * =====================================
      *
-     * Provider hanya berjalan setelah PAID.
-     *
-     * Perubahan sistem promo tidak boleh
-     * membuat Digiflazz berjalan sebelum
-     * pembayaran berhasil.
+     * Provider hanya dijalankan setelah
+     * pembayaran benar-benar PAID.
      */
 
     let digiflazzResult:
@@ -1091,8 +1075,9 @@ export async function POST(
     }
 
     /*
-     * Jangan log kode promo ataupun
-     * Midtrans Server Key.
+     * =====================================
+     * LOG
+     * =====================================
      */
 
     console.log(
@@ -1106,11 +1091,6 @@ export async function POST(
         incomingPaymentStatus,
 
         paymentStatus,
-
-        /*
-         * order.total adalah harga produk
-         * FINAL setelah diskon.
-         */
 
         originalAmount:
           order.total,
@@ -1138,12 +1118,9 @@ export async function POST(
     );
 
     /*
-     * Midtrans harus menerima HTTP 200
-     * setelah notification berhasil
-     * diterima dan diproses.
-     *
-     * Error provider tidak membuat
-     * webhook pembayaran gagal.
+     * =====================================
+     * RESPONSE KE MIDTRANS
+     * =====================================
      */
 
     return NextResponse.json({
