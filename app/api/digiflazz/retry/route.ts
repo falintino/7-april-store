@@ -23,6 +23,23 @@ const SPECIAL_RETRY_INVOICE =
 
 const SPECIAL_RETRY_MAX_PRICE = 795;
 
+/*
+ * TEST KHUSUS VEXXA
+ *
+ * Hanya invoice ini yang boleh
+ * retry RC69 dengan max_price 6025.
+ *
+ * Tujuannya untuk menguji apakah
+ * seller VEXXA / FF50 benar-benar
+ * bisa memproses UID customer.
+ *
+ * Jangan dipakai untuk invoice lain.
+ */
+const VEXXA_TEST_INVOICE =
+  "7A-20261005-324423";
+
+const VEXXA_TEST_MAX_PRICE = 6025;
+
 export async function POST(
   request: Request
 ) {
@@ -173,14 +190,8 @@ export async function POST(
      * RC70:
      * Timeout Dari Biller.
      *
-     * RC70 berbeda:
-     *
-     * Jangan langsung kirim request lagi.
-     *
-     * Kita ubah kembali menjadi PENDING
-     * dan biarkan cron 1 menit kemudian
-     * melakukan pengecekan dengan ref_id
-     * yang sama.
+     * RC70 tidak langsung dikirim ulang.
+     * Dikembalikan ke PENDING.
      */
 
     const normalRetry =
@@ -189,8 +200,7 @@ export async function POST(
       );
 
     /*
-     * RC69 khusus order lama
-     * 7A-20261005-665076.
+     * RC69 khusus order lama.
      */
 
     const specialPriceRetry =
@@ -199,11 +209,45 @@ export async function POST(
       providerRc ===
         "69";
 
+    /*
+     * RC69 khusus test VEXXA.
+     */
+
+    const vexxaTestRetry =
+      order.invoice ===
+        VEXXA_TEST_INVOICE &&
+      providerRc ===
+        "69";
+
+    /*
+     * Apakah retry ini termasuk
+     * retry dengan harga khusus?
+     */
+
+    const priceRetry =
+      specialPriceRetry ||
+      vexxaTestRetry;
+
+    /*
+     * max_price yang akan dipakai.
+     */
+
+    const retryMaxPrice =
+      vexxaTestRetry
+        ? VEXXA_TEST_MAX_PRICE
+        : SPECIAL_RETRY_MAX_PRICE;
+
+    /*
+     * =========================================
+     * VALIDASI RETRY
+     * =========================================
+     */
+
     if (
       order.providerStatus !==
         "REFUND_REQUIRED" ||
       (!normalRetry &&
-        !specialPriceRetry)
+        !priceRetry)
     ) {
       return NextResponse.json(
         {
@@ -240,13 +284,10 @@ export async function POST(
      * RC70
      * =========================================
      *
-     * Jangan request provider dalam
-     * request admin ini.
+     * Jangan request provider langsung.
      *
-     * Cukup kembalikan ke PENDING.
-     *
-     * Cron VPS akan mengambilnya
-     * pada siklus berikutnya.
+     * Kembalikan ke PENDING dan tunggu
+     * checker berikutnya.
      */
 
     if (
@@ -335,7 +376,8 @@ export async function POST(
     const claimed =
       await prisma.order.updateMany({
         where: {
-          id: order.id,
+          id:
+            order.id,
 
           paymentStatus:
             "PAID",
@@ -343,13 +385,21 @@ export async function POST(
           providerStatus:
             "REFUND_REQUIRED",
 
-          ...(specialPriceRetry
+          /*
+           * Untuk VEXXA / retry khusus,
+           * wajib RC69.
+           */
+          ...(priceRetry
             ? {
                 providerRc:
                   "69",
 
+                /*
+                 * Jangan sampai invoice
+                 * lain lolos sebagai VEXXA.
+                 */
                 invoice:
-                  SPECIAL_RETRY_INVOICE,
+                  order.invoice,
               }
             : {
                 providerRc: {
@@ -368,13 +418,15 @@ export async function POST(
           providerRefId:
             refId,
 
-          ...(specialPriceRetry
+          ...(priceRetry
             ? {
                 providerPriceSnapshot:
-                  SPECIAL_RETRY_MAX_PRICE,
+                  retryMaxPrice,
 
                 providerMessage:
-                  "Retry Digiflazz dengan batas harga Rp795. Selisih harga seller Rp45 ditanggung toko.",
+                  vexxaTestRetry
+                    ? "Test VEXXA FF50 dengan batas harga Rp6.025. Selisih harga provider ditanggung toko khusus untuk pengujian invoice ini."
+                    : "Retry Digiflazz dengan batas harga Rp795. Selisih harga seller Rp45 ditanggung toko.",
               }
             : {
                 providerMessage:
@@ -405,14 +457,8 @@ export async function POST(
 
     /*
      * =========================================
-     * RC41 / RC45 / RC69
+     * PROSES RETRY
      * =========================================
-     *
-     * Untuk retry manual yang memang sudah
-     * diperbolehkan, proses sekarang.
-     *
-     * RC70 sudah ditangani di atas dan
-     * sengaja tidak masuk ke sini.
      */
 
     try {
@@ -428,9 +474,11 @@ export async function POST(
           false,
 
         message:
-          specialPriceRetry
-            ? "Retry Digiflazz dengan batas harga Rp795 selesai diproses."
-            : "Retry Digiflazz selesai diproses.",
+          vexxaTestRetry
+            ? "Test VEXXA FF50 dengan batas harga Rp6.025 selesai diproses."
+            : specialPriceRetry
+              ? "Retry Digiflazz dengan batas harga Rp795 selesai diproses."
+              : "Retry Digiflazz selesai diproses.",
 
         invoice:
           order.invoice,
@@ -460,15 +508,23 @@ export async function POST(
 
         specialPriceRetry,
 
+        vexxaTestRetry,
+
         maxPrice:
-          specialPriceRetry
-            ? SPECIAL_RETRY_MAX_PRICE
+          priceRetry
+            ? retryMaxPrice
             : null,
 
+        /*
+         * Test VEXXA:
+         * 6025 - 5565 = 460
+         */
         storeAbsorbsDifference:
-          specialPriceRetry
-            ? 45
-            : 0,
+          vexxaTestRetry
+            ? 460
+            : specialPriceRetry
+              ? 45
+              : 0,
       });
     } catch (error) {
       console.error(
