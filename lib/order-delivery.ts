@@ -1,10 +1,17 @@
 import crypto from "crypto";
 import type { Prisma } from "@prisma/client";
 
-import { processDigiflazzOrder, type DigiflazzProcessResult } from "@/lib/digiflazz";
+import {
+  processDigiflazzOrder,
+  type DigiflazzProcessResult,
+} from "@/lib/digiflazz";
 import { prisma } from "@/lib/prisma";
 
-type FallbackProduct = { providerCode: string; maxPrice: number };
+type FallbackProduct = {
+  providerCode: string;
+  maxPrice: number;
+};
+
 type SafeFlow = {
   version: 1;
   attempt: 1;
@@ -26,219 +33,1448 @@ type DigiflazzData = {
   buyer_last_saldo?: number;
 };
 
-function json(value: unknown): Prisma.InputJsonValue {
-  return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+type StoredProviderResponse = {
+  _recoveryAttempt?: number;
+
+  _safeFlow?: SafeFlow;
+
+  digiflazz?: {
+    data?: {
+      rc?: string;
+      status?: string;
+      message?: string;
+      ref_id?: string;
+      sn?: string;
+      price?: number;
+    };
+  };
+
+  previousProviderResponse?: unknown;
+};
+
+function json(
+  value: unknown
+): Prisma.InputJsonValue {
+  return JSON.parse(
+    JSON.stringify(value)
+  ) as Prisma.InputJsonValue;
 }
 
-function readFlow(value: unknown): SafeFlow | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const flow = (value as Record<string, unknown>)._safeFlow;
-  if (!flow || typeof flow !== "object" || Array.isArray(flow)) return null;
-  const data = flow as Record<string, unknown>;
-  if (data.version !== 1 || data.attempt !== 1) return null;
-  if (typeof data.providerCode !== "string" || typeof data.maxPrice !== "number" || typeof data.refId !== "string") return null;
+function readFlow(
+  value: unknown
+): SafeFlow | null {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+    return null;
+  }
+
+  const root =
+    value as StoredProviderResponse;
+
+  const flow =
+    root._safeFlow;
+
+  if (
+    !flow ||
+    typeof flow !== "object" ||
+    Array.isArray(flow)
+  ) {
+    return null;
+  }
+
+  const data =
+    flow as Record<
+      string,
+      unknown
+    >;
+
+  if (
+    data.version !== 1 ||
+    data.attempt !== 1
+  ) {
+    return null;
+  }
+
+  if (
+    typeof data.providerCode !==
+      "string" ||
+    typeof data.maxPrice !==
+      "number" ||
+    typeof data.refId !==
+      "string"
+  ) {
+    return null;
+  }
+
   return data as unknown as SafeFlow;
 }
 
-function fallbackFor(productSku: string, primaryCode: string): FallbackProduct | null {
-  const raw = process.env.DIGIFLAZZ_FALLBACK_PRODUCTS?.trim();
-  if (!raw) return null;
+function readStoredRc(
+  value: unknown
+): string | null {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+    return null;
+  }
+
+  const root =
+    value as StoredProviderResponse;
+
+  const directRc =
+    root.digiflazz?.data?.rc;
+
+  if (
+    typeof directRc ===
+    "string"
+  ) {
+    return directRc
+      .trim();
+  }
+
+  const previous =
+    root.previousProviderResponse;
+
+  if (
+    previous &&
+    typeof previous ===
+      "object" &&
+    !Array.isArray(previous)
+  ) {
+    const nestedRc =
+      readStoredRc(
+        previous
+      );
+
+    if (nestedRc) {
+      return nestedRc;
+    }
+  }
+
+  return null;
+}
+
+function hasRecoveryAttempt(
+  value: unknown
+) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+    return false;
+  }
+
+  const root =
+    value as StoredProviderResponse;
+
+  return (
+    root._recoveryAttempt ===
+    1
+  );
+}
+
+function fallbackFor(
+  productSku: string,
+  primaryCode: string
+): FallbackProduct | null {
+  const raw =
+    process.env
+      .DIGIFLAZZ_FALLBACK_PRODUCTS
+      ?.trim();
+
+  if (!raw) {
+    return null;
+  }
+
   try {
-    const config = JSON.parse(raw) as Record<string, Partial<FallbackProduct>>;
-    const candidate = config[productSku] ?? config[primaryCode];
-    if (!candidate || typeof candidate.providerCode !== "string" || !Number.isInteger(candidate.maxPrice) || Number(candidate.maxPrice) <= 0) return null;
-    if (candidate.providerCode.trim() === primaryCode) return null;
-    return { providerCode: candidate.providerCode.trim(), maxPrice: Number(candidate.maxPrice) };
+    const config =
+      JSON.parse(raw) as Record<
+        string,
+        Partial<FallbackProduct>
+      >;
+
+    const candidate =
+      config[productSku] ??
+      config[primaryCode];
+
+    if (
+      !candidate ||
+      typeof candidate.providerCode !==
+        "string" ||
+      !Number.isInteger(
+        candidate.maxPrice
+      ) ||
+      Number(candidate.maxPrice) <= 0
+    ) {
+      return null;
+    }
+
+    if (
+      candidate.providerCode.trim() ===
+      primaryCode
+    ) {
+      return null;
+    }
+
+    return {
+      providerCode:
+        candidate.providerCode.trim(),
+
+      maxPrice:
+        Number(
+          candidate.maxPrice
+        ),
+    };
   } catch {
-    throw new Error("DIGIFLAZZ_FALLBACK_PRODUCTS bukan JSON yang valid.");
+    throw new Error(
+      "DIGIFLAZZ_FALLBACK_PRODUCTS bukan JSON yang valid."
+    );
   }
 }
 
-function normalize(status?: string) {
-  const value = String(status ?? "").trim().toLowerCase();
-  if (value === "sukses") return "SUCCESS";
-  if (value === "gagal") return "FAILED";
+function normalize(
+  status?: string
+) {
+  const value = String(
+    status ?? ""
+  )
+    .trim()
+    .toLowerCase();
+
+  if (
+    value === "sukses"
+  ) {
+    return "SUCCESS";
+  }
+
+  if (
+    value === "gagal"
+  ) {
+    return "FAILED";
+  }
+
   return "PENDING";
 }
 
 function digiflazzConfig() {
-  const username = process.env.DIGIFLAZZ_USERNAME?.trim();
-  const mode = process.env.DIGIFLAZZ_MODE?.trim().toLowerCase() || "development";
-  const apiKey = mode === "production"
-    ? process.env.DIGIFLAZZ_PRODUCTION_KEY?.trim()
-    : process.env.DIGIFLAZZ_DEVELOPMENT_KEY?.trim();
-  if (!username || !apiKey) throw new Error("Konfigurasi Digiflazz belum lengkap.");
-  return { username, apiKey, mode };
+  const username =
+    process.env
+      .DIGIFLAZZ_USERNAME
+      ?.trim();
+
+  const mode =
+    process.env
+      .DIGIFLAZZ_MODE
+      ?.trim()
+      .toLowerCase() ||
+    "development";
+
+  const apiKey =
+    mode === "production"
+      ? process.env
+          .DIGIFLAZZ_PRODUCTION_KEY
+          ?.trim()
+      : process.env
+          .DIGIFLAZZ_DEVELOPMENT_KEY
+          ?.trim();
+
+  if (
+    !username ||
+    !apiKey
+  ) {
+    throw new Error(
+      "Konfigurasi Digiflazz belum lengkap."
+    );
+  }
+
+  return {
+    username,
+    apiKey,
+    mode,
+  };
 }
 
-async function gatewayRequest(payload: Record<string, unknown>) {
-  const response = await fetch("https://gateway.falintino.com/v1/transaction", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json", "User-Agent": "7-April-Store" },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(30_000),
-    cache: "no-store",
-  });
-  const body = await response.text();
-  if (!response.ok) throw new Error(`Gateway Digiflazz HTTP ${response.status}.`);
+async function gatewayRequest(
+  payload: Record<
+    string,
+    unknown
+  >
+) {
+  const response =
+    await fetch(
+      "https://gateway.falintino.com/v1/transaction",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+
+          "User-Agent":
+            "7-April-Store",
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          ),
+
+        signal:
+          AbortSignal.timeout(
+            30_000
+          ),
+
+        cache:
+          "no-store",
+      }
+    );
+
+  const body =
+    await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `Gateway Digiflazz HTTP ${response.status}.`
+    );
+  }
+
   try {
-    return JSON.parse(body) as { data?: DigiflazzData };
+    return JSON.parse(
+      body
+    ) as {
+      data?: DigiflazzData;
+    };
   } catch {
-    throw new Error("Respons Digiflazz tidak valid.");
+    throw new Error(
+      "Respons Digiflazz tidak valid."
+    );
   }
 }
 
-async function requestRefund(orderId: string): Promise<DigiflazzProcessResult> {
-  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { payment: true } });
-  if (!order) throw new Error("Order tidak ditemukan saat menyiapkan refund.");
+async function requestRefund(
+  orderId: string
+): Promise<DigiflazzProcessResult> {
+  const order =
+    await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
 
-  if (process.env.AUTO_REFUND_FAILED_ORDERS?.trim().toLowerCase() !== "true") {
-    await prisma.order.updateMany({
-      where: { id: orderId, providerStatus: "FAILED" },
-      data: {
-        providerStatus: "REFUND_REQUIRED",
-        providerMessage: "Pengiriman gagal. Refund menunggu verifikasi dan aktivasi Refund API.",
-        providerUpdatedAt: new Date(),
+      include: {
+        payment: true,
       },
     });
-    return { skipped: false, providerStatus: "REFUND_REQUIRED", refId: order.providerRefId ?? undefined, message: "Refund perlu diproses." };
+
+  if (!order) {
+    throw new Error(
+      "Order tidak ditemukan saat menyiapkan refund."
+    );
   }
 
-  const serverKey = process.env.MIDTRANS_SERVER_KEY?.trim();
+  /*
+   * Kalau Auto Refund belum diaktifkan,
+   * jangan kirim refund otomatis.
+   *
+   * Status REFUND_REQUIRED berarti:
+   *
+   * - pembayaran customer sudah PAID
+   * - provider gagal
+   * - refund menunggu tindakan/verifikasi
+   */
+
+  if (
+    process.env
+      .AUTO_REFUND_FAILED_ORDERS
+      ?.trim()
+      .toLowerCase() !==
+    "true"
+  ) {
+    await prisma.order.updateMany({
+      where: {
+        id: orderId,
+
+        providerStatus:
+          "FAILED",
+      },
+
+      data: {
+        providerStatus:
+          "REFUND_REQUIRED",
+
+        providerMessage:
+          "Pengiriman gagal. Refund menunggu verifikasi dan aktivasi Refund API.",
+
+        providerUpdatedAt:
+          new Date(),
+      },
+    });
+
+    return {
+      skipped: false,
+
+      providerStatus:
+        "REFUND_REQUIRED",
+
+      refId:
+        order.providerRefId ??
+        undefined,
+
+      message:
+        "Refund perlu diproses.",
+    };
+  }
+
+  const serverKey =
+    process.env
+      .MIDTRANS_SERVER_KEY
+      ?.trim();
+
   if (!serverKey) {
     await prisma.order.updateMany({
-      where: { id: orderId, providerStatus: { in: ["FAILED", "REFUND_REQUIRED"] } },
+      where: {
+        id: orderId,
+
+        providerStatus: {
+          in: [
+            "FAILED",
+            "REFUND_REQUIRED",
+          ],
+        },
+      },
+
       data: {
-        providerStatus: "REFUND_REQUIRED",
-        providerMessage: "Refund menunggu konfigurasi Midtrans.",
-        providerUpdatedAt: new Date(),
+        providerStatus:
+          "REFUND_REQUIRED",
+
+        providerMessage:
+          "Refund menunggu konfigurasi Midtrans.",
+
+        providerUpdatedAt:
+          new Date(),
       },
     });
-    return { skipped: false, providerStatus: "REFUND_REQUIRED", refId: order.providerRefId ?? undefined, message: "Refund menunggu konfigurasi Midtrans." };
+
+    return {
+      skipped: false,
+
+      providerStatus:
+        "REFUND_REQUIRED",
+
+      refId:
+        order.providerRefId ??
+        undefined,
+
+      message:
+        "Refund menunggu konfigurasi Midtrans.",
+    };
   }
 
-  const claimed = await prisma.order.updateMany({
-    where: { id: orderId, providerStatus: { in: ["FAILED", "REFUND_REQUIRED"] } },
-    data: { providerStatus: "REFUND_PROCESSING", providerMessage: "Refund sedang diajukan.", providerUpdatedAt: new Date() },
-  });
-  if (claimed.count === 0) return { skipped: true, providerStatus: order.providerStatus, refId: order.providerRefId ?? undefined };
+  const claimed =
+    await prisma.order.updateMany({
+      where: {
+        id: orderId,
 
-  const production = process.env.MIDTRANS_IS_PRODUCTION?.trim() === "true";
-  const refundKey = `${order.invoice}-AUTO-REFUND-1`;
+        providerStatus: {
+          in: [
+            "FAILED",
+            "REFUND_REQUIRED",
+          ],
+        },
+      },
+
+      data: {
+        providerStatus:
+          "REFUND_PROCESSING",
+
+        providerMessage:
+          "Refund sedang diajukan.",
+
+        providerUpdatedAt:
+          new Date(),
+      },
+    });
+
+  if (
+    claimed.count === 0
+  ) {
+    return {
+      skipped: true,
+
+      providerStatus:
+        order.providerStatus,
+
+      refId:
+        order.providerRefId ??
+        undefined,
+    };
+  }
+
+  const production =
+    process.env
+      .MIDTRANS_IS_PRODUCTION
+      ?.trim() ===
+    "true";
+
+  const refundKey =
+    `${order.invoice}-AUTO-REFUND-1`;
 
   try {
-    const response = await fetch(`${production ? "https://api.midtrans.com" : "https://api.sandbox.midtrans.com"}/v2/${encodeURIComponent(order.invoice)}/refund`, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${serverKey}:`).toString("base64")}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ refund_key: refundKey, reason: "Pengiriman produk digital gagal" }),
-      cache: "no-store",
-    });
-    const responseBody = await response.json().catch(() => ({})) as Record<string, unknown>;
-    if (!response.ok || String(responseBody.status_code ?? "") !== "200") {
-      throw new Error(String(responseBody.status_message ?? `Refund Midtrans HTTP ${response.status}`));
+    const response =
+      await fetch(
+        `${
+          production
+            ? "https://api.midtrans.com"
+            : "https://api.sandbox.midtrans.com"
+        }/v2/${encodeURIComponent(
+          order.invoice
+        )}/refund`,
+        {
+          method: "POST",
+
+          headers: {
+            Authorization:
+              `Basic ${Buffer.from(
+                `${serverKey}:`
+              ).toString(
+                "base64"
+              )}`,
+
+            "Content-Type":
+              "application/json",
+
+            Accept:
+              "application/json",
+          },
+
+          body:
+            JSON.stringify({
+              refund_key:
+                refundKey,
+
+              reason:
+                "Pengiriman produk digital gagal",
+            }),
+
+          cache:
+            "no-store",
+        }
+      );
+
+    const responseBody =
+      (await response
+        .json()
+        .catch(
+          () => ({})
+        )) as Record<
+        string,
+        unknown
+      >;
+
+    if (
+      !response.ok ||
+      String(
+        responseBody.status_code ??
+          ""
+      ) !== "200"
+    ) {
+      throw new Error(
+        String(
+          responseBody.status_message ??
+            `Refund Midtrans HTTP ${response.status}`
+        )
+      );
     }
+
     await prisma.$transaction([
       prisma.order.update({
-        where: { id: orderId },
+        where: {
+          id: orderId,
+        },
+
         data: {
-          paymentStatus: "REFUND_PENDING",
-          providerStatus: "REFUND_PENDING",
-          providerMessage: "Refund disetujui dan menunggu konfirmasi bank atau penyedia pembayaran.",
-          providerResponse: json({ _safeFlow: { ...(readFlow(order.providerResponse) ?? {}), refundKey, refundResponse: responseBody } }),
-          providerUpdatedAt: new Date(),
+          paymentStatus:
+            "REFUND_PENDING",
+
+          providerStatus:
+            "REFUND_PENDING",
+
+          providerMessage:
+            "Refund disetujui dan menunggu konfirmasi bank atau penyedia pembayaran.",
+
+          providerResponse:
+            json({
+              _safeFlow: {
+                ...(readFlow(
+                  order.providerResponse
+                ) ?? {}),
+                refundKey,
+                refundResponse:
+                  responseBody,
+              },
+            }),
+
+          providerUpdatedAt:
+            new Date(),
         },
       }),
-      prisma.payment.update({ where: { orderId }, data: { status: "REFUND_PENDING" } }),
+
+      prisma.payment.update({
+        where: {
+          orderId,
+        },
+
+        data: {
+          status:
+            "REFUND_PENDING",
+        },
+      }),
     ]);
-    return { skipped: false, providerStatus: "REFUND_PENDING", refId: order.providerRefId ?? undefined, message: "Refund sedang diproses." };
+
+    return {
+      skipped: false,
+
+      providerStatus:
+        "REFUND_PENDING",
+
+      refId:
+        order.providerRefId ??
+        undefined,
+
+      message:
+        "Refund sedang diproses.",
+    };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Refund Midtrans gagal diajukan.";
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Refund Midtrans gagal diajukan.";
+
     await prisma.order.update({
-      where: { id: orderId },
-      data: { providerStatus: "REFUND_REQUIRED", providerMessage: message, providerUpdatedAt: new Date() },
+      where: {
+        id: orderId,
+      },
+
+      data: {
+        providerStatus:
+          "REFUND_REQUIRED",
+
+        providerMessage:
+          message,
+
+        providerUpdatedAt:
+          new Date(),
+      },
     });
-    return { skipped: false, providerStatus: "REFUND_REQUIRED", refId: order.providerRefId ?? undefined, message };
+
+    return {
+      skipped: false,
+
+      providerStatus:
+        "REFUND_REQUIRED",
+
+      refId:
+        order.providerRefId ??
+        undefined,
+
+      message,
+    };
   }
 }
 
-async function processFallback(orderId: string, flow: SafeFlow): Promise<DigiflazzProcessResult> {
-  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { product: true } });
-  if (!order) throw new Error("Order tidak ditemukan.");
-  const claimed = await prisma.order.updateMany({
-    where: { id: orderId, providerStatus: { in: ["PENDING", "FAILED"] } },
-    data: { providerStatus: "FALLBACK_PROCESSING", providerRefId: flow.refId, providerMessage: "Mencoba seller cadangan satu kali.", providerUpdatedAt: new Date() },
-  });
-  if (claimed.count === 0) return { skipped: true, providerStatus: order.providerStatus, refId: order.providerRefId ?? undefined };
+async function processFallback(
+  orderId: string,
+  flow: SafeFlow
+): Promise<DigiflazzProcessResult> {
+  const order =
+    await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
 
-  try {
-    const { username, apiKey, mode } = digiflazzConfig();
-    const payload: Record<string, unknown> = {
-      username,
-      buyer_sku_code: flow.providerCode,
-      customer_no: order.uid,
-      ref_id: flow.refId,
-      sign: crypto.createHash("md5").update(`${username}${apiKey}${flow.refId}`).digest("hex"),
-      max_price: flow.maxPrice,
-    };
-    if (mode !== "production") payload.testing = true;
-    const response = await gatewayRequest(payload);
-    if (!response.data) throw new Error("Digiflazz tidak memberikan data transaksi fallback.");
-    const data = response.data;
-    const providerStatus = normalize(data.status);
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        providerStatus,
-        providerRefId: data.ref_id || flow.refId,
-        providerSn: data.sn || null,
-        providerRc: data.rc || null,
-        providerMessage: data.message || null,
-        providerActualPrice: typeof data.price === "number" ? data.price : null,
-        providerLastBalance: typeof data.buyer_last_saldo === "number" ? data.buyer_last_saldo : null,
-        providerResponse: json({ _safeFlow: flow, digiflazz: response }),
-        providerUpdatedAt: new Date(),
+      include: {
+        product: true,
       },
     });
-    if (providerStatus === "FAILED") return requestRefund(orderId);
-    return { skipped: false, providerStatus, refId: data.ref_id || flow.refId, rc: data.rc, message: data.message, sn: data.sn, price: data.price };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Gangguan saat mengecek seller cadangan.";
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { providerStatus: "PENDING", providerRefId: flow.refId, providerMessage: message, providerResponse: json({ _safeFlow: flow }), providerUpdatedAt: new Date() },
+
+  if (!order) {
+    throw new Error(
+      "Order tidak ditemukan."
+    );
+  }
+
+  const claimed =
+    await prisma.order.updateMany({
+      where: {
+        id: orderId,
+
+        providerStatus: {
+          in: [
+            "PENDING",
+            "FAILED",
+          ],
+        },
+      },
+
+      data: {
+        providerStatus:
+          "FALLBACK_PROCESSING",
+
+        providerRefId:
+          flow.refId,
+
+        providerMessage:
+          "Mencoba seller cadangan satu kali.",
+
+        providerUpdatedAt:
+          new Date(),
+      },
     });
+
+  if (
+    claimed.count === 0
+  ) {
+    return {
+      skipped: true,
+
+      providerStatus:
+        order.providerStatus,
+
+      refId:
+        order.providerRefId ??
+        undefined,
+    };
+  }
+
+  try {
+    const {
+      username,
+      apiKey,
+      mode,
+    } =
+      digiflazzConfig();
+
+    const payload: Record<
+      string,
+      unknown
+    > = {
+      username,
+
+      buyer_sku_code:
+        flow.providerCode,
+
+      customer_no:
+        order.uid,
+
+      ref_id:
+        flow.refId,
+
+      sign:
+        crypto
+          .createHash("md5")
+          .update(
+            `${username}${apiKey}${flow.refId}`
+          )
+          .digest("hex"),
+
+      max_price:
+        flow.maxPrice,
+    };
+
+    if (
+      mode !==
+      "production"
+    ) {
+      payload.testing =
+        true;
+    }
+
+    const response =
+      await gatewayRequest(
+        payload
+      );
+
+    if (
+      !response.data
+    ) {
+      throw new Error(
+        "Digiflazz tidak memberikan data transaksi fallback."
+      );
+    }
+
+    const data =
+      response.data;
+
+    const providerStatus =
+      normalize(
+        data.status
+      );
+
+    /*
+     * Penting:
+     *
+     * Setelah recovery/fallback gagal,
+     * SafeFlow TIDAK disimpan lagi sebagai
+     * attempt 1.
+     *
+     * Ini mencegah retry tanpa batas.
+     */
+
+    const shouldKeepRetryFlow =
+      providerStatus !==
+      "FAILED";
+
+    await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+
+      data: {
+        providerStatus,
+
+        providerRefId:
+          data.ref_id ||
+          flow.refId,
+
+        providerSn:
+          data.sn ||
+          null,
+
+        providerRc:
+          data.rc ||
+          null,
+
+        providerMessage:
+          data.message ||
+          null,
+
+        providerActualPrice:
+          typeof data.price ===
+          "number"
+            ? data.price
+            : null,
+
+        providerLastBalance:
+          typeof data.buyer_last_saldo ===
+          "number"
+            ? data.buyer_last_saldo
+            : null,
+
+        providerResponse:
+          shouldKeepRetryFlow
+            ? json({
+                _safeFlow:
+                  flow,
+
+                digiflazz:
+                  response,
+              })
+            : json({
+                _recoveryAttempt:
+                  1,
+
+                digiflazz:
+                  response,
+              }),
+
+        providerUpdatedAt:
+          new Date(),
+      },
+    });
+
+    /*
+     * Kalau gagal setelah percobaan
+     * recovery/fallback:
+     *
+     * jangan ulang terus.
+     */
+
+    if (
+      providerStatus ===
+      "FAILED"
+    ) {
+      return requestRefund(
+        orderId
+      );
+    }
+
+    return {
+      skipped: false,
+
+      providerStatus,
+
+      refId:
+        data.ref_id ||
+        flow.refId,
+
+      rc:
+        data.rc,
+
+      message:
+        data.message,
+
+      sn:
+        data.sn,
+
+      price:
+        data.price,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Gangguan saat mengecek seller cadangan.";
+
+    await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+
+      data: {
+        providerStatus:
+          "PENDING",
+
+        providerRefId:
+          flow.refId,
+
+        providerMessage:
+          message,
+
+        /*
+         * Tetap simpan SafeFlow attempt 1
+         * karena error jaringan belum berarti
+         * transaksi provider gagal.
+         *
+         * Checker berikutnya memakai ref_id
+         * yang sama.
+         */
+
+        providerResponse:
+          json({
+            _safeFlow:
+              flow,
+          }),
+
+        providerUpdatedAt:
+          new Date(),
+      },
+    });
+
     throw error;
   }
 }
 
-export async function processOrderDelivery(orderId: string): Promise<DigiflazzProcessResult> {
-  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { product: true } });
-  if (!order) throw new Error("Order tidak ditemukan.");
-  if (order.paymentStatus !== "PAID") return { skipped: true, providerStatus: order.providerStatus, message: "Pembayaran belum PAID." };
-  if (["SUCCESS", "REFUND_PROCESSING", "REFUND_PENDING", "REFUNDED"].includes(order.providerStatus)) {
-    return { skipped: true, providerStatus: order.providerStatus, refId: order.providerRefId ?? undefined, sn: order.providerSn ?? undefined, message: order.providerMessage ?? undefined };
-  }
+export async function processOrderDelivery(
+  orderId: string
+): Promise<DigiflazzProcessResult> {
+  const order =
+    await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
 
-  const flow = readFlow(order.providerResponse);
-  if (flow && ["PENDING", "FAILED"].includes(order.providerStatus)) return processFallback(orderId, flow);
-  if (order.providerStatus === "REFUND_REQUIRED") return requestRefund(orderId);
-  if (["PROCESSING", "FALLBACK_PROCESSING"].includes(order.providerStatus)) return { skipped: true, providerStatus: order.providerStatus, refId: order.providerRefId ?? undefined, message: "Transaksi sedang diproses." };
-
-  if (order.providerStatus === "FAILED") {
-    const fallback = fallbackFor(order.product.sku, order.product.providerCode);
-    if (!fallback) return requestRefund(orderId);
-    const nextFlow: SafeFlow = { version: 1, attempt: 1, providerCode: fallback.providerCode, maxPrice: fallback.maxPrice, refId: `${order.invoice}-F1` };
-    await prisma.order.updateMany({
-      where: { id: orderId, providerStatus: "FAILED" },
-      data: { providerStatus: "PENDING", providerRefId: nextFlow.refId, providerMessage: "Seller utama gagal. Menyiapkan seller cadangan.", providerResponse: json({ _safeFlow: nextFlow }), providerUpdatedAt: new Date() },
+      include: {
+        product: true,
+      },
     });
-    return processFallback(orderId, nextFlow);
+
+  if (!order) {
+    throw new Error(
+      "Order tidak ditemukan."
+    );
   }
 
-  const result = await processDigiflazzOrder(orderId);
-  return result.providerStatus === "FAILED" ? processOrderDelivery(orderId) : result;
+  /*
+   * =========================================
+   * PEMBAYARAN HARUS PAID
+   * =========================================
+   */
+
+  if (
+    order.paymentStatus !==
+    "PAID"
+  ) {
+    return {
+      skipped: true,
+
+      providerStatus:
+        order.providerStatus,
+
+      message:
+        "Pembayaran belum PAID.",
+    };
+  }
+
+  /*
+   * =========================================
+   * SUCCESS ADALAH FINAL
+   * =========================================
+   */
+
+  if (
+    [
+      "SUCCESS",
+      "REFUND_PROCESSING",
+      "REFUND_PENDING",
+      "REFUNDED",
+    ].includes(
+      order.providerStatus
+    )
+  ) {
+    return {
+      skipped: true,
+
+      providerStatus:
+        order.providerStatus,
+
+      refId:
+        order.providerRefId ??
+        undefined,
+
+      sn:
+        order.providerSn ??
+        undefined,
+
+      rc:
+        order.providerRc ??
+        undefined,
+
+      message:
+        order.providerMessage ??
+        undefined,
+    };
+  }
+
+  /*
+   * =========================================
+   * FLOW FALLBACK
+   * =========================================
+   */
+
+  const flow =
+    readFlow(
+      order.providerResponse
+    );
+
+  if (
+    flow &&
+    [
+      "PENDING",
+      "FAILED",
+    ].includes(
+      order.providerStatus
+    )
+  ) {
+    return processFallback(
+      orderId,
+      flow
+    );
+  }
+
+  /*
+   * =========================================
+   * RECOVERY UNTUK RC02 YANG SUDAH TERLANJUR
+   * REFUND_REQUIRED
+   * =========================================
+   *
+   * Kasus:
+   *
+   * order lama sudah:
+   *
+   * RC02
+   * ->
+   * REFUND_REQUIRED
+   *
+   * Tetapi AUTO_REFUND belum aktif.
+   *
+   * Kita beri satu kesempatan recovery.
+   *
+   * Recovery menggunakan ref_id BARU:
+   *
+   * invoice-R1
+   *
+   * bukan mengulang ref_id yang sama.
+   */
+
+  if (
+    order.providerStatus ===
+    "REFUND_REQUIRED"
+  ) {
+    const storedRc =
+      readStoredRc(
+        order.providerResponse
+      );
+
+    const alreadyRecovered =
+      hasRecoveryAttempt(
+        order.providerResponse
+      );
+
+    if (
+      storedRc === "02" &&
+      !alreadyRecovered
+    ) {
+      const recoveryRefId =
+        `${order.invoice}-R1`;
+
+      const claimed =
+        await prisma.order.updateMany({
+          where: {
+            id: orderId,
+
+            providerStatus:
+              "REFUND_REQUIRED",
+          },
+
+          data: {
+            providerStatus:
+              "PENDING",
+
+            providerRefId:
+              recoveryRefId,
+
+            providerMessage:
+              "Provider sebelumnya mengembalikan RC02. Mencoba recovery satu kali dengan ref_id baru.",
+
+            providerResponse:
+              json({
+                _recoveryAttempt:
+                  1,
+
+                previousProviderResponse:
+                  order.providerResponse,
+              }),
+
+            providerUpdatedAt:
+              new Date(),
+          },
+        });
+
+      if (
+        claimed.count === 0
+      ) {
+        return {
+          skipped: true,
+
+          providerStatus:
+            order.providerStatus,
+
+          refId:
+            order.providerRefId ??
+            undefined,
+
+          rc:
+            order.providerRc ??
+            undefined,
+
+          message:
+            "Recovery sedang diproses.",
+        };
+      }
+
+      /*
+       * Jangan kirim transaksi kedua
+       * secara langsung dalam request yang sama.
+       *
+       * Biarkan checker berikutnya yang
+       * menjalankannya setelah jeda.
+       */
+
+      return {
+        skipped: false,
+
+        providerStatus:
+          "PENDING",
+
+        refId:
+          recoveryRefId,
+
+        rc:
+          "02",
+
+        message:
+          "Recovery disiapkan. Menunggu checker berikutnya.",
+      };
+    }
+
+    /*
+     * Kalau bukan RC02, atau recovery sudah
+     * pernah dilakukan, jangan ulang lagi.
+     */
+
+    return requestRefund(
+      orderId
+    );
+  }
+
+  /*
+   * =========================================
+   * FAILED
+   * =========================================
+   *
+   * RC02:
+   *
+   * transaksi provider memang GAGAL.
+   *
+   * Kita beri satu recovery saja.
+   *
+   * Recovery menggunakan ref_id baru.
+   */
+
+  if (
+    order.providerStatus ===
+    "FAILED"
+  ) {
+    const alreadyRecovered =
+      hasRecoveryAttempt(
+        order.providerResponse
+      );
+
+    const isRc02 =
+      order.providerRc ===
+      "02";
+
+    if (
+      isRc02 &&
+      !alreadyRecovered
+    ) {
+      const recoveryRefId =
+        `${order.invoice}-R1`;
+
+      const claimed =
+        await prisma.order.updateMany({
+          where: {
+            id: orderId,
+
+            providerStatus:
+              "FAILED",
+          },
+
+          data: {
+            providerStatus:
+              "PENDING",
+
+            providerRefId:
+              recoveryRefId,
+
+            providerMessage:
+              "Digiflazz mengembalikan RC02. Mencoba recovery satu kali dengan ref_id baru.",
+
+            providerResponse:
+              json({
+                _recoveryAttempt:
+                  1,
+
+                previousProviderResponse:
+                  order.providerResponse,
+              }),
+
+            providerUpdatedAt:
+              new Date(),
+          },
+        });
+
+      if (
+        claimed.count === 0
+      ) {
+        return {
+          skipped: true,
+
+          providerStatus:
+            order.providerStatus,
+
+          refId:
+            order.providerRefId ??
+            undefined,
+
+          rc:
+            order.providerRc ??
+            undefined,
+
+          message:
+            "Recovery sedang diproses.",
+        };
+      }
+
+      return {
+        skipped: false,
+
+        providerStatus:
+          "PENDING",
+
+        refId:
+          recoveryRefId,
+
+        rc:
+          "02",
+
+        message:
+          "Recovery disiapkan. Menunggu checker berikutnya.",
+      };
+    }
+
+    /*
+     * Kalau recovery sudah pernah dilakukan,
+     * jangan mengulang lagi.
+     */
+
+    if (
+      alreadyRecovered
+    ) {
+      return requestRefund(
+        orderId
+      );
+    }
+
+    /*
+     * Fallback seller hanya digunakan
+     * jika memang dikonfigurasi.
+     */
+
+    const fallback =
+      fallbackFor(
+        order.product.sku,
+        order.product.providerCode
+      );
+
+    if (!fallback) {
+      return requestRefund(
+        orderId
+      );
+    }
+
+    const nextFlow: SafeFlow =
+      {
+        version: 1,
+
+        attempt: 1,
+
+        providerCode:
+          fallback.providerCode,
+
+        maxPrice:
+          fallback.maxPrice,
+
+        refId:
+          `${order.invoice}-F1`,
+      };
+
+    await prisma.order.updateMany({
+      where: {
+        id: orderId,
+
+        providerStatus:
+          "FAILED",
+      },
+
+      data: {
+        providerStatus:
+          "PENDING",
+
+        providerRefId:
+          nextFlow.refId,
+
+        providerMessage:
+          "Seller utama gagal. Menyiapkan seller cadangan.",
+
+        providerResponse:
+          json({
+            _safeFlow:
+              nextFlow,
+          }),
+
+        providerUpdatedAt:
+          new Date(),
+      },
+    });
+
+    return {
+      skipped: false,
+
+      providerStatus:
+        "PENDING",
+
+      refId:
+        nextFlow.refId,
+
+      message:
+        "Seller cadangan disiapkan.",
+    };
+  }
+
+  /*
+   * =========================================
+   * PROCESS NORMAL / PENDING
+   * =========================================
+   *
+   * Kalau status PENDING:
+   *
+   * providerRefId tetap dipakai.
+   *
+   * Untuk timeout/network error,
+   * checker akan melakukan request ulang
+   * dengan ref_id yang sama sesuai mekanisme
+   * cek status Digiflazz.
+   */
+
+  if (
+    [
+      "PROCESSING",
+      "FALLBACK_PROCESSING",
+    ].includes(
+      order.providerStatus
+    )
+  ) {
+    return {
+      skipped: true,
+
+      providerStatus:
+        order.providerStatus,
+
+      refId:
+        order.providerRefId ??
+        undefined,
+
+      message:
+        "Transaksi sedang diproses.",
+    };
+  }
+
+  /*
+   * =========================================
+   * KIRIM / CEK TRANSAKSI UTAMA
+   * =========================================
+   */
+
+  const result =
+    await processDigiflazzOrder(
+      orderId
+    );
+
+  /*
+   * Kalau provider memberikan FAILED,
+   * jalankan logic recovery di atas.
+   *
+   * Kalau PENDING:
+   * tunggu checker berikutnya.
+   */
+
+  if (
+    result.providerStatus ===
+    "FAILED"
+  ) {
+    return processOrderDelivery(
+      orderId
+    );
+  }
+
+  return result;
 }
