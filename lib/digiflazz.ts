@@ -32,13 +32,26 @@ export type DigiflazzProcessResult = {
 
 /* Berlaku juga untuk pemanggilan dari Cron dan checker manual. */
 export function assertPaymentModesMatch() {
-  const midtransMode = process.env.MIDTRANS_IS_PRODUCTION?.trim();
-  const digiflazzMode = process.env.DIGIFLAZZ_MODE?.trim().toLowerCase();
+  const midtransMode =
+    process.env.MIDTRANS_IS_PRODUCTION?.trim();
 
-  const sandboxPair = midtransMode === "false" && digiflazzMode === "development";
-  const productionPair = midtransMode === "true" && digiflazzMode === "production";
+  const digiflazzMode =
+    process.env.DIGIFLAZZ_MODE
+      ?.trim()
+      .toLowerCase();
 
-  if (!sandboxPair && !productionPair) {
+  const sandboxPair =
+    midtransMode === "false" &&
+    digiflazzMode === "development";
+
+  const productionPair =
+    midtransMode === "true" &&
+    digiflazzMode === "production";
+
+  if (
+    !sandboxPair &&
+    !productionPair
+  ) {
     throw new Error(
       "Mode pembayaran tidak sesuai. Gunakan Midtrans false + Digiflazz development, atau Midtrans true + Digiflazz production."
     );
@@ -59,20 +72,28 @@ function getDigiflazzConfig() {
   const mode =
     process.env.DIGIFLAZZ_MODE
       ?.trim()
-      .toLowerCase() || "development";
+      .toLowerCase() ||
+    "development";
 
   const developmentKey =
-    process.env.DIGIFLAZZ_DEVELOPMENT_KEY?.trim();
+    process.env
+      .DIGIFLAZZ_DEVELOPMENT_KEY
+      ?.trim();
 
   const productionKey =
-    process.env.DIGIFLAZZ_PRODUCTION_KEY?.trim();
+    process.env
+      .DIGIFLAZZ_PRODUCTION_KEY
+      ?.trim();
 
   const apiKey =
     mode === "production"
       ? productionKey
       : developmentKey;
 
-  if (!username || !apiKey) {
+  if (
+    !username ||
+    !apiKey
+  ) {
     throw new Error(
       "Konfigurasi Digiflazz belum lengkap."
     );
@@ -91,78 +112,73 @@ function requestDigiflazz(
   return new Promise(
     (resolve, reject) => {
       const body =
-        JSON.stringify(payload);
+        JSON.stringify(
+          payload
+        );
 
-      const req = https.request(
-        {
-          /*
-           * Semua request Digiflazz
-           * dikirim melalui VPS gateway
-           * dengan Dedicated Public IPv4.
-           *
-           * Vercel
-           *   ->
-           * Gateway VPS
-           *   ->
-           * Digiflazz
-           */
+      const req =
+        https.request(
+          {
+            hostname:
+              "gateway.falintino.com",
 
-          hostname:
-            "gateway.falintino.com",
+            port: 443,
 
-          port: 443,
+            path:
+              "/v1/transaction",
 
-          path:
-            "/v1/transaction",
+            method:
+              "POST",
 
-          method:
-            "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
 
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            "Content-Length":
-              Buffer.byteLength(
-                body
-              ),
+              "Content-Length":
+                Buffer.byteLength(
+                  body
+                ),
+            },
           },
-        },
 
-        (res) => {
-          let responseBody = "";
+          (res) => {
+            let responseBody =
+              "";
 
-          res.on(
-            "data",
-            (chunk) => {
-              responseBody += chunk;
-            }
-          );
-
-          res.on(
-            "end",
-            () => {
-              try {
-                const parsed =
-                  JSON.parse(
-                    responseBody
-                  ) as DigiflazzResponse;
-
-                resolve(parsed);
-              } catch {
-                reject(
-                  new Error(
-                    `Respons Digiflazz tidak valid. HTTP ${
-                      res.statusCode ??
-                      "?"
-                    }`
-                  )
-                );
+            res.on(
+              "data",
+              (chunk) => {
+                responseBody +=
+                  chunk;
               }
-            }
-          );
-        }
-      );
+            );
+
+            res.on(
+              "end",
+              () => {
+                try {
+                  const parsed =
+                    JSON.parse(
+                      responseBody
+                    ) as DigiflazzResponse;
+
+                  resolve(
+                    parsed
+                  );
+                } catch {
+                  reject(
+                    new Error(
+                      `Respons Digiflazz tidak valid. HTTP ${
+                        res.statusCode ??
+                        "?"
+                      }`
+                    )
+                  );
+                }
+              }
+            );
+          }
+        );
 
       req.on(
         "error",
@@ -181,14 +197,47 @@ function requestDigiflazz(
       );
 
       req.write(body);
+
       req.end();
     }
   );
 }
 
+/*
+ * =========================================
+ * NORMALISASI STATUS DIGIFLAZZ
+ * =========================================
+ *
+ * RC70 = Timeout Dari Biller.
+ *
+ * Digiflazz dapat mengembalikan:
+ *
+ * status = "Gagal"
+ * rc     = "70"
+ *
+ * Namun timeout biller belum berarti
+ * transaksi benar-benar gagal final.
+ *
+ * Karena itu RC70 dianggap PENDING.
+ *
+ * Checker berikutnya akan mengecek
+ * menggunakan ref_id yang sama.
+ */
 function normalizeProviderStatus(
-  status?: string
+  status?: string,
+  rc?: string
 ) {
+  const normalizedRc =
+    String(rc ?? "")
+      .trim();
+
+  if (
+    normalizedRc ===
+    "70"
+  ) {
+    return "PENDING";
+  }
+
   const normalized =
     String(status ?? "")
       .trim()
@@ -215,7 +264,9 @@ function toJsonValue(
   value: unknown
 ): Prisma.InputJsonValue {
   return JSON.parse(
-    JSON.stringify(value)
+    JSON.stringify(
+      value
+    )
   ) as Prisma.InputJsonValue;
 }
 
@@ -234,7 +285,10 @@ function toJsonValue(
 export async function processDigiflazzOrder(
   orderId: string
 ): Promise<DigiflazzProcessResult> {
-  // Periksa sebelum membaca/mengubah order atau menghubungi provider.
+  /*
+   * Periksa mode sebelum melakukan
+   * request provider.
+   */
   assertPaymentModesMatch();
 
   const order =
@@ -279,9 +333,6 @@ export async function processDigiflazzOrder(
    * =====================================
    * SUCCESS ADALAH FINAL
    * =====================================
-   *
-   * Jangan pernah kirim ulang transaksi
-   * yang sudah berhasil.
    */
 
   if (
@@ -317,15 +368,11 @@ export async function processDigiflazzOrder(
 
   /*
    * =====================================
-   * FAILED JUGA FINAL
+   * FAILED ADALAH FINAL
    * =====================================
    *
-   * Jangan otomatis membuat transaksi
-   * provider baru.
-   *
-   * Customer sudah membayar sehingga
-   * kasus gagal harus ditangani dengan
-   * aman.
+   * Penanganan retry/fallback dilakukan
+   * oleh lib/order-delivery.ts.
    */
 
   if (
@@ -357,13 +404,8 @@ export async function processDigiflazzOrder(
    * LOCK TRANSAKSI
    * =====================================
    *
-   * Hanya satu proses yang boleh:
-   *
-   * PENDING -> PROCESSING
-   *
-   * Kalau webhook dan checker berjalan
-   * bersamaan, hanya satu yang berhasil
-   * mendapatkan lock.
+   * Hanya satu proses yang boleh
+   * mengambil PENDING -> PROCESSING.
    */
 
   const claimed =
@@ -444,13 +486,15 @@ export async function processDigiflazzOrder(
   }
 
   /*
-   * Ref ID harus selalu stabil.
+   * =====================================
+   * REF ID STABIL
+   * =====================================
    *
-   * Kalau sebelumnya sudah pernah
-   * mengirim transaksi, gunakan
-   * providerRefId yang lama.
+   * Jika sudah pernah dikirim:
+   * gunakan providerRefId lama.
    *
-   * Kalau belum, gunakan invoice.
+   * Jika belum:
+   * gunakan invoice.
    */
 
   const refId =
@@ -467,39 +511,8 @@ export async function processDigiflazzOrder(
 
     /*
      * =====================================
-     * HARGA MODAL PROVIDER
+     * PROVIDER MAX PRICE
      * =====================================
-     *
-     * ORDER BARU:
-     *
-     * Gunakan providerPriceSnapshot
-     * yang disimpan ketika order dibuat.
-     *
-     * Contoh:
-     *
-     * Saat order:
-     * providerPriceSnapshot = 750
-     *
-     * Harga Product kemudian berubah:
-     * providerPrice = 800
-     *
-     * max_price tetap 750.
-     *
-     * =====================================
-     * ORDER LAMA
-     * =====================================
-     *
-     * Order lama dibuat sebelum field
-     * providerPriceSnapshot tersedia.
-     *
-     * Karena itu nilainya bisa null.
-     *
-     * Untuk kompatibilitas order lama,
-     * fallback ke Product.providerPrice.
-     *
-     * Semua ORDER BARU tidak memakai
-     * fallback karena snapshot selalu
-     * disimpan oleh /api/orders.
      */
 
     const providerMaxPrice =
@@ -518,10 +531,15 @@ export async function processDigiflazzOrder(
     }
 
     /*
-     * Digiflazz:
+     * =====================================
+     * SIGNATURE
+     * =====================================
      *
-     * sign =
-     * md5(username + apiKey + ref_id)
+     * md5(
+     *   username +
+     *   apiKey +
+     *   ref_id
+     * )
      */
 
     const sign =
@@ -553,24 +571,12 @@ export async function processDigiflazzOrder(
 
       sign,
 
-      /*
-       * Proteksi perubahan harga.
-       *
-       * Untuk order baru nilai ini
-       * berasal dari snapshot pada saat
-       * customer membuat order.
-       */
-
       max_price:
         providerMaxPrice,
     };
 
     /*
-     * Development:
-     * testing = true
-     *
-     * Production:
-     * transaksi sungguhan.
+     * DEVELOPMENT MODE
      */
 
     if (
@@ -583,7 +589,7 @@ export async function processDigiflazzOrder(
 
     /*
      * =====================================
-     * REQUEST DIGIFLAZZ
+     * REQUEST
      * =====================================
      */
 
@@ -597,14 +603,8 @@ export async function processDigiflazzOrder(
 
     /*
      * =====================================
-     * RESPONSE TANPA DATA
+     * TIDAK ADA DATA
      * =====================================
-     *
-     * Jangan anggap gagal final.
-     *
-     * Kembalikan ke PENDING supaya
-     * checker dapat melakukan pengecekan
-     * ulang menggunakan ref_id yang sama.
      */
 
     if (!data) {
@@ -640,18 +640,19 @@ export async function processDigiflazzOrder(
 
     /*
      * =====================================
-     * NORMALISASI STATUS
+     * NORMALISASI
      * =====================================
      */
 
     const providerStatus =
       normalizeProviderStatus(
-        data.status
+        data.status,
+        data.rc
       );
 
     /*
      * =====================================
-     * SIMPAN HASIL PROVIDER
+     * SIMPAN HASIL
      * =====================================
      */
 
@@ -702,10 +703,9 @@ export async function processDigiflazzOrder(
     });
 
     /*
-     * Jangan pernah log:
-     *
-     * - apiKey
-     * - signature
+     * =====================================
+     * LOG
+     * =====================================
      */
 
     console.log(
@@ -736,11 +736,6 @@ export async function processDigiflazzOrder(
 
         price:
           data.price,
-
-        /*
-         * Aman untuk debugging.
-         * Tidak mengandung credential.
-         */
 
         providerMaxPrice,
 
@@ -779,19 +774,12 @@ export async function processDigiflazzOrder(
      * NETWORK / UNKNOWN ERROR
      * =====================================
      *
-     * Network error TIDAK berarti
-     * transaksi Digiflazz gagal.
+     * Error jaringan bukan berarti
+     * transaksi provider gagal.
      *
-     * Bisa saja request sudah diterima
-     * Digiflazz tetapi koneksi terputus
-     * sebelum respons diterima.
-     *
-     * Karena itu:
-     *
-     * PROCESSING -> PENDING
-     *
-     * sehingga checker dapat mengecek lagi
-     * menggunakan ref_id yang SAMA.
+     * Kembalikan PROCESSING -> PENDING
+     * supaya checker berikutnya memakai
+     * ref_id yang sama.
      */
 
     const errorMessage =

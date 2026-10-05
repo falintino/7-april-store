@@ -943,13 +943,108 @@ export async function processOrderDelivery(
    */
 
   if (
-    order.providerStatus ===
-    "REFUND_REQUIRED"
+  order.providerStatus ===
+  "REFUND_REQUIRED"
+) {
+  /*
+   * RC70 = Timeout Dari Biller.
+   *
+   * Karena hasil transaksi belum pasti,
+   * jangan langsung refund.
+   *
+   * Kembalikan order ke PENDING dan
+   * pertahankan providerRefId yang sama.
+   *
+   * Checker berikutnya akan melakukan
+   * pengecekan menggunakan ref_id yang sama.
+   */
+
+  if (
+    order.providerRc ===
+    "70"
   ) {
-    return requestRefund(
-      orderId
-    );
+    const claimed =
+      await prisma.order.updateMany({
+        where: {
+          id: orderId,
+
+          providerStatus:
+            "REFUND_REQUIRED",
+
+          providerRc:
+            "70",
+        },
+
+        data: {
+          providerStatus:
+            "PENDING",
+
+          providerMessage:
+            "Biller timeout. Menunggu pengecekan ulang menggunakan ref_id yang sama.",
+
+          providerUpdatedAt:
+            new Date(),
+        },
+      });
+
+    if (
+      claimed.count === 0
+    ) {
+      return {
+        skipped: true,
+
+        providerStatus:
+          order.providerStatus,
+
+        refId:
+          order.providerRefId ??
+          undefined,
+
+        rc:
+          order.providerRc ??
+          undefined,
+
+        message:
+          "Pengecekan transaksi sedang diproses.",
+      };
+    }
+
+    /*
+     * Jangan langsung request provider
+     * pada siklus yang sama.
+     *
+     * Tunggu checker berikutnya agar
+     * interval minimal antar pengecekan
+     * tetap terjaga.
+     */
+
+    return {
+      skipped: false,
+
+      providerStatus:
+        "PENDING",
+
+      refId:
+        order.providerRefId ??
+        order.invoice,
+
+      rc:
+        "70",
+
+      message:
+        "Biller timeout. Transaksi dikembalikan ke PENDING untuk pengecekan ulang.",
+    };
   }
+
+  /*
+   * Selain RC70, REFUND_REQUIRED tetap
+   * mengikuti mekanisme refund normal.
+   */
+
+  return requestRefund(
+    orderId
+  );
+}
 
   /*
    * Kalau ada SafeFlow, berarti ini
