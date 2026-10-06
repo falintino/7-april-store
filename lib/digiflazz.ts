@@ -515,9 +515,7 @@ export async function processDigiflazzOrder(
      * =====================================
      */
 
-    const providerMaxPrice =
-      order.providerPriceSnapshot ??
-      order.product.providerPrice;
+    const providerMaxPrice = order.total;
 
     if (
       !Number.isInteger(
