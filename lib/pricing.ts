@@ -1,8 +1,86 @@
 const ZERO_PROFIT_MAX = 49;
 const ONE_PERCENT_MAX = 70;
 
+/*
+ * Target harga kompetitif berdasarkan harga Banana Store
+ * yang terakhir kita gunakan sebagai acuan.
+ *
+ * Target dibuat sedikit di bawah Banana agar 7 April Store
+ * tetap terlihat kompetitif, tetapi tidak boleh membuat
+ * harga jual berada di bawah modal provider.
+ *
+ * Nilai di sini adalah harga PRODUK, belum termasuk
+ * biaya QRIS. Biaya QRIS tetap dihitung terpisah.
+ */
+const COMPETITOR_TARGET_PRICES: Record<number, number> = {
+  5: 737,
+  10: 1480,
+  12: 1650,
+  20: 3060,
+  25: 3830,
+  30: 4590,
+
+  50: 6090,
+  55: 6860,
+  70: 8190,
+  75: 8960,
+  80: 9720,
+  90: 11260,
+  100: 12190,
+  120: 15260,
+  140: 16380,
+  145: 17150,
+  150: 17920,
+  160: 19450,
+  170: 20990,
+  190: 22480,
+
+  210: 24580,
+  280: 32770,
+  300: 35840,
+  355: 44030,
+  375: 44030,
+  405: 47060,
+  425: 49160,
+  475: 55260,
+  495: 57350,
+  500: 58120,
+  510: 59650,
+  545: 63450,
+  565: 66310,
+  635: 74510,
+  720: 81910,
+  725: 82670,
+  740: 84980,
+  770: 88000,
+  790: 90100,
+  860: 98290,
+  930: 106490,
+  1000: 114680,
+  1075: 122870,
+  1440: 163820,
+  1450: 165350,
+  2000: 229370,
+  2160: 245730,
+  7290: 829660,
+};
+
 function roundUpRp10(value: number) {
   return Math.ceil(value / 10) * 10;
+}
+
+function getCompetitorTargetPrice(
+  diamondAmount: number | null,
+) {
+  if (diamondAmount === null) {
+    return null;
+  }
+
+  return (
+    COMPETITOR_TARGET_PRICES[
+      diamondAmount
+    ] ?? null
+  );
 }
 
 /*
@@ -34,13 +112,13 @@ export function getDiamondAmount(
 }
 
 /*
- * Aturan profit:
+ * Aturan profit fallback:
  *
  * 1–49 DM   = 0%
  * 50–70 DM  = 1%
  * 71+ DM    = 3%
  *
- * Membership = 3%
+ * Target kompetitor diutamakan ketika tersedia.
  */
 export function getProfitPercent(
   diamondAmount: number | null,
@@ -63,16 +141,20 @@ export function getProfitPercent(
 }
 
 /*
- * Hitung harga dasar dari modal Digiflazz.
+ * Hitung harga jual:
  *
- * Catatan:
- * Fungsi ini TIDAK menentukan apakah
- * harga harus lebih tinggi dari nominal
- * sebelumnya.
+ * 1. Untuk nominal yang punya target Banana:
+ *    gunakan target kompetitif.
  *
- * Aturan harga berjenjang akan dilakukan
- * oleh sync-prices setelah semua produk
- * diurutkan berdasarkan jumlah Diamond.
+ * 2. Tetapi HARGA TIDAK BOLEH DI BAWAH MODAL
+ *    provider. Jadi kalau harga kompetitor lebih
+ *    murah daripada modal kita, otomatis gunakan
+ *    minimal harga modal.
+ *
+ * 3. Untuk nominal yang belum punya target:
+ *    gunakan aturan margin lama sebagai fallback.
+ *
+ * Membership tetap menggunakan margin 3%.
  */
 export function calculateBaseSellingPrice({
   name,
@@ -94,7 +176,7 @@ export function calculateBaseSellingPrice({
 
   /*
    * Membership:
-   * profit 3%.
+   * tetap 3%.
    */
   if (
     sku.startsWith(
@@ -113,8 +195,26 @@ export function calculateBaseSellingPrice({
     );
 
   /*
+   * Target kompetitor.
+   */
+  const competitorTarget =
+    getCompetitorTargetPrice(
+      diamondAmount,
+    );
+
+  if (competitorTarget !== null) {
+    /*
+     * Jangan pernah menjual di bawah modal.
+     */
+    return Math.max(
+      providerPrice,
+      competitorTarget,
+    );
+  }
+
+  /*
    * 1–49 DM:
-   * benar-benar 0% profit.
+   * 0% profit sebagai fallback.
    */
   if (
     diamondAmount !== null &&
@@ -125,7 +225,7 @@ export function calculateBaseSellingPrice({
 
   /*
    * 50–70 DM:
-   * profit 1%.
+   * profit 1% sebagai fallback.
    */
   if (
     diamondAmount !== null &&
@@ -138,7 +238,7 @@ export function calculateBaseSellingPrice({
 
   /*
    * 71 DM ke atas:
-   * profit 3%.
+   * profit 3% sebagai fallback.
    */
   return roundUpRp10(
     providerPrice * 1.03,
@@ -150,19 +250,12 @@ export function calculateBaseSellingPrice({
  * tidak lebih murah dari nominal
  * Diamond yang lebih kecil.
  *
- * Contoh harga dasar:
+ * Contoh:
  *
- * 70 DM  = 7.070
- * 75 DM  = 6.180
+ * 70 DM  = 8.190
+ * 75 DM  = 8.960
  *
- * Fungsi ini akan membuat:
- *
- * 75 DM >= 7.070
- *
- * sehingga harga tidak turun.
- *
- * Nilai ini DIKUNCI ke kelipatan Rp10
- * supaya tampilan tetap rapi.
+ * Harga tidak boleh turun.
  */
 export function enforceMinimumSellingPrice({
   calculatedPrice,
