@@ -41,9 +41,44 @@ function getProviderStatusConfig(
 
     case "FAILED":
       return {
-        label: "GAGAL",
+        label: "GAGAL - REFUND AKAN DIAJUKAN",
         className:
           "border-red-500/30 bg-red-500/10 text-red-400",
+      };
+
+    case "REFUND_REQUIRED":
+      return {
+        label: "REFUND DIPERSIAPKAN",
+        className:
+          "border-orange-500/30 bg-orange-500/10 text-orange-400",
+      };
+
+    case "REFUND_PROCESSING":
+      return {
+        label: "REFUND SEDANG DIPROSES",
+        className:
+          "border-orange-500/30 bg-orange-500/10 text-orange-400",
+      };
+
+    case "REFUND_PENDING":
+      return {
+        label: "REFUND MENUNGGU KONFIRMASI",
+        className:
+          "border-yellow-500/30 bg-yellow-500/10 text-yellow-400",
+      };
+
+    case "REFUNDED":
+      return {
+        label: "DANA SUDAH DIKEMBALIKAN",
+        className:
+          "border-green-500/30 bg-green-500/10 text-green-400",
+      };
+
+    case "PARTIAL_REFUND":
+      return {
+        label: "SEBAGIAN DANA DIKEMBALIKAN",
+        className:
+          "border-green-500/30 bg-green-500/10 text-green-400",
       };
 
     case "PROCESSING":
