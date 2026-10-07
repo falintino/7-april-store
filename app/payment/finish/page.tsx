@@ -258,9 +258,20 @@ export default async function PaymentFinishPage({
                   Top Up
                 </span>
 
-                <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-300">
-                  {order.providerStatus}
-                </span>
+                {order.providerStatus === "SUCCESS" ? (
+                  <span className="rounded-lg border border-emerald-300/70 bg-emerald-400 px-4 py-1.5 text-xs font-black tracking-wide text-slate-950 shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-400/20">
+                    ✓ SUCCESS
+                  </span>
+                ) : order.providerStatus === "FAILED" ||
+                  order.providerStatus === "REFUND_REQUIRED" ? (
+                  <span className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-400">
+                    {order.providerStatus}
+                  </span>
+                ) : (
+                  <span className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-1.5 text-xs font-bold text-yellow-400">
+                    {order.providerStatus}
+                  </span>
+                )}
               </div>
             </div>
           </div>
