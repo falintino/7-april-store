@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
 import SiteFooter from "@/components/layout/SiteFooter";
 import { prisma } from "@/lib/prisma";
@@ -5,6 +6,26 @@ import { prisma } from "@/lib/prisma";
 import OrderStatusCheck from "./OrderStatusCheck";
 import RecentOrders from "./RecentOrders";
 import TopUpClient from "./TopUpClient";
+
+export const metadata: Metadata = {
+  title: "Top Up Diamond Free Fire Murah",
+  description:
+    "Top up Diamond Free Fire murah dan cepat di 7 April Store. Pilih nominal, masukkan UID Free Fire, bayar QRIS, dan cek status pesanan.",
+  keywords: [
+    "top up Diamond Free Fire",
+    "top up Free Fire murah",
+    "top up FF murah",
+    "beli Diamond FF",
+    "top up FF QRIS",
+  ],
+  alternates: { canonical: "https://store.falintino.com/topup/free-fire" },
+  openGraph: {
+    title: "Top Up Diamond Free Fire Murah | 7 April Store",
+    description:
+      "Pilih nominal Diamond Free Fire, bayar dengan QRIS, dan pantau status pesanan di 7 April Store.",
+    url: "https://store.falintino.com/topup/free-fire",
+  },
+};
 
 export const dynamic = "force-dynamic";
 
