@@ -270,6 +270,43 @@ function toJsonValue(
   ) as Prisma.InputJsonValue;
 }
 
+function readRc70StartedAt(
+  value: unknown
+) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+    return null;
+  }
+
+  const data =
+    value as Record<
+      string,
+      unknown
+    >;
+
+  const raw =
+    data._rc70StartedAt;
+
+  if (
+    typeof raw !== "string"
+  ) {
+    return null;
+  }
+
+  const date =
+    new Date(raw);
+
+  return Number.isNaN(
+    date.getTime()
+  )
+    ? null
+    : date;
+}
+
+
 /*
  * Fungsi utama Digiflazz.
  *
@@ -654,6 +691,36 @@ export async function processDigiflazzOrder(
      * =====================================
      */
 
+    /*
+     * RC70 perlu menyimpan waktu pertama kali
+     * timeout terdeteksi. ProviderUpdatedAt
+     * berubah setiap checker berjalan, jadi
+     * timeout 10 menit tidak boleh dihitung
+     * dari providerUpdatedAt.
+     */
+    let providerResponseValue:
+      unknown = response;
+
+    if (
+      String(data.rc ?? "").trim() ===
+      "70"
+    ) {
+      const startedAt =
+        readRc70StartedAt(
+          order.providerResponse
+        ) ??
+        new Date();
+
+      providerResponseValue = {
+        ...(response as Record<
+          string,
+          unknown
+        >),
+        _rc70StartedAt:
+          startedAt.toISOString(),
+      };
+    }
+
     await prisma.order.update({
       where: {
         id: order.id,
@@ -692,7 +759,7 @@ export async function processDigiflazzOrder(
 
         providerResponse:
           toJsonValue(
-            response
+            providerResponseValue
           ),
 
         providerUpdatedAt:
