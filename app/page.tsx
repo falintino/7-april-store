@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   ExternalLink,
   Newspaper,
@@ -9,6 +10,19 @@ import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
 import QuickMenu from "@/components/quick-menu/QuickMenu";
 import ServicesGrid from "@/components/services/ServicesGrid";
 import SiteFooter from "@/components/layout/SiteFooter";
+
+export const metadata: Metadata = {
+  title: "Top Up Free Fire Murah & Cepat",
+  description:
+    "Top up Free Fire dan Diamond FF murah di 7 April Store. Masukkan UID, pilih nominal, bayar dengan QRIS, dan pantau status pesanan online.",
+  alternates: { canonical: "https://store.falintino.com/" },
+  openGraph: {
+    title: "Top Up Free Fire Murah & Cepat | 7 April Store",
+    description:
+      "Top up Diamond Free Fire secara online di 7 April Store dengan harga transparan dan pembayaran QRIS.",
+    url: "https://store.falintino.com/",
+  },
+};
 
 const ownerPress = [
   {
