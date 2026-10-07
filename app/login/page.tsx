@@ -134,11 +134,11 @@ export default function LoginPage() {
 
             <a
               href="/api/auth/google"
-              className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white text-sm font-bold text-slate-900 transition hover:bg-slate-100"
+              className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white !text-slate-900 transition hover:bg-slate-100"
             >
               <svg
                 viewBox="0 0 24 24"
-                className="h-5 w-5"
+                className="h-5 w-5 shrink-0"
                 aria-hidden="true"
               >
                 <path
@@ -159,14 +159,18 @@ export default function LoginPage() {
                 />
               </svg>
 
-              Lanjutkan dengan Google
+              <span className="!text-slate-900">
+                Lanjutkan dengan Google
+              </span>
             </a>
 
             <div className="my-6 flex items-center gap-4">
               <div className="h-px flex-1 bg-white/10" />
+
               <span className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                 atau
               </span>
+
               <div className="h-px flex-1 bg-white/10" />
             </div>
 
@@ -223,7 +227,10 @@ export default function LoginPage() {
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 text-sm font-bold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isLoading ? "Memproses..." : "Login"}
-                {!isLoading && <ArrowRight className="h-4 w-4" />}
+
+                {!isLoading && (
+                  <ArrowRight className="h-4 w-4" />
+                )}
               </button>
 
               <div className="text-center">
