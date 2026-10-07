@@ -88,27 +88,31 @@ export default function OrderAutoRefresh({
     }
 
     /*
-     * Top up gagal.
+     * Refund sedang diproses.
      */
     if (
       [
-        "FAILED",
         "REFUND_REQUIRED",
-        "REFUND_PENDING",
         "REFUND_PROCESSING",
-      ].includes(providerStatus) &&
+        "REFUND_PENDING",
+      ].includes(
+        providerStatus
+      ) &&
       ![
-        "FAILED",
         "REFUND_REQUIRED",
-        "REFUND_PENDING",
         "REFUND_PROCESSING",
-      ].includes(previousProvider)
+        "REFUND_PENDING",
+      ].includes(
+        previousProvider
+      )
     ) {
       setNotification(
-        "Pesanan tidak berhasil diproses. Silakan cek detail pesanan."
+        "Top up gagal. Dana sedang diproses untuk dikembalikan."
       );
 
-      setNotificationType("error");
+      setNotificationType(
+        "error"
+      );
 
       if (
         typeof window !== "undefined" &&
@@ -119,10 +123,56 @@ export default function OrderAutoRefresh({
           "7 April Store",
           {
             body:
-              "Pesanan tidak berhasil diproses. Silakan cek detail pesanan.",
+              "Top up gagal. Dana sedang diproses untuk dikembalikan.",
           }
         );
       }
+    }
+
+    /*
+     * Refund sudah selesai.
+     */
+    if (
+      providerStatus === "REFUNDED" &&
+      previousProvider !== "REFUNDED"
+    ) {
+      setNotification(
+        "Dana sudah dikembalikan melalui metode pembayaran kamu."
+      );
+
+      setNotificationType(
+        "success"
+      );
+
+      if (
+        typeof window !== "undefined" &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+        new Notification(
+          "7 April Store",
+          {
+            body:
+              "Dana sudah dikembalikan melalui metode pembayaran kamu.",
+          }
+        );
+      }
+    }
+
+    /*
+     * Top up gagal final tanpa refund.
+     */
+    if (
+      providerStatus === "FAILED" &&
+      previousProvider !== "FAILED"
+    ) {
+      setNotification(
+        "Pesanan gagal diproses. Refund akan diajukan."
+      );
+
+      setNotificationType(
+        "error"
+      );
     }
 
     previousPaymentStatus.current =
@@ -171,8 +221,6 @@ export default function OrderAutoRefresh({
         "SUCCESS",
         "REFUNDED",
         "PARTIAL_REFUND",
-        "REFUND_PENDING",
-        "REFUND_PROCESSING",
       ].includes(providerStatus);
 
     /*
