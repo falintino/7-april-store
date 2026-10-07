@@ -33,67 +33,41 @@ export const dynamic = "force-dynamic";
  *
  * AUTO_REFUND_FAILED_ORDERS=true
  */
-const MAX_RC70_WAIT_MS =
-  10 * 60 * 1000;
 
-function isAuthorized(
-  request: Request
-) {
-  const cronSecret =
-    process.env.CRON_SECRET?.trim();
+const MAX_RC70_WAIT_MS = 10 * 60 * 1000;
+
+function isAuthorized(request: Request) {
+  const cronSecret = process.env.CRON_SECRET?.trim();
 
   if (!cronSecret) {
     return false;
   }
 
-  const authorization =
-    request.headers.get(
-      "authorization"
-    );
+  const authorization = request.headers.get("authorization");
 
-  return (
-    authorization ===
-    `Bearer ${cronSecret}`
-  );
+  return authorization === `Bearer ${cronSecret}`;
 }
 
-function getRc70StartedAt(
-  providerResponse: unknown
-) {
+function getRc70StartedAt(providerResponse: unknown) {
   if (
     !providerResponse ||
-    typeof providerResponse !==
-      "object" ||
-    Array.isArray(
-      providerResponse
-    )
+    typeof providerResponse !== "object" ||
+    Array.isArray(providerResponse)
   ) {
     return null;
   }
 
-  const raw =
-    (
-      providerResponse as Record<
-        string,
-        unknown
-      >
-    )._rc70StartedAt;
+  const raw = (
+    providerResponse as Record<string, unknown>
+  )._rc70StartedAt;
 
-  if (
-    typeof raw !==
-    "string"
-  ) {
+  if (typeof raw !== "string") {
     return null;
   }
 
-  const date =
-    new Date(raw);
+  const date = new Date(raw);
 
-  return Number.isNaN(
-    date.getTime()
-  )
-    ? null
-    : date;
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function isRc70Expired(
@@ -110,26 +84,18 @@ function isRc70Expired(
    * Fallback ke providerUpdatedAt / createdAt
    * hanya untuk order lama.
    */
+
   const startedAt =
-    getRc70StartedAt(
-      providerResponse
-    ) ??
+    getRc70StartedAt(providerResponse) ??
     providerUpdatedAt ??
     createdAt;
 
-  const age =
-    Date.now() -
-    startedAt.getTime();
+  const age = Date.now() - startedAt.getTime();
 
-  return (
-    age >=
-    MAX_RC70_WAIT_MS
-  );
+  return age >= MAX_RC70_WAIT_MS;
 }
 
-async function checkPendingOrders(
-  request: Request
-) {
+async function checkPendingOrders(request: Request) {
   try {
     /*
      * =====================================
@@ -137,15 +103,11 @@ async function checkPendingOrders(
      * =====================================
      */
 
-    if (
-      !isAuthorized(request)
-    ) {
+    if (!isAuthorized(request)) {
       return NextResponse.json(
         {
           success: false,
-
-          message:
-            "Unauthorized.",
+          message: "Unauthorized.",
         },
         {
           status: 401,
@@ -155,44 +117,25 @@ async function checkPendingOrders(
 
     /*
      * =====================================
-     * AMBIL ORDER
+     * AMBIL ORDER PENDING SAJA
      * =====================================
      *
-     * Hanya order:
+     * Checker ini HANYA mengambil order:
      *
-     * PAID
+     * paymentStatus = PAID
+     * providerStatus = PENDING
      *
-     * dan provider:
+     * Order FAILED atau REFUND_REQUIRED
+     * TIDAK akan diambil lagi oleh checker.
      *
-     * PENDING
-     * FAILED
-     * REFUND_REQUIRED
-     *
-     * serta sudah memiliki ref_id.
-     *
-     * PRIORITAS:
-     *
-     * 1. Transaksi normal / aktif
-     *    yang bukan RC70.
-     *
-     * 2. RC70 lama diproses setelah
-     *    transaksi normal habis.
-     *
-     * Ini mencegah satu transaksi RC70
-     * lama menghalangi transaksi baru.
+     * Ini penting agar order refund lama
+     * tidak menghalangi transaksi baru.
      */
 
     const pendingWhere = {
-      paymentStatus:
-        "PAID" as const,
+      paymentStatus: "PAID" as const,
 
-      providerStatus: {
-        in: [
-          "PENDING",
-          "FAILED",
-          "REFUND_REQUIRED",
-        ],
-      },
+      providerStatus: "PENDING" as const,
 
       providerRefId: {
         not: null,
@@ -204,7 +147,8 @@ async function checkPendingOrders(
      * PRIORITAS TRANSAKSI NORMAL
      * =====================================
      *
-     * RC70 tidak diprioritaskan lebih dulu.
+     * RC70 diproses setelah transaksi
+     * non-RC70 selesai.
      *
      * Contoh:
      *
@@ -214,59 +158,49 @@ async function checkPendingOrders(
      * Maka Invoice B diproses lebih dulu.
      */
 
-    let pendingOrders =
-      await prisma.order.findMany({
-        where: {
-          ...pendingWhere,
+    let pendingOrders = await prisma.order.findMany({
+      where: {
+        ...pendingWhere,
 
-          OR: [
-            {
-              providerRc:
-                null,
+        OR: [
+          {
+            providerRc: null,
+          },
+
+          {
+            providerRc: {
+              not: "70",
             },
+          },
+        ],
+      },
 
-            {
-              providerRc: {
-                not: "70",
-              },
-            },
-          ],
-        },
+      orderBy: {
+        providerUpdatedAt: "asc",
+      },
 
-        orderBy: {
-          providerUpdatedAt:
-            "asc",
-        },
+      take: 1,
 
-        take: 1,
+      select: {
+        id: true,
 
-        select: {
-          id: true,
+        invoice: true,
 
-          invoice: true,
+        providerRefId: true,
 
-          providerRefId:
-            true,
+        providerUpdatedAt: true,
 
-          providerUpdatedAt:
-            true,
+        providerStatus: true,
 
-          providerStatus:
-            true,
+        providerRc: true,
 
-          providerRc:
-            true,
+        providerMessage: true,
 
-          providerMessage:
-            true,
+        providerResponse: true,
 
-          providerResponse:
-            true,
-
-          createdAt:
-            true,
-        },
-      });
+        createdAt: true,
+      },
+    });
 
     /*
      * =====================================
@@ -278,53 +212,40 @@ async function checkPendingOrders(
      * yang paling lama.
      */
 
-    if (
-      pendingOrders.length ===
-      0
-    ) {
-      pendingOrders =
-        await prisma.order.findMany({
-          where: {
-            ...pendingWhere,
+    if (pendingOrders.length === 0) {
+      pendingOrders = await prisma.order.findMany({
+        where: {
+          ...pendingWhere,
 
-            providerRc:
-              "70",
-          },
+          providerRc: "70",
+        },
 
-          orderBy: {
-            providerUpdatedAt:
-              "asc",
-          },
+        orderBy: {
+          providerUpdatedAt: "asc",
+        },
 
-          take: 1,
+        take: 1,
 
-          select: {
-            id: true,
+        select: {
+          id: true,
 
-            invoice: true,
+          invoice: true,
 
-            providerRefId:
-              true,
+          providerRefId: true,
 
-            providerUpdatedAt:
-              true,
+          providerUpdatedAt: true,
 
-            providerStatus:
-              true,
+          providerStatus: true,
 
-            providerRc:
-              true,
+          providerRc: true,
 
-            providerMessage:
-              true,
+          providerMessage: true,
 
-            providerResponse:
-              true,
+          providerResponse: true,
 
-            createdAt:
-              true,
-          },
-        });
+          createdAt: true,
+        },
+      });
     }
 
     const results: Array<{
@@ -349,9 +270,7 @@ async function checkPendingOrders(
      * =====================================
      */
 
-    for (
-      const order of pendingOrders
-    ) {
+    for (const order of pendingOrders) {
       try {
         /*
          * ===================================
@@ -363,8 +282,7 @@ async function checkPendingOrders(
          */
 
         if (
-          order.providerRc ===
-            "70" &&
+          order.providerRc === "70" &&
           isRc70Expired(
             order.providerResponse,
             order.providerUpdatedAt,
@@ -379,40 +297,28 @@ async function checkPendingOrders(
            * diubah oleh proses ini.
            */
 
-          const claimed =
-            await prisma.order.updateMany(
-              {
-                where: {
-                  id:
-                    order.id,
+          const claimed = await prisma.order.updateMany({
+            where: {
+              id: order.id,
 
-                  paymentStatus:
-                    "PAID",
+              paymentStatus: "PAID",
 
-                  providerStatus:
-                    "PENDING",
+              providerStatus: "PENDING",
 
-                  providerRc:
-                    "70",
-                },
+              providerRc: "70",
+            },
 
-                data: {
-                  providerStatus:
-                    "FAILED",
+            data: {
+              providerStatus: "FAILED",
 
-                  providerMessage:
-                    "Biller timeout lebih dari 10 menit. Transaksi dihentikan dan masuk proses refund.",
+              providerMessage:
+                "Biller timeout lebih dari 10 menit. Transaksi dihentikan dan masuk proses refund.",
 
-                  providerUpdatedAt:
-                    new Date(),
-                },
-              }
-            );
+              providerUpdatedAt: new Date(),
+            },
+          });
 
-          if (
-            claimed.count ===
-            1
-          ) {
+          if (claimed.count === 1) {
             /*
              * Jalankan alur delivery sekali lagi.
              *
@@ -428,33 +334,25 @@ async function checkPendingOrders(
              * REFUND_REQUIRED
              */
 
-            const result =
-              await processOrderDelivery(
-                order.id
-              );
+            const result = await processOrderDelivery(order.id);
 
             results.push({
-              invoice:
-                order.invoice,
+              invoice: order.invoice,
 
-              providerStatus:
-                result.providerStatus,
+              providerStatus: result.providerStatus,
 
               refId:
                 result.refId ??
                 order.providerRefId ??
                 undefined,
 
-              rc:
-                result.rc ??
-                "70",
+              rc: result.rc ?? "70",
 
               message:
                 result.message ??
                 "RC70 timeout lebih dari 10 menit.",
 
-              timeout:
-                true,
+              timeout: true,
             });
 
             continue;
@@ -466,24 +364,18 @@ async function checkPendingOrders(
            */
 
           results.push({
-            invoice:
-              order.invoice,
+            invoice: order.invoice,
 
-            providerStatus:
-              "PENDING",
+            providerStatus: "PENDING",
 
-            refId:
-              order.providerRefId ??
-              undefined,
+            refId: order.providerRefId ?? undefined,
 
-            rc:
-              "70",
+            rc: "70",
 
             message:
               "Transaksi sedang diproses oleh proses lain.",
 
-            timeout:
-              true,
+            timeout: true,
           });
 
           continue;
@@ -495,26 +387,18 @@ async function checkPendingOrders(
          * ===================================
          */
 
-        const result =
-          await processOrderDelivery(
-            order.id
-          );
+        const result = await processOrderDelivery(order.id);
 
         results.push({
-          invoice:
-            order.invoice,
+          invoice: order.invoice,
 
-          providerStatus:
-            result.providerStatus,
+          providerStatus: result.providerStatus,
 
-          refId:
-            result.refId,
+          refId: result.refId,
 
-          rc:
-            result.rc,
+          rc: result.rc,
 
-          message:
-            result.message,
+          message: result.message,
         });
       } catch (error) {
         /*
@@ -524,15 +408,11 @@ async function checkPendingOrders(
          */
 
         results.push({
-          invoice:
-            order.invoice,
+          invoice: order.invoice,
 
-          providerStatus:
-            "PENDING",
+          providerStatus: "PENDING",
 
-          refId:
-            order.providerRefId ??
-            undefined,
+          refId: order.providerRefId ?? undefined,
 
           error:
             error instanceof Error
@@ -548,38 +428,27 @@ async function checkPendingOrders(
      * =====================================
      */
 
-    const successCount =
-      results.filter(
-        (item) =>
-          item.providerStatus ===
-          "SUCCESS"
-      ).length;
+    const successCount = results.filter(
+      (item) => item.providerStatus === "SUCCESS"
+    ).length;
 
-    const pendingCount =
-      results.filter(
-        (item) =>
-          item.providerStatus ===
-          "PENDING"
-      ).length;
+    const pendingCount = results.filter(
+      (item) => item.providerStatus === "PENDING"
+    ).length;
 
-    const failedCount =
-      results.filter(
-        (item) =>
-          [
-            "FAILED",
-            "REFUND_REQUIRED",
-            "REFUND_PENDING",
-            "REFUND_PROCESSING",
-          ].includes(
-            item.providerStatus
-          )
-      ).length;
+    const failedCount = results.filter((item) =>
+      [
+        "FAILED",
+        "REFUND_REQUIRED",
+        "REFUND_PENDING",
+        "REFUND_PROCESSING",
+      ].includes(item.providerStatus)
+    ).length;
 
     return NextResponse.json({
       success: true,
 
-      checked:
-        pendingOrders.length,
+      checked: pendingOrders.length,
 
       successCount,
 
@@ -587,8 +456,7 @@ async function checkPendingOrders(
 
       failedCount,
 
-      maxRc70WaitMinutes:
-        10,
+      maxRc70WaitMinutes: 10,
 
       results,
     });
@@ -615,22 +483,16 @@ async function checkPendingOrders(
 /*
  * Vercel Cron / VPS Cron menggunakan GET.
  */
-export async function GET(
-  request: Request
-) {
-  return checkPendingOrders(
-    request
-  );
+
+export async function GET(request: Request) {
+  return checkPendingOrders(request);
 }
 
 /*
  * POST tetap dipertahankan
  * untuk testing manual.
  */
-export async function POST(
-  request: Request
-) {
-  return checkPendingOrders(
-    request
-  );
+
+export async function POST(request: Request) {
+  return checkPendingOrders(request);
 }
