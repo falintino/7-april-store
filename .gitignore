@@ -44,3 +44,7 @@ next-env.d.ts
 
 .vercel
 .env*
+
+/falintino-website/node_modules/
+
+/falintino-website/.next/

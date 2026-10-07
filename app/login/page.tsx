@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
-import { ArrowRight, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+import {
+  ArrowRight,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+} from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +17,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+
+    if (error) {
+      setMessage(error);
+
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname,
+      );
+    }
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -63,7 +83,9 @@ export default function LoginPage() {
 
               <div>
                 <p className="font-bold text-white">7 April Store</p>
-                <p className="text-xs text-slate-400">Layanan Top Up Game</p>
+                <p className="text-xs text-slate-400">
+                  Layanan Top Up Game
+                </p>
               </div>
             </Link>
 
@@ -77,8 +99,8 @@ export default function LoginPage() {
               </h1>
 
               <p className="mt-4 leading-7 text-slate-300">
-                Lihat status top up, riwayat transaksi, dan data akunmu di satu
-                tempat.
+                Lihat status top up, riwayat transaksi, dan data akunmu di
+                satu tempat.
               </p>
             </div>
 
@@ -107,10 +129,48 @@ export default function LoginPage() {
             </h2>
 
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              Gunakan email dan password yang kamu pakai saat mendaftar.
+              Gunakan email dan password atau akun Google kamu.
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <a
+              href="/api/auth/google"
+              className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white text-sm font-bold text-slate-900 transition hover:bg-slate-100"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                <path
+                  fill="#4285F4"
+                  d="M21.35 12.27c0-.78-.07-1.53-.22-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.7 2.91-4.2 2.91-7.42Z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 21.5c2.64 0 4.86-.87 6.48-2.35l-3.14-2.45c-.87.58-1.98.92-3.34.92-2.56 0-4.73-1.73-5.51-4.06H3.25v2.53A9.8 9.8 0 0 0 12 21.5Z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M6.49 13.56A5.9 5.9 0 0 1 6.18 12c0-.54.11-1.07.31-1.56V7.9H3.25A9.5 9.5 0 0 0 2.25 12c0 1.47.35 2.86 1 4.1l3.24-2.54Z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 6.38c1.44 0 2.73.5 3.75 1.48l2.81-2.82C16.86 3.43 14.64 2.5 12 2.5a9.8 9.8 0 0 0-8.75 5.4l3.24 2.54C7.27 8.11 9.44 6.38 12 6.38Z"
+                />
+              </svg>
+
+              Lanjutkan dengan Google
+            </a>
+
+            <div className="my-6 flex items-center gap-4">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                atau
+              </span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
               <label className="block">
                 <span className="mb-2 block text-sm font-semibold text-slate-200">
                   Email
@@ -118,6 +178,7 @@ export default function LoginPage() {
 
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+
                   <input
                     type="email"
                     value={email}
@@ -137,6 +198,7 @@ export default function LoginPage() {
 
                 <div className="relative">
                   <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+
                   <input
                     type="password"
                     value={password}
