@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
  * ->
  * cek ulang setiap 1 menit
  *
- * Setelah 10 menit sejak order dibuat:
+ * Setelah 10 menit sejak RC70 terakhir dicatat:
  *
  * RC70
  * ->
@@ -58,11 +58,23 @@ function isAuthorized(
 }
 
 function isRc70Expired(
+  providerUpdatedAt: Date | null,
   createdAt: Date
 ) {
+  /*
+   * Gunakan waktu terakhir provider diperbarui
+   * sebagai awal hitung timeout RC70.
+   *
+   * Fallback ke createdAt hanya untuk order lama
+   * yang belum memiliki providerUpdatedAt.
+   */
+  const startedAt =
+    providerUpdatedAt ??
+    createdAt;
+
   const age =
     Date.now() -
-    createdAt.getTime();
+    startedAt.getTime();
 
   return age >=
     MAX_RC70_WAIT_MS;
@@ -202,6 +214,7 @@ async function checkPendingOrders(
           order.providerRc ===
             "70" &&
           isRc70Expired(
+            order.providerUpdatedAt,
             order.createdAt
           )
         ) {
