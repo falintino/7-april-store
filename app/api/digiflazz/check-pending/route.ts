@@ -192,7 +192,7 @@ async function checkPendingOrders(
             "asc",
         },
 
-        take: 20,
+        take: 1,
 
         select: {
           id: true,
