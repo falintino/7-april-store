@@ -163,6 +163,15 @@ export default function LoginPage() {
                 {isLoading ? "Memproses..." : "Login"}
                 {!isLoading && <ArrowRight className="h-4 w-4" />}
               </button>
+
+              <div className="text-center">
+                <Link
+                  href="/lupa-password"
+                  className="text-sm font-semibold text-blue-400 transition hover:text-blue-300"
+                >
+                  Lupa kata sandi?
+                </Link>
+              </div>
             </form>
 
             <p className="mt-6 text-center text-sm text-slate-400">
