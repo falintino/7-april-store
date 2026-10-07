@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
  * ->
  * cek ulang setiap 1 menit
  *
- * Setelah 10 menit sejak RC70 terakhir dicatat:
+ * Setelah 10 menit sejak RC70 pertama:
  *
  * RC70
  * ->
@@ -103,6 +103,7 @@ function isRc70Expired(
 ) {
   /*
    * Gunakan waktu pertama kali RC70 tercatat.
+   *
    * Jangan memakai providerUpdatedAt karena
    * nilainya berubah setiap kali checker berjalan.
    *
@@ -120,8 +121,10 @@ function isRc70Expired(
     Date.now() -
     startedAt.getTime();
 
-  return age >=
-    MAX_RC70_WAIT_MS;
+  return (
+    age >=
+    MAX_RC70_WAIT_MS
+  );
 }
 
 async function checkPendingOrders(
@@ -166,25 +169,68 @@ async function checkPendingOrders(
      * REFUND_REQUIRED
      *
      * serta sudah memiliki ref_id.
+     *
+     * PRIORITAS:
+     *
+     * 1. Transaksi normal / aktif
+     *    yang bukan RC70.
+     *
+     * 2. RC70 lama diproses setelah
+     *    transaksi normal habis.
+     *
+     * Ini mencegah satu transaksi RC70
+     * lama menghalangi transaksi baru.
      */
 
-    const pendingOrders =
+    const pendingWhere = {
+      paymentStatus:
+        "PAID" as const,
+
+      providerStatus: {
+        in: [
+          "PENDING",
+          "FAILED",
+          "REFUND_REQUIRED",
+        ],
+      },
+
+      providerRefId: {
+        not: null,
+      },
+    };
+
+    /*
+     * =====================================
+     * PRIORITAS TRANSAKSI NORMAL
+     * =====================================
+     *
+     * RC70 tidak diprioritaskan lebih dulu.
+     *
+     * Contoh:
+     *
+     * Invoice A -> RC70
+     * Invoice B -> RC03 PENDING
+     *
+     * Maka Invoice B diproses lebih dulu.
+     */
+
+    let pendingOrders =
       await prisma.order.findMany({
         where: {
-          paymentStatus:
-            "PAID",
+          ...pendingWhere,
 
-          providerStatus: {
-            in: [
-              "PENDING",
-              "FAILED",
-              "REFUND_REQUIRED",
-            ],
-          },
+          OR: [
+            {
+              providerRc:
+                null,
+            },
 
-          providerRefId: {
-            not: null,
-          },
+            {
+              providerRc: {
+                not: "70",
+              },
+            },
+          ],
         },
 
         orderBy: {
@@ -222,6 +268,65 @@ async function checkPendingOrders(
         },
       });
 
+    /*
+     * =====================================
+     * FALLBACK KE RC70
+     * =====================================
+     *
+     * Kalau tidak ada transaksi normal,
+     * baru ambil satu transaksi RC70
+     * yang paling lama.
+     */
+
+    if (
+      pendingOrders.length ===
+      0
+    ) {
+      pendingOrders =
+        await prisma.order.findMany({
+          where: {
+            ...pendingWhere,
+
+            providerRc:
+              "70",
+          },
+
+          orderBy: {
+            providerUpdatedAt:
+              "asc",
+          },
+
+          take: 1,
+
+          select: {
+            id: true,
+
+            invoice: true,
+
+            providerRefId:
+              true,
+
+            providerUpdatedAt:
+              true,
+
+            providerStatus:
+              true,
+
+            providerRc:
+              true,
+
+            providerMessage:
+              true,
+
+            providerResponse:
+              true,
+
+            createdAt:
+              true,
+          },
+        });
+    }
+
     const results: Array<{
       invoice: string;
 
@@ -240,7 +345,7 @@ async function checkPendingOrders(
 
     /*
      * =====================================
-     * PROSES SATU PER SATU
+     * PROSES SATU ORDER
      * =====================================
      */
 
