@@ -57,18 +57,62 @@ function isAuthorized(
   );
 }
 
+function getRc70StartedAt(
+  providerResponse: unknown
+) {
+  if (
+    !providerResponse ||
+    typeof providerResponse !==
+      "object" ||
+    Array.isArray(
+      providerResponse
+    )
+  ) {
+    return null;
+  }
+
+  const raw =
+    (
+      providerResponse as Record<
+        string,
+        unknown
+      >
+    )._rc70StartedAt;
+
+  if (
+    typeof raw !==
+    "string"
+  ) {
+    return null;
+  }
+
+  const date =
+    new Date(raw);
+
+  return Number.isNaN(
+    date.getTime()
+  )
+    ? null
+    : date;
+}
+
 function isRc70Expired(
+  providerResponse: unknown,
   providerUpdatedAt: Date | null,
   createdAt: Date
 ) {
   /*
-   * Gunakan waktu terakhir provider diperbarui
-   * sebagai awal hitung timeout RC70.
+   * Gunakan waktu pertama kali RC70 tercatat.
+   * Jangan memakai providerUpdatedAt karena
+   * nilainya berubah setiap kali checker berjalan.
    *
-   * Fallback ke createdAt hanya untuk order lama
-   * yang belum memiliki providerUpdatedAt.
+   * Fallback ke providerUpdatedAt / createdAt
+   * hanya untuk order lama.
    */
   const startedAt =
+    getRc70StartedAt(
+      providerResponse
+    ) ??
     providerUpdatedAt ??
     createdAt;
 
@@ -170,6 +214,9 @@ async function checkPendingOrders(
           providerMessage:
             true,
 
+          providerResponse:
+            true,
+
           createdAt:
             true,
         },
@@ -214,6 +261,7 @@ async function checkPendingOrders(
           order.providerRc ===
             "70" &&
           isRc70Expired(
+            order.providerResponse,
             order.providerUpdatedAt,
             order.createdAt
           )
