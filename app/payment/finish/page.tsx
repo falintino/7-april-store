@@ -220,10 +220,11 @@ export default async function PaymentFinishPage({
               )}
 
               <PaymentStatusClient
-                invoice={order.invoice}
-                expiresAt={expiresAt}
-                paymentPending={paymentPending}
-              />
+  invoice={order.invoice}
+  expiresAt={expiresAt}
+  paymentPending={paymentPending}
+  providerStatus={order.providerStatus}
+/>
             </div>
 
             {/* STATUS */}
