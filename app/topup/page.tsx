@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -16,6 +17,13 @@ import {
 } from "lucide-react";
 
 import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
+
+export const metadata: Metadata = {
+  title: "Top Up Free Fire Murah",
+  description:
+    "Pilih layanan top up Free Fire di 7 April Store. Cek nominal Diamond, harga, dan lanjutkan pembayaran secara online.",
+  alternates: { canonical: "https://store.falintino.com/topup" },
+};
 
 const whatsappUrl = "https://wa.me/62895704041437";
 const supportEmail = "falintino10@gmail.com";
