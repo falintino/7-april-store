@@ -65,6 +65,7 @@ model Customer {
    * sedang login akan terhubung ke akun ini.
    */
   orders Order[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([whatsapp])
   @@index([createdAt])
