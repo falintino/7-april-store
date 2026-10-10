@@ -56,22 +56,6 @@ export default function Home() {
   return (
     <main className="bg-[#030712]">
       <PromoBannerCarousel />
-      <section className="border-b border-amber-500/20 bg-amber-500/10">
-        <div className="mx-auto flex max-w-7xl items-start gap-3 px-5 py-4 sm:px-8">
-          <div className="mt-0.5 text-lg">⚠️</div>
-          <div>
-            <p className="text-sm font-black text-amber-300">
-              Pemberitahuan Pembayaran
-            </p>
-            <p className="mt-1 text-xs leading-5 text-amber-100/80">
-              Sistem pembayaran sedang dalam proses pembaruan dan aktivasi.
-              Untuk sementara, pembayaran dapat belum tersedia. Silakan coba
-              kembali setelah sistem pembayaran aktif.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <Hero />
       <QuickMenu />
       <ServicesGrid />
