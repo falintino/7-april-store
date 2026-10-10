@@ -56,6 +56,22 @@ export default async function FreeFireTopUpPage() {
     <main className="min-h-screen bg-[#030712] text-white">
       <PromoBannerCarousel />
 
+      <section className="border-b border-amber-500/20 bg-amber-500/10">
+        <div className="mx-auto flex max-w-7xl items-start gap-3 px-6 py-4">
+          <div className="mt-0.5 text-lg">⚠️</div>
+          <div>
+            <p className="text-sm font-black text-amber-300">
+              Pembayaran Sedang Diperbarui
+            </p>
+            <p className="mt-1 text-xs leading-5 text-amber-100/80">
+              Metode pembayaran saat ini sedang dalam proses pembaruan dan
+              aktivasi. Untuk sementara, checkout dapat belum tersedia.
+              Silakan coba kembali setelah pembayaran aktif.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="border-y border-white/10 bg-gradient-to-b from-blue-950/30 to-[#030712]">
         <div className="mx-auto max-w-7xl px-6 py-14">
           <div className="max-w-3xl">
