@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import Navbar from "@/components/layout/Navbar";
-import PaymentUpdatePopup from "@/components/layout/PaymentUpdatePopup";
 
 const siteUrl = "https://store.falintino.com";
 
@@ -107,7 +106,6 @@ export default function RootLayout({
         />
         <Navbar />
         {children}
-        <PaymentUpdatePopup />
       </body>
     </html>
   );
