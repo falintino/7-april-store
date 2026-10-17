@@ -334,6 +334,12 @@ export default function TopUpClient({
       value.replace(/\D/g, ""),
     );
 
+    setAppliedPromo(null);
+    setPromoMessage(
+      promoCode.trim()
+        ? "Nomor WhatsApp berubah. Terapkan ulang kode promo."
+        : "",
+    );
     setErrorMessage("");
   }
 
