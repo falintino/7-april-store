@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -143,10 +144,41 @@ export async function POST(
       body.productId ?? ""
     ).trim();
 
-    const whatsapp =
-      normalizeWhatsapp(
-        body.whatsapp
+    // Semua promo checkout wajib digunakan oleh customer yang login.
+    const session = await getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        {
+          success: false,
+          valid: false,
+          requiresLogin: true,
+          message: "Login ke akun 7 April Store terlebih dahulu untuk menggunakan kode promo.",
+        },
+        { status: 401 },
       );
+    }
+
+    const customer = await prisma.customer.findUnique({
+      where: { id: session.id },
+      select: { id: true, whatsapp: true },
+    });
+
+    if (!customer) {
+      return NextResponse.json(
+        {
+          success: false,
+          valid: false,
+          requiresLogin: true,
+          message: "Akun pelanggan tidak ditemukan. Silakan login kembali.",
+        },
+        { status: 401 },
+      );
+    }
+
+    // Batas pemakaian promo memakai nomor WhatsApp akun yang login,
+    // bukan nomor yang bisa diubah dari browser.
+    const whatsapp = normalizeWhatsapp(customer.whatsapp);
 
     /*
      * =========================================
