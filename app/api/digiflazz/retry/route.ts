@@ -42,6 +42,7 @@ const VEXXA_TEST_MAX_PRICE = 6025;
 
 /* RC69 khusus invoice 250 Diamond yang sedang dipulihkan. */
 const CURRENT_RC69_RETRY_INVOICE = "7A-20261017-179905";
+const CURRENT_RC69_RETRY_MAX_PRICE = 32000;
 
 export async function POST(
   request: Request
@@ -249,7 +250,7 @@ export async function POST(
       vexxaTestRetry
         ? VEXXA_TEST_MAX_PRICE
         : currentInvoicePriceRetry
-          ? order.total
+          ? CURRENT_RC69_RETRY_MAX_PRICE
           : SPECIAL_RETRY_MAX_PRICE;
 
     /*
