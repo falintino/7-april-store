@@ -310,6 +310,9 @@ export async function POST(
       );
     }
 
+    // Identitas promo berasal dari akun yang login, bukan nomor kontak checkout.
+    let promoCustomerWhatsapp: string | null = null;
+
     // Promo hanya boleh dipakai oleh pemilik akun yang sedang login.
     if (promoCodeInput || order.promoCodeId) {
       const session = await getSession();
@@ -340,19 +343,17 @@ export async function POST(
         select: { whatsapp: true },
       });
 
-      if (
-        !customer ||
-        normalizeWhatsapp(customer.whatsapp) !==
-          normalizeWhatsapp(order.whatsapp)
-      ) {
+      if (!customer) {
         return NextResponse.json(
           {
             success: false,
-            message: "Untuk memakai kode promo, nomor WhatsApp pesanan harus sama dengan nomor WhatsApp yang terdaftar di akunmu.",
+            message: "Akun pelanggan tidak ditemukan. Silakan login kembali.",
           },
-          { status: 400 },
+          { status: 401 },
         );
       }
+
+      promoCustomerWhatsapp = normalizeWhatsapp(customer.whatsapp);
     }
 
     if (
@@ -440,9 +441,8 @@ export async function POST(
      */
 
     const customerWhatsapp =
-      normalizeWhatsapp(
-        order.whatsapp
-      );
+      promoCustomerWhatsapp ??
+      normalizeWhatsapp(order.whatsapp);
 
     /*
      * =========================================
