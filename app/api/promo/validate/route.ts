@@ -176,19 +176,10 @@ export async function POST(
       );
     }
 
-    // Batas pemakaian promo memakai nomor WhatsApp akun yang login,
-    // bukan nomor yang bisa diubah dari browser.
+    // Login menjadi identitas utama promo. Nomor WhatsApp akun dipakai
+    // untuk batas pemakaian promo, sedangkan nomor checkout boleh diedit
+    // jika pelanggan sudah tidak menggunakan nomor lama.
     const whatsapp = normalizeWhatsapp(customer.whatsapp);
-    const checkoutWhatsapp = normalizeWhatsapp(body.whatsapp);
-
-    if (
-      !whatsapp ||
-      checkoutWhatsapp !== whatsapp
-    ) {
-      return invalidPromo(
-        "Untuk memakai kode promo, nomor WhatsApp checkout harus sama dengan nomor yang terdaftar di akunmu.",
-      );
-    }
 
     /*
      * =========================================
