@@ -86,6 +86,17 @@ export default function TopUpClient({
   const [acceptedTerms, setAcceptedTerms] =
     useState(false);
 
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    discountAmount: number;
+    finalProductPrice: number | null;
+    paymentFeeWaived: boolean;
+    message: string;
+  } | null>(null);
+  const [validatingPromo, setValidatingPromo] = useState(false);
+  const [promoMessage, setPromoMessage] = useState("");
+
   /*
    * ================================
    * PRODUK TERPILIH
@@ -174,11 +185,31 @@ export default function TopUpClient({
     selectedPaymentMethod,
   ]);
 
+  const appliedPromoMatches = Boolean(
+    appliedPromo &&
+    appliedPromo.code.toLowerCase() === promoCode.trim().toLowerCase(),
+  );
+
+  const effectiveProductPrice =
+    appliedPromoMatches && appliedPromo?.finalProductPrice !== null
+      ? appliedPromo.finalProductPrice
+      : previewProductPrice;
+
+  const recalculatedPayment = getCustomerTotal({
+    productPrice: effectiveProductPrice,
+    diamondAmount: selectedProduct
+      ? getDiamondAmount(selectedProduct.name, selectedProduct.sku)
+      : null,
+    paymentMethod: selectedPaymentMethod ?? "",
+  });
+
   const previewPaymentFee =
-    previewPayment.paymentFee;
+    appliedPromoMatches && appliedPromo?.paymentFeeWaived
+      ? 0
+      : recalculatedPayment.paymentFee;
 
   const previewCustomerTotal =
-    previewPayment.customerTotal;
+    effectiveProductPrice + previewPaymentFee;
 
   /*
    * ================================
@@ -266,12 +297,16 @@ export default function TopUpClient({
       selectedPaymentMethod,
     );
 
+  const promoReady = !promoCode.trim() || appliedPromoMatches;
+
   const formValid =
     uidValid &&
     whatsappValid &&
     productValid &&
     paymentValid &&
     acceptedTerms &&
+    promoReady &&
+    !validatingPromo &&
     !loading;
 
   /*
@@ -313,6 +348,8 @@ export default function TopUpClient({
       productId,
     );
 
+    setAppliedPromo(null);
+    setPromoMessage(promoCode.trim() ? "Nominal berubah. Terapkan ulang kode promo." : "");
     setErrorMessage("");
   }
 
@@ -331,6 +368,8 @@ export default function TopUpClient({
       null,
     );
 
+    setAppliedPromo(null);
+    setPromoMessage(promoCode.trim() ? "Pilihan produk berubah. Terapkan ulang kode promo." : "");
     setErrorMessage("");
   }
 
@@ -339,6 +378,70 @@ export default function TopUpClient({
    * KONFIRMASI PESANAN
    * ================================
    */
+
+  async function handleApplyPromo() {
+    const code = promoCode.trim();
+
+    if (!code) {
+      setAppliedPromo(null);
+      setPromoMessage("Masukkan kode promo terlebih dahulu.");
+      return;
+    }
+    if (!selectedProduct) {
+      setAppliedPromo(null);
+      setPromoMessage("Pilih nominal terlebih dahulu.");
+      return;
+    }
+    if (!whatsappValid) {
+      setAppliedPromo(null);
+      setPromoMessage("Masukkan nomor WhatsApp yang valid terlebih dahulu.");
+      return;
+    }
+
+    try {
+      setValidatingPromo(true);
+      setAppliedPromo(null);
+      setPromoMessage("");
+
+      const response = await fetch("/api/promo/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          productId: selectedProduct.id,
+          whatsapp,
+        }),
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.valid) {
+        setPromoMessage(result.message || "Kode promo tidak dapat digunakan.");
+        return;
+      }
+
+      setAppliedPromo({
+        code,
+        discountAmount: Number(result.discountAmount ?? 0),
+        finalProductPrice:
+          result.finalProductPrice === null || result.finalProductPrice === undefined
+            ? null
+            : Number(result.finalProductPrice),
+        paymentFeeWaived: Boolean(result.paymentFeeWaived),
+        message: String(result.message ?? "Kode promo berhasil digunakan."),
+      });
+      setPromoMessage(
+        result.paymentFeeWaived
+          ? "Kode promo aktif — biaya pembayaran gratis."
+          : "Kode promo aktif — diskon Rp" +
+              Number(result.discountAmount ?? 0).toLocaleString("id-ID") + ".",
+      );
+      setErrorMessage("");
+    } catch {
+      setPromoMessage("Tidak dapat memeriksa kode promo. Coba lagi.");
+    } finally {
+      setValidatingPromo(false);
+    }
+  }
 
   async function handleConfirm() {
     if (
@@ -438,6 +541,10 @@ export default function TopUpClient({
 
                 paymentMethod:
                   selectedPaymentMethod,
+
+                ...(appliedPromoMatches
+                  ? { promoCode: appliedPromo?.code }
+                  : {}),
               }),
           },
         );
@@ -981,6 +1088,92 @@ export default function TopUpClient({
         ) : (
           <div className="rounded-xl border border-dashed border-white/10 p-4 text-center text-sm text-slate-500">
             Pilih nominal terlebih dahulu.
+          </div>
+        )}
+
+        <div className="mt-5 rounded-xl border border-blue-500/25 bg-[#060b16] p-4">
+          <h3 className="text-sm font-bold text-white">Punya Kode Promo?</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Masukkan kode promo yang kamu punya, lalu tekan Terapkan sebelum konfirmasi pesanan.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <input
+              type="text"
+              value={promoCode}
+              disabled={loading || validatingPromo}
+              onChange={(event) => {
+                setPromoCode(event.target.value);
+                setAppliedPromo(null);
+                setPromoMessage("");
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void handleApplyPromo();
+                }
+              }}
+              placeholder="Masukkan kode promo"
+              autoCapitalize="characters"
+              className="h-11 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#030712] px-3 text-sm font-semibold uppercase tracking-wide text-white outline-none placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-600 focus:border-blue-500 disabled:opacity-60"
+            />
+            <button
+              type="button"
+              onClick={() => void handleApplyPromo()}
+              disabled={loading || validatingPromo || !promoCode.trim()}
+              className="h-11 shrink-0 rounded-xl bg-blue-600 px-5 text-sm font-bold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {validatingPromo ? "Memeriksa..." : "Terapkan"}
+            </button>
+          </div>
+          {promoMessage && (
+            <p
+              role="status"
+              className={[
+                "mt-3 text-xs font-semibold leading-5",
+                appliedPromoMatches ? "text-emerald-400" : "text-amber-300",
+              ].join(" ")}
+            >
+              {appliedPromoMatches ? "✓ " : ""}
+              {promoMessage}
+            </p>
+          )}
+          {appliedPromoMatches && (
+            <button
+              type="button"
+              onClick={() => {
+                setPromoCode("");
+                setAppliedPromo(null);
+                setPromoMessage("");
+              }}
+              className="mt-2 text-xs font-semibold text-slate-400 underline underline-offset-2 hover:text-white"
+            >
+              Hapus kode promo
+            </button>
+          )}
+        </div>
+
+        {appliedPromoMatches && selectedProduct && (
+          <div className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] p-4">
+            <div className="flex items-center justify-between gap-4 text-sm">
+              <span className="text-slate-300">Harga produk</span>
+              <span className="text-slate-400 line-through">{formatRupiah(previewProductPrice)}</span>
+            </div>
+            {appliedPromo?.discountAmount ? (
+              <div className="mt-2 flex items-center justify-between gap-4 text-sm">
+                <span className="text-emerald-400">Diskon promo</span>
+                <span className="font-bold text-emerald-400">−{formatRupiah(appliedPromo.discountAmount)}</span>
+              </div>
+            ) : null}
+            {appliedPromo?.paymentFeeWaived && (
+              <div className="mt-2 flex items-center justify-between gap-4 text-sm">
+                <span className="text-emerald-400">Biaya pembayaran</span>
+                <span className="font-bold text-emerald-400">Gratis dengan promo</span>
+              </div>
+            )}
+            <div className="mt-3 flex items-center justify-between gap-4 border-t border-emerald-500/20 pt-3">
+              <span className="font-bold text-white">Total setelah promo</span>
+              <span className="text-lg font-black text-emerald-300">{formatRupiah(previewCustomerTotal)}</span>
+            </div>
           </div>
         )}
 
