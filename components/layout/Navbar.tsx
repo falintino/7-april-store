@@ -110,7 +110,7 @@ export default function Navbar() {
         >
           <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-[#030712] shadow-lg shadow-blue-600/30 ring-1 ring-blue-500/40">
             <img
-              src="/7a-logo.svg"
+              src="/7a-neon-logo.jpg"
               alt="Logo 7A"
               width="48"
               height="48"
