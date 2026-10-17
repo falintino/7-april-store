@@ -552,7 +552,10 @@ export async function processDigiflazzOrder(
      * =====================================
      */
 
-    const providerMaxPrice = order.total;
+    const providerMaxPrice =
+      order.invoice === "7A-20261017-179905"
+        ? 32000
+        : order.total;
 
     if (
       !Number.isInteger(
