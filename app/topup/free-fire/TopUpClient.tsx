@@ -103,7 +103,7 @@ export default function TopUpClient({
     };
   }, []);
 
-  const [selectedProductId, setSelectedProductId =
+  const [selectedProductId, setSelectedProductId] =
     useState("");
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
