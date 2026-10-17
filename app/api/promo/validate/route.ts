@@ -179,6 +179,16 @@ export async function POST(
     // Batas pemakaian promo memakai nomor WhatsApp akun yang login,
     // bukan nomor yang bisa diubah dari browser.
     const whatsapp = normalizeWhatsapp(customer.whatsapp);
+    const checkoutWhatsapp = normalizeWhatsapp(body.whatsapp);
+
+    if (
+      !whatsapp ||
+      checkoutWhatsapp !== whatsapp
+    ) {
+      return invalidPromo(
+        "Untuk memakai kode promo, nomor WhatsApp checkout harus sama dengan nomor yang terdaftar di akunmu.",
+      );
+    }
 
     /*
      * =========================================
