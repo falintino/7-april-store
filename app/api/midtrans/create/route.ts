@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assertPaymentModesMatch } from "@/lib/digiflazz";
 import { getCustomerTotal } from "@/lib/payment-fees";
@@ -307,6 +308,32 @@ export async function POST(
           status: 404,
         }
       );
+    }
+
+    // Promo hanya boleh dipakai oleh pemilik akun yang sedang login.
+    if (promoCodeInput || order.promoCodeId) {
+      const session = await getSession();
+
+      if (!session) {
+        return NextResponse.json(
+          {
+            success: false,
+            requiresLogin: true,
+            message: "Login terlebih dahulu untuk menggunakan kode promo.",
+          },
+          { status: 401 },
+        );
+      }
+
+      if (!order.customerId || order.customerId !== session.id) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Kode promo hanya dapat digunakan pada pesanan milik akun yang sedang login. Silakan buat ulang pesanan setelah login.",
+          },
+          { status: 403 },
+        );
+      }
     }
 
     if (
