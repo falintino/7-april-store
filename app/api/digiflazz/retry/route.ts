@@ -181,6 +181,9 @@ export async function POST(
      * RC41:
      * signature invalid.
      *
+     * RC44:
+     * Retry manual setelah saldo buyer dicukupkan.
+     *
      * RC45:
      * IP belum dikenali.
      *
@@ -195,7 +198,7 @@ export async function POST(
      */
 
     const normalRetry =
-      ["41", "45", "70"].includes(
+      ["41", "44", "45", "70"].includes(
         providerRc
       );
 
@@ -405,6 +408,7 @@ export async function POST(
                 providerRc: {
                   in: [
                     "41",
+                    "44",
                     "45",
                   ],
                 },
