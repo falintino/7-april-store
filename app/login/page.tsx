@@ -59,7 +59,18 @@ export default function LoginPage() {
         return;
       }
 
-      router.replace("/profil");
+      const requestedRedirect = new URLSearchParams(
+        window.location.search,
+      ).get("redirect");
+
+      const redirectTo =
+        requestedRedirect &&
+        requestedRedirect.startsWith("/") &&
+        !requestedRedirect.startsWith("//")
+          ? requestedRedirect
+          : "/profil";
+
+      router.replace(redirectTo);
       router.refresh();
     } catch {
       setMessage("Koneksi bermasalah. Silakan coba lagi.");
