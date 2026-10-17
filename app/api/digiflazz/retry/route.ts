@@ -486,6 +486,18 @@ export async function POST(
           order.id
         );
 
+      const latestOrder =
+        await prisma.order.findUnique({
+          where: { id: order.id },
+          select: {
+            providerMessage: true,
+            providerResponse: true,
+            providerRc: true,
+            providerStatus: true,
+            providerRefId: true,
+          },
+        });
+
       return NextResponse.json({
         success: true,
 
@@ -516,8 +528,22 @@ export async function POST(
           null,
 
         providerMessage:
+          latestOrder?.providerMessage ??
           result.message ??
           null,
+
+        providerResponse:
+          latestOrder?.providerResponse ??
+          null,
+
+        latestProviderRc:
+          latestOrder?.providerRc ??
+          result.rc ??
+          null,
+
+        latestProviderStatus:
+          latestOrder?.providerStatus ??
+          result.providerStatus,
 
         sn:
           result.sn ??
