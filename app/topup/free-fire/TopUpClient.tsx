@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { getCustomerTotal } from "@/lib/payment-fees";
 import { getDiamondAmount } from "@/lib/pricing";
@@ -65,8 +65,45 @@ export default function TopUpClient({
   const [uid, setUid] = useState("");
 
   const [whatsapp, setWhatsapp] = useState("");
+  const [accountWhatsapp, setAccountWhatsapp] = useState("");
+  const [whatsappAutofilled, setWhatsappAutofilled] = useState(false);
 
-  const [selectedProductId, setSelectedProductId] =
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAccountWhatsapp() {
+      try {
+        const response = await fetch("/api/auth/me", {
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+
+        const result = await response.json();
+        const savedWhatsapp = String(result.customer?.whatsapp ?? "")
+          .replace(/\D/g, "")
+          .trim();
+
+        if (!cancelled && savedWhatsapp) {
+          setAccountWhatsapp(savedWhatsapp);
+          setWhatsapp((current) => {
+            if (current.trim()) return current;
+            setWhatsappAutofilled(true);
+            return savedWhatsapp;
+          });
+        }
+      } catch {
+        // Checkout tetap bisa digunakan dengan input manual jika profil gagal dimuat.
+      }
+    }
+
+    void loadAccountWhatsapp();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const [selectedProductId, setSelectedProductId =
     useState("");
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
@@ -334,6 +371,7 @@ export default function TopUpClient({
     setWhatsapp(
       value.replace(/\D/g, ""),
     );
+    setWhatsappAutofilled(false);
 
     setAppliedPromo(null);
     setPromoMessage(
@@ -707,6 +745,7 @@ export default function TopUpClient({
             <input
               type="tel"
               inputMode="numeric"
+              autoComplete="tel"
               value={whatsapp}
               disabled={loading}
               onChange={(event) =>
@@ -717,6 +756,13 @@ export default function TopUpClient({
               placeholder="Contoh: 081234567890"
               className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
             />
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              {whatsappAutofilled
+                ? "Nomor WhatsApp akunmu diisi otomatis. Kamu bisa menghapus atau menggantinya jika nomor sudah tidak aktif."
+                : accountWhatsapp && whatsapp !== accountWhatsapp
+                  ? "Nomor sudah diedit. Gunakan nomor WhatsApp yang aktif untuk menerima informasi pesanan."
+                  : "Masukkan nomor WhatsApp aktif untuk informasi pesanan."}
+            </p>
 
             {whatsapp.length > 0 &&
               !whatsappValid && (
