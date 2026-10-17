@@ -22,7 +22,7 @@ export default function RetryDigiflazzButton({
     providerStatus === "REFUND_REQUIRED" &&
     (
       providerRc === "44" ||
-      (invoice === "7A-20261017-179905" && ["69", "02"].includes(providerRc))
+      (invoice === "7A-20261017-179905" && (providerRc === "69" || providerRc === "02"))
     );
 
   if (!allowedRetry) {
