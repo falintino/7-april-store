@@ -334,6 +334,25 @@ export async function POST(
           { status: 403 },
         );
       }
+
+      const customer = await prisma.customer.findUnique({
+        where: { id: session.id },
+        select: { whatsapp: true },
+      });
+
+      if (
+        !customer ||
+        normalizeWhatsapp(customer.whatsapp) !==
+          normalizeWhatsapp(order.whatsapp)
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Untuk memakai kode promo, nomor WhatsApp pesanan harus sama dengan nomor WhatsApp yang terdaftar di akunmu.",
+          },
+          { status: 400 },
+        );
+      }
     }
 
     if (
