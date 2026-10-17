@@ -17,6 +17,7 @@ export default function RetryDigiflazzButton({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [diagnostics, setDiagnostics] = useState("");
 
   const allowedRetry =
     providerStatus === "REFUND_REQUIRED" &&
@@ -38,6 +39,7 @@ export default function RetryDigiflazzButton({
 
     setLoading(true);
     setMessage("");
+    setDiagnostics("");
 
     try {
       const response = await fetch("/api/digiflazz/retry", {
@@ -58,8 +60,11 @@ export default function RetryDigiflazzButton({
       }
 
       setMessage(
-        `Hasil: ${result.providerStatus || "diproses"} · RC ${result.rc || "-"} · Ref ID ${result.refId || "-"}`,
+        `Hasil: ${result.latestProviderStatus || result.providerStatus || "diproses"} · RC ${result.latestProviderRc || result.rc || "-"} · Ref ID ${result.refId || "-"} · ${result.providerMessage || result.message || ""}`,
       );
+      if (result.providerResponse) {
+        setDiagnostics(JSON.stringify(result.providerResponse, null, 2));
+      }
       router.refresh();
     } catch {
       setMessage(
@@ -81,9 +86,25 @@ export default function RetryDigiflazzButton({
         {loading ? "Memproses..." : "Hit Ulang Digiflazz"}
       </button>
       {message && (
-        <p role="status" className="max-w-[220px] break-words text-[10px] leading-4 text-slate-300">
+        <p role="status" className="max-w-[260px] break-words text-[10px] leading-4 text-slate-300">
           {message}
         </p>
+      )}
+      {diagnostics && (
+        <div className="max-w-[300px]">
+          <p className="mb-1 text-[10px] font-bold text-amber-200">Respons JSON provider</p>
+          <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded border border-slate-700 bg-slate-950 p-2 text-[10px] leading-4 text-slate-200">{diagnostics}</pre>
+          <button
+            type="button"
+            onClick={() => {
+              void navigator.clipboard.writeText(diagnostics);
+              setMessage("JSON respons provider disalin. Periksa dan samarkan data sensitif sebelum dikirim ke CS.");
+            }}
+            className="mt-1 rounded border border-slate-600 px-2 py-1 text-[10px] text-slate-200"
+          >
+            Salin JSON
+          </button>
+        </div>
       )}
     </div>
   );
