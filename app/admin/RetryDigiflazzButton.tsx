@@ -18,16 +18,20 @@ export default function RetryDigiflazzButton({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  if (
-    providerStatus !== "REFUND_REQUIRED" ||
-    providerRc !== "44"
-  ) {
+  const allowedRetry =
+    providerStatus === "REFUND_REQUIRED" &&
+    (
+      providerRc === "44" ||
+      (invoice === "7A-20261017-179905" && providerRc === "69")
+    );
+
+  if (!allowedRetry) {
     return null;
   }
 
   async function retryOrder() {
     const confirmed = window.confirm(
-      `Hit ulang transaksi Digiflazz untuk invoice ${invoice}? Pastikan saldo Digiflazz sudah cukup. Sistem akan menggunakan Ref ID yang sama.`,
+      `Hit ulang transaksi Digiflazz untuk invoice ${invoice}? Pastikan seller sudah benar, harga seller saat ini tidak melebihi batas harga pesanan, dan saldo Digiflazz cukup. Sistem akan menggunakan Ref ID yang sama.`,
     );
 
     if (!confirmed || loading) return;
