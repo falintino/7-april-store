@@ -191,7 +191,9 @@ export default function TopUpClient({
   );
 
   const effectiveProductPrice =
-    appliedPromoMatches && appliedPromo?.finalProductPrice !== null
+    appliedPromoMatches &&
+    appliedPromo &&
+    appliedPromo.finalProductPrice !== null
       ? appliedPromo.finalProductPrice
       : previewProductPrice;
 
