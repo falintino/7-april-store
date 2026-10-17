@@ -96,6 +96,7 @@ export default function TopUpClient({
   } | null>(null);
   const [validatingPromo, setValidatingPromo] = useState(false);
   const [promoMessage, setPromoMessage] = useState("");
+  const [loginRequired, setLoginRequired] = useState(false);
 
   /*
    * ================================
@@ -422,10 +423,22 @@ export default function TopUpClient({
       });
       const result = await response.json();
 
+      if (result.requiresLogin || response.status === 401) {
+        setLoginRequired(true);
+        setPromoMessage(
+          result.message ||
+            "Login ke akun 7 April Store terlebih dahulu untuk menggunakan kode promo.",
+        );
+        return;
+      }
+
       if (!response.ok || !result.valid) {
+        setLoginRequired(false);
         setPromoMessage(result.message || "Kode promo tidak dapat digunakan.");
         return;
       }
+
+      setLoginRequired(false);
 
       setAppliedPromo({
         code,
@@ -1113,6 +1126,7 @@ export default function TopUpClient({
                 setPromoCode(event.target.value);
                 setAppliedPromo(null);
                 setPromoMessage("");
+                setLoginRequired(false);
               }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -1145,6 +1159,14 @@ export default function TopUpClient({
               {promoMessage}
             </p>
           )}
+          {loginRequired && (
+            <Link
+              href="/login?redirect=%2Ftopup%2Ffree-fire"
+              className="mt-3 inline-flex h-10 items-center justify-center rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 text-sm font-bold text-blue-300 transition hover:bg-blue-500/20"
+            >
+              Login untuk Pakai Promo
+            </Link>
+          )}
           {appliedPromoMatches && (
             <button
               type="button"
@@ -1152,6 +1174,7 @@ export default function TopUpClient({
                 setPromoCode("");
                 setAppliedPromo(null);
                 setPromoMessage("");
+                setLoginRequired(false);
               }}
               className="mt-2 text-xs font-semibold text-slate-400 underline underline-offset-2 hover:text-white"
             >
