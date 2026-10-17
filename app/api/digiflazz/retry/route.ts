@@ -235,7 +235,7 @@ export async function POST(
 
     const currentInvoicePriceRetry =
       order.invoice === CURRENT_RC69_RETRY_INVOICE &&
-      providerRc === "69";
+      ["69", "02"].includes(providerRc);
 
     const priceRetry =
       specialPriceRetry ||
@@ -408,7 +408,7 @@ export async function POST(
           ...(priceRetry
             ? {
                 providerRc:
-                  "69",
+                  currentInvoicePriceRetry ? providerRc : "69",
 
                 /*
                  * Jangan sampai invoice
@@ -444,7 +444,7 @@ export async function POST(
                   vexxaTestRetry
                     ? "Test VEXXA FF50 dengan batas harga Rp6.025. Selisih harga provider ditanggung toko khusus untuk pengujian invoice ini."
                     : currentInvoicePriceRetry
-                      ? `Retry RC69 khusus invoice ini menggunakan max_price sebesar total pesanan Rp${retryMaxPrice.toLocaleString("id-ID")}.`
+                      ? `Retry pemulihan khusus invoice ini (RC ${providerRc}) menggunakan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}; selisih harga ditanggung toko.`
                       : "Retry Digiflazz dengan batas harga Rp795. Selisih harga seller Rp45 ditanggung toko.",
               }
             : {
@@ -496,7 +496,7 @@ export async function POST(
           vexxaTestRetry
             ? "Test VEXXA FF50 dengan batas harga Rp6.025 selesai diproses."
             : currentInvoicePriceRetry
-              ? `Retry RC69 khusus invoice ini selesai diproses dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
+              ? `Retry pemulihan khusus invoice ini (RC awal ${providerRc}) selesai diproses dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
               : specialPriceRetry
                 ? "Retry Digiflazz dengan batas harga Rp795 selesai diproses."
                 : "Retry Digiflazz selesai diproses.",
