@@ -7,6 +7,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 import AdminLogoutButton from "./AdminLogoutButton";
+import RetryDigiflazzButton from "./RetryDigiflazzButton";
 
 export const dynamic = "force-dynamic";
 
@@ -1238,6 +1239,12 @@ export default async function AdminPage({
                             >
                               Detail
                             </Link>
+
+                            <RetryDigiflazzButton
+                              invoice={order.invoice}
+                              providerStatus={order.providerStatus}
+                              providerRc={order.providerRc}
+                            />
 
                             {order.providerMessage && (
                               <span
