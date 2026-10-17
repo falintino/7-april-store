@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getCustomerTotal } from "@/lib/payment-fees";
 import { getDiamondAmount } from "@/lib/pricing";
@@ -67,6 +67,7 @@ export default function TopUpClient({
   const [whatsapp, setWhatsapp] = useState("");
   const [accountWhatsapp, setAccountWhatsapp] = useState("");
   const [whatsappAutofilled, setWhatsappAutofilled] = useState(false);
+  const whatsappManuallyEdited = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,11 +86,10 @@ export default function TopUpClient({
 
         if (!cancelled && savedWhatsapp) {
           setAccountWhatsapp(savedWhatsapp);
-          setWhatsapp((current) => {
-            if (current.trim()) return current;
+          if (!whatsappManuallyEdited.current) {
+            setWhatsapp(savedWhatsapp);
             setWhatsappAutofilled(true);
-            return savedWhatsapp;
-          });
+          }
         }
       } catch {
         // Checkout tetap bisa digunakan dengan input manual jika profil gagal dimuat.
@@ -368,6 +368,7 @@ export default function TopUpClient({
   function handleWhatsappChange(
     value: string,
   ) {
+    whatsappManuallyEdited.current = true;
     setWhatsapp(
       value.replace(/\D/g, ""),
     );
