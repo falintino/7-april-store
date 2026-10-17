@@ -40,6 +40,9 @@ const VEXXA_TEST_INVOICE =
 
 const VEXXA_TEST_MAX_PRICE = 6025;
 
+/* RC69 khusus invoice 250 Diamond yang sedang dipulihkan. */
+const CURRENT_RC69_RETRY_INVOICE = "7A-20261017-179905";
+
 export async function POST(
   request: Request
 ) {
@@ -127,6 +130,8 @@ export async function POST(
 
           providerPriceSnapshot:
             true,
+
+          total: true,
         },
       });
 
@@ -227,9 +232,14 @@ export async function POST(
      * retry dengan harga khusus?
      */
 
+    const currentInvoicePriceRetry =
+      order.invoice === CURRENT_RC69_RETRY_INVOICE &&
+      providerRc === "69";
+
     const priceRetry =
       specialPriceRetry ||
-      vexxaTestRetry;
+      vexxaTestRetry ||
+      currentInvoicePriceRetry;
 
     /*
      * max_price yang akan dipakai.
@@ -238,7 +248,9 @@ export async function POST(
     const retryMaxPrice =
       vexxaTestRetry
         ? VEXXA_TEST_MAX_PRICE
-        : SPECIAL_RETRY_MAX_PRICE;
+        : currentInvoicePriceRetry
+          ? order.total
+          : SPECIAL_RETRY_MAX_PRICE;
 
     /*
      * =========================================
@@ -430,7 +442,9 @@ export async function POST(
                 providerMessage:
                   vexxaTestRetry
                     ? "Test VEXXA FF50 dengan batas harga Rp6.025. Selisih harga provider ditanggung toko khusus untuk pengujian invoice ini."
-                    : "Retry Digiflazz dengan batas harga Rp795. Selisih harga seller Rp45 ditanggung toko.",
+                    : currentInvoicePriceRetry
+                      ? `Retry RC69 khusus invoice ini menggunakan max_price sebesar total pesanan Rp${retryMaxPrice.toLocaleString("id-ID")}.`
+                      : "Retry Digiflazz dengan batas harga Rp795. Selisih harga seller Rp45 ditanggung toko.",
               }
             : {
                 providerMessage:
@@ -480,9 +494,11 @@ export async function POST(
         message:
           vexxaTestRetry
             ? "Test VEXXA FF50 dengan batas harga Rp6.025 selesai diproses."
-            : specialPriceRetry
-              ? "Retry Digiflazz dengan batas harga Rp795 selesai diproses."
-              : "Retry Digiflazz selesai diproses.",
+            : currentInvoicePriceRetry
+              ? `Retry RC69 khusus invoice ini selesai diproses dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
+              : specialPriceRetry
+                ? "Retry Digiflazz dengan batas harga Rp795 selesai diproses."
+                : "Retry Digiflazz selesai diproses.",
 
         invoice:
           order.invoice,
@@ -513,6 +529,8 @@ export async function POST(
         specialPriceRetry,
 
         vexxaTestRetry,
+
+        currentInvoicePriceRetry,
 
         maxPrice:
           priceRetry
