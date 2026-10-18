@@ -955,6 +955,41 @@ export default async function AdminPage({
             </div>
           </div>
 
+          {/* PAGINATION ATAS: akses halaman tanpa scroll ke bawah */}
+          <div className="flex flex-col gap-3 border-b border-white/10 bg-slate-950/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[10px] text-slate-400">
+              Halaman{" "}
+              {safePage} dari{" "}
+              {totalPages}
+              {" · "}
+              Menampilkan {firstItem}–{lastItem} dari {filteredCount} transaksi
+            </p>
+
+            <div className="flex gap-2">
+              {safePage > 1 && (
+                <Link
+                  href={buildPageUrl(
+                    safePage - 1,
+                  )}
+                  className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white/5 px-4 text-xs font-bold transition hover:bg-white/10"
+                >
+                  ← Sebelumnya
+                </Link>
+              )}
+
+              {safePage < totalPages && (
+                <Link
+                  href={buildPageUrl(
+                    safePage + 1,
+                  )}
+                  className="inline-flex h-9 items-center rounded-md bg-blue-600 px-4 text-xs font-bold transition hover:bg-blue-500"
+                >
+                  Berikutnya →
+                </Link>
+              )}
+            </div>
+          </div>
+
           {/* TABLE */}
           {filteredOrders.length >
           0 ? (
