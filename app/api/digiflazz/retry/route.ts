@@ -300,13 +300,42 @@ export async function POST(
 
     /*
      * =========================================
-     * REF ID HARUS TETAP SAMA
+     * REF ID RETRY
      * =========================================
+     *
+     * Untuk invoice 160 Diamond yang sudah
+     * dikonfirmasi gagal/invalid oleh CS:
+     * setiap retry memakai Ref ID provider baru.
+     *
+     * Retry lain tetap mempertahankan Ref ID
+     * agar alur pengecekan transaksi pending
+     * tidak berubah.
      */
+    function nextSellerRetryRefId(
+      invoiceValue: string,
+      previousRefId: string | null
+    ) {
+      const prefix = `${invoiceValue}-R`;
+      const previousAttempt =
+        previousRefId?.startsWith(prefix)
+          ? Number(previousRefId.slice(prefix.length))
+          : 0;
+      const nextAttempt =
+        Number.isInteger(previousAttempt) && previousAttempt > 0
+          ? previousAttempt + 1
+          : 1;
+
+      return `${prefix}${nextAttempt}`;
+    }
 
     const refId =
-      order.providerRefId ||
-      order.invoice;
+      currentInvoiceSellerRetry
+        ? nextSellerRetryRefId(
+            order.invoice,
+            order.providerRefId
+          )
+        : order.providerRefId ||
+          order.invoice;
 
     /*
      * =========================================
