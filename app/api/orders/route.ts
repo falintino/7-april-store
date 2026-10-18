@@ -239,6 +239,21 @@ export async function POST(request: Request) {
 
     /*
      * =====================================
+     * PENYESUAIAN HARGA FF250
+     * =====================================
+     *
+     * Modal Digiflazz yang teramati untuk 250 Diamond adalah Rp28.787.
+     * Harga jual dipasang Rp29.990 agar tidak lagi memakai harga lama
+     * yang berada di bawah modal tersebut.
+     */
+    const effectiveSalePrice =
+      product.sku === "FF250" ? 29990 : product.price;
+
+    const effectiveProviderPrice =
+      product.sku === "FF250" ? 28787 : product.providerPrice;
+
+    /*
+     * =====================================
      * SNAPSHOT HARGA ORDER
      * =====================================
      *
@@ -289,7 +304,7 @@ export async function POST(request: Request) {
      * subtotal TIDAK berubah.
      */
 
-    const subtotal = product.price;
+    const subtotal = effectiveSalePrice;
 
     const discountAmount = 0;
 
@@ -327,7 +342,7 @@ export async function POST(request: Request) {
      * provider terbaru berubah.
      */
 
-    const providerPriceSnapshot = product.providerPrice;
+    const providerPriceSnapshot = effectiveProviderPrice;
 
     /*
      * =====================================
@@ -592,7 +607,7 @@ export async function POST(request: Request) {
 
             sku: order.product.sku,
 
-            price: order.product.price,
+            price: order.subtotal,
           },
         },
       },
