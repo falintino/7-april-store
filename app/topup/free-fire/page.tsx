@@ -30,6 +30,54 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function FreeFireTopUpPage() {
+  // Pastikan produk kecil ini tersedia di database produksi.
+  // Harga modal diverifikasi dari daftar Digiflazz Buyer:
+  // FF15 = Rp2.174 dan FF60 = Rp7.245.
+  await Promise.all([
+    prisma.product.upsert({
+      where: { sku: "FF15" },
+      update: {
+        game: "Free Fire",
+        name: "15 Diamond",
+        providerCode: "ff15",
+        price: 2250,
+        providerPrice: 2174,
+        active: true,
+      },
+      create: {
+        game: "Free Fire",
+        name: "15 Diamond",
+        sku: "FF15",
+        providerCode: "ff15",
+        price: 2250,
+        providerPrice: 2174,
+        popular: false,
+        active: true,
+      },
+    }),
+    prisma.product.upsert({
+      where: { sku: "FF60" },
+      update: {
+        game: "Free Fire",
+        name: "60 Diamond",
+        providerCode: "ff60",
+        price: 7623,
+        providerPrice: 7245,
+        active: true,
+      },
+      create: {
+        game: "Free Fire",
+        name: "60 Diamond",
+        sku: "FF60",
+        providerCode: "ff60",
+        price: 7623,
+        providerPrice: 7245,
+        popular: false,
+        active: true,
+      },
+    }),
+  ]);
+
   const products = await prisma.product.findMany({
     where: {
       game: "Free Fire",
