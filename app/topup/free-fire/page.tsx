@@ -56,7 +56,7 @@ export default async function FreeFireTopUpPage() {
   // yang teramati Rp28.787, dengan margin dasar toko.
   const displayProducts = products.map((product) =>
     product.sku === "FF250"
-      ? { ...product, price: 29990 }
+      ? { ...product, price: 30547 }
       : product
   );
 
