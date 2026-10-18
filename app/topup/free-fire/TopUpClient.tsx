@@ -757,6 +757,9 @@ export default function TopUpClient({
               placeholder="Contoh: 081234567890"
               className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
             />
+            <p className="mt-2 text-sm leading-6 text-blue-200">
+              Nomor ini digunakan admin untuk menghubungimu jika pesanan mengalami kendala, misalnya pembayaran berhasil tetapi diamond belum masuk atau status pesanan bermasalah. Pastikan nomor WhatsApp aktif dan bisa dihubungi.
+            </p>
             <p className="mt-2 text-xs leading-5 text-slate-500">
               {whatsappAutofilled
                 ? "Nomor WhatsApp akunmu diisi otomatis. Kamu bisa menghapus atau menggantinya jika nomor sudah tidak aktif."
@@ -1191,7 +1194,7 @@ export default function TopUpClient({
               }}
               placeholder="Masukkan kode promo"
               autoCapitalize="characters"
-              className="h-11 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#030712] px-3 text-sm font-semibold uppercase tracking-wide text-white outline-none placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-600 focus:border-blue-500 disabled:opacity-60"
+              className="h-14 min-w-0 w-full flex-1 rounded-xl border border-white/10 bg-[#030712] px-4 text-base font-semibold uppercase tracking-wide text-white outline-none placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-500 focus:border-blue-500 disabled:opacity-60 sm:h-12 sm:text-sm"
             />
             <button
               type="button"
