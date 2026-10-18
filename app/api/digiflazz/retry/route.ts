@@ -216,7 +216,7 @@ export async function POST(
      */
 
     const normalRetry =
-      ["41", "44", "45", "70"].includes(
+      ["02", "41", "44", "45", "69", "70"].includes(
         providerRc
       );
 
@@ -349,7 +349,7 @@ export async function POST(
     }
 
     const refId =
-      (currentInvoiceSellerRetry || currentInvoice40DmRetry || currentInvoice100DmPromoRetry)
+      (providerRc !== "70" && (normalRetry || currentInvoiceSellerRetry || currentInvoice40DmRetry || currentInvoice100DmPromoRetry))
         ? nextSellerRetryRefId(
             order.invoice,
             order.providerRefId
@@ -482,9 +482,11 @@ export async function POST(
             : {
                 providerRc: {
                   in: [
+                    "02",
                     "41",
                     "44",
                     "45",
+                    "69",
                   ],
                 },
               }),
