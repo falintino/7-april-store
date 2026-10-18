@@ -60,6 +60,9 @@ export default async function FreeFireTopUpPage() {
     if (product.sku === "FF2160") {
       return { ...product, price: 246190 };
     }
+    if (product.sku === "FF2180") {
+      return { ...product, price: 248650 };
+    }
     const updatedPrices: Record<string, number> = {
       FF40: 5690,
       FF50: 5950,
