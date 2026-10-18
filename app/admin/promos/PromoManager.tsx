@@ -980,7 +980,7 @@ export default function PromoManager({
                 type={showCodeInput ? "text" : "password"}
                 value={code}
                 disabled={loading}
-                onChange={(event) => setCode(event.target.value)}
+                onChange={(event) => setCode(event.target.value.toUpperCase())}
                 placeholder="CONTOH10"
                 autoComplete="new-password"
                 className="h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none focus:border-blue-500"
