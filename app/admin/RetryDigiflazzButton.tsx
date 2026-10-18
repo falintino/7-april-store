@@ -23,7 +23,7 @@ export default function RetryDigiflazzButton({
     providerStatus === "REFUND_REQUIRED" &&
     (
       providerRc === "44" ||
-      ((invoice === "7A-20261017-179905" && (providerRc === "69" || providerRc === "02")) || (invoice === "7A-20261018-496191" && providerRc === "02"))
+      ((invoice === "7A-20261017-179905" && (providerRc === "69" || providerRc === "02")) || (invoice === "7A-20261018-496191" && providerRc === "02") || (invoice === "7A-20261018-303451" && (providerRc === "69" || providerRc === "02")) )
     );
 
   if (!allowedRetry) {
@@ -32,7 +32,7 @@ export default function RetryDigiflazzButton({
 
   async function retryOrder() {
     const confirmed = window.confirm(
-      `Hit ulang transaksi Digiflazz untuk invoice ${invoice}? Pastikan seller sudah benar, harga seller saat ini tidak melebihi batas harga, dan saldo Digiflazz cukup. ${invoice === "7A-20261018-496191" ? "Retry khusus ini akan menggunakan Ref ID provider baru." : "Sistem akan menggunakan Ref ID yang sama."}`,
+      `Hit ulang transaksi Digiflazz untuk invoice ${invoice}? Pastikan seller sudah benar, harga seller saat ini tidak melebihi batas harga, dan saldo Digiflazz cukup. ${["7A-20261018-496191", "7A-20261018-303451"].includes(invoice) ? "Retry khusus ini akan menggunakan Ref ID provider baru." : "Sistem akan menggunakan Ref ID yang sama."}`,
     );
 
     if (!confirmed || loading) return;
