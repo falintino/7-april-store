@@ -375,7 +375,7 @@ export default function Navbar() {
     </header>
 
       {!pathname.startsWith("/admin") && (
-        <div className="fixed bottom-5 left-4 z-[70] sm:bottom-6 sm:left-6">
+        <div className="fixed bottom-5 right-4 z-[70] sm:bottom-6 sm:right-6">
           {isSupportOpen && (
             <section
               aria-label="Pusat bantuan 7 April Store"
@@ -431,7 +431,7 @@ export default function Navbar() {
                 </Link>
 
                 <a
-                  href="https://wa.me/62895704041437?text=Halo%207%20April%20Store%2C%20saya%20butuh%20bantuan%20pesanan.%20Saya%20sudah%20membayar%20tetapi%20ada%20kendala%20status%20atau%20pengiriman.%20Mohon%20dibantu%20cek."
+                  href="https://wa.me/6285960237306?text=Halo%207%20April%20Store%2C%20saya%20butuh%20bantuan%20pesanan.%20Saya%20sudah%20membayar%20tetapi%20ada%20kendala%20status%20atau%20pengiriman.%20Mohon%20dibantu%20cek."
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-500"
