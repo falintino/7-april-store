@@ -24,6 +24,8 @@ const STORAGE_KEY =
   "7aprilstore_order_history";
 
 const MAX_SAVED_ORDERS = 10;
+const HISTORY_MAX_AGE_MS =
+  24 * 60 * 60 * 1000;
 
 export default function SaveOrderHistory({
   invoice,
@@ -51,12 +53,36 @@ export default function SaveOrderHistory({
         }
       }
 
+      const now = Date.now();
+
       /*
-       * Hapus invoice yang sama kalau
-       * sebelumnya sudah pernah disimpan.
-       *
-       * Setelah itu masukkan data terbaru
-       * ke posisi paling atas.
+       * Simpan hanya riwayat yang belum berumur
+       * 24 jam. Ini juga membersihkan data lama
+       * ketika pelanggan membuka invoice baru.
+       */
+      const recentOrders =
+        orders.filter((order) => {
+          if (
+            !order ||
+            typeof order.createdAt !== "string"
+          ) {
+            return false;
+          }
+
+          const timestamp = new Date(
+            order.createdAt
+          ).getTime();
+
+          return (
+            Number.isFinite(timestamp) &&
+            timestamp <= now &&
+            now - timestamp < HISTORY_MAX_AGE_MS
+          );
+        });
+
+      /*
+       * Hapus invoice yang sama kalau sebelumnya
+       * sudah tersimpan, lalu masukkan data terbaru.
        */
       const updatedOrders = [
         {
@@ -67,7 +93,7 @@ export default function SaveOrderHistory({
           providerStatus,
           createdAt,
         },
-        ...orders.filter(
+        ...recentOrders.filter(
           (order) =>
             order.invoice !== invoice
         ),
