@@ -107,6 +107,7 @@ export default function Navbar() {
     customer?.name.split(" ")[0] ?? "";
 
   return (
+    <>
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#030712]/95 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6">
         <Link
@@ -371,6 +372,8 @@ export default function Navbar() {
         </div>
       )}
 
+    </header>
+
       {!pathname.startsWith("/admin") && (
         <div className="fixed bottom-5 left-4 z-[70] sm:bottom-6 sm:left-6">
           {isSupportOpen && (
@@ -456,6 +459,6 @@ export default function Navbar() {
           </button>
         </div>
       )}
-    </header>
+    </>
   );
 }
