@@ -1186,7 +1186,7 @@ export default function TopUpClient({
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <div className="flex min-w-0 flex-1 gap-2">
               <input
-                type="text"
+                type={showPromoCode ? "text" : "password"}
                 name="promo-code-entry"
                 value={promoCode}
                 disabled={loading || validatingPromo}
@@ -1207,7 +1207,6 @@ export default function TopUpClient({
                 autoComplete="new-password"
                 autoCorrect="off"
                 spellCheck={false}
-                style={{ WebkitTextSecurity: showPromoCode ? "none" : "disc" }}
                 className="h-14 min-w-0 w-full flex-1 rounded-xl border border-white/10 bg-[#030712] px-4 text-base font-semibold uppercase tracking-wide text-white outline-none placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-500 focus:border-blue-500 disabled:opacity-60 sm:h-12 sm:text-sm"
               />
               <button
