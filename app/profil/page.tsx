@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import LogoutButton from "@/components/auth/LogoutButton";
+import ProfileSettings from "@/components/profile/ProfileSettings";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -168,6 +169,8 @@ export default async function ProfilPage() {
                 </p>
               </div>
             </div>
+
+            <ProfileSettings whatsapp={customer.whatsapp} />
 
             <p className="mt-5 text-xs leading-5 text-slate-500">
               Bergabung sejak{" "}
