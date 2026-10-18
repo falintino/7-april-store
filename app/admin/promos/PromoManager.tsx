@@ -225,6 +225,9 @@ export default function PromoManager({
     setCode,
   ] = useState("");
 
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [visiblePromoCodes, setVisiblePromoCodes] = useState<string[]>([]);
+
   const [
     name,
     setName,
@@ -972,15 +975,25 @@ export default function PromoManager({
               Kode Promo *
             </label>
 
-            <input
-              value={code}
-              disabled={loading}
-              onChange={(event) =>
-  setCode(event.target.value)
-}
-              placeholder="CONTOH10"
-              className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none focus:border-blue-500"
-            />
+            <div className="flex gap-2">
+              <input
+                type={showCodeInput ? "text" : "password"}
+                value={code}
+                disabled={loading}
+                onChange={(event) => setCode(event.target.value)}
+                placeholder="CONTOH10"
+                autoComplete="new-password"
+                className="h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none focus:border-blue-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCodeInput((visible) => !visible)}
+                className="h-12 rounded-xl border border-white/10 bg-white/5 px-4 text-xs font-bold text-slate-300 hover:bg-white/10"
+                aria-label={showCodeInput ? "Sembunyikan kode promo" : "Tampilkan kode promo"}
+              >
+                {showCodeInput ? "🙈 Sembunyikan" : "👁 Tampilkan"}
+              </button>
+            </div>
           </div>
 
           <div>
@@ -1506,9 +1519,23 @@ export default function PromoManager({
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-base font-black text-white">
-                            {promo.code}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-base font-black text-white">
+                              {visiblePromoCodes.includes(promo.id) ? promo.code : "••••••••"}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setVisiblePromoCodes((current) =>
+                                current.includes(promo.id)
+                                  ? current.filter((id) => id !== promo.id)
+                                  : [...current, promo.id]
+                              )}
+                              className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-bold text-slate-300 hover:bg-white/10"
+                              aria-label={visiblePromoCodes.includes(promo.id) ? "Sembunyikan kode promo" : "Tampilkan kode promo"}
+                            >
+                              {visiblePromoCodes.includes(promo.id) ? "🙈" : "👁"}
+                            </button>
+                          </div>
 
                           <span
                             className={[
