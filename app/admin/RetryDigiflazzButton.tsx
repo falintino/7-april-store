@@ -32,7 +32,7 @@ export default function RetryDigiflazzButton({
 
   async function retryOrder() {
     const confirmed = window.confirm(
-      `Hit ulang transaksi Digiflazz untuk invoice ${invoice}? Pastikan seller sudah benar, harga seller saat ini tidak melebihi batas harga pesanan, dan saldo Digiflazz cukup. Sistem akan menggunakan Ref ID yang sama.`,
+      `Hit ulang transaksi Digiflazz untuk invoice ${invoice}? Pastikan seller sudah benar, harga seller saat ini tidak melebihi batas harga, dan saldo Digiflazz cukup. ${invoice === "7A-20261018-496191" ? "Retry khusus ini akan menggunakan Ref ID provider baru." : "Sistem akan menggunakan Ref ID yang sama."}`,
     );
 
     if (!confirmed || loading) return;
