@@ -251,6 +251,7 @@ export async function POST(request: Request) {
       FF50: 5950,
       FF250: 30547,
       FF2160: 246190,
+      FF2180: 248650,
       FF2000: 229791,
       FF1450: 165613,
       FF1440: 164123,
