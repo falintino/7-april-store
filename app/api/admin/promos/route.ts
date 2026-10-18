@@ -310,7 +310,8 @@ export async function POST(
       normalizeOptionalInteger(
         body.minimumMargin,
         {
-          min: 0,
+          min: -1_000_000,
+          max: 1_000_000,
         }
       );
 
