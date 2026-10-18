@@ -64,14 +64,11 @@ export default function TopUpClient({
 }: TopUpClientProps) {
   const [uid, setUid] = useState("");
   const [savedGameIds, setSavedGameIds] = useState<string[]>([]);
-  const [autoFillGameId, setAutoFillGameId] = useState(true);
   const [gameIdHistoryReady, setGameIdHistoryReady] = useState(false);
 
   useEffect(() => {
     try {
-      const storedIds = JSON.parse(
-        window.localStorage.getItem("7as_ff_uid_history") ?? "[]",
-      );
+      const storedIds = JSON.parse(window.localStorage.getItem("7as_ff_uid_history") ?? "[]");
       const cleanedIds = Array.isArray(storedIds)
         ? storedIds
             .filter((value): value is string => typeof value === "string")
@@ -81,12 +78,12 @@ export default function TopUpClient({
             .slice(0, 5)
         : [];
       setSavedGameIds(cleanedIds);
-      const shouldAutoFill =
-        window.localStorage.getItem("7as_ff_uid_autofill") !== "false";
-      setAutoFillGameId(shouldAutoFill);
-      if (shouldAutoFill && cleanedIds[0]) setUid(cleanedIds[0]);
+      const profileUid = (window.localStorage.getItem("7as_ff_profile_uid") ?? "").replace(/\\D/g, "");
+      const profileAutoFill = window.localStorage.getItem("7as_ff_profile_uid_autofill") !== "false";
+      if (profileAutoFill && profileUid.length >= 6) setUid(profileUid);
+      else if (cleanedIds[0]) setUid(cleanedIds[0]);
     } catch {
-      // Jika penyimpanan browser tidak tersedia, input UID tetap bisa dipakai manual.
+      // UID tetap bisa dimasukkan manual jika penyimpanan browser tidak tersedia.
     } finally {
       setGameIdHistoryReady(true);
     }
@@ -104,23 +101,11 @@ export default function TopUpClient({
   function rememberGameId(value: string) {
     const cleanId = value.replace(/\\D/g, "").slice(0, 20);
     if (cleanId.length < 6) return;
-    setSavedGameIds((current) =>
-      [cleanId, ...current.filter((item) => item !== cleanId)].slice(0, 5),
-    );
+    setSavedGameIds((current) => [cleanId, ...current.filter((item) => item !== cleanId)].slice(0, 5));
   }
 
   function removeSavedGameId(value: string) {
     setSavedGameIds((current) => current.filter((item) => item !== value));
-  }
-
-  function changeAutoFillGameId(enabled: boolean) {
-    setAutoFillGameId(enabled);
-    try {
-      window.localStorage.setItem("7as_ff_uid_autofill", String(enabled));
-    } catch {
-      // Preferensi tetap aktif untuk sesi ini.
-    }
-    if (enabled && !uid && savedGameIds[0]) setUid(savedGameIds[0]);
   }
 
   const [whatsapp, setWhatsapp] = useState("");
@@ -790,15 +775,7 @@ export default function TopUpClient({
               className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
             />
 
-            <label className="mt-3 flex items-center gap-2 text-xs text-slate-300">
-              <input
-                type="checkbox"
-                checked={autoFillGameId}
-                onChange={(event) => changeAutoFillGameId(event.target.checked)}
-                className="accent-blue-500"
-              />
-              Isi otomatis dengan ID terakhir
-            </label>
+    </label>
 
             {savedGameIds.length > 0 && (
               <div className="mt-3 rounded-xl border border-white/10 bg-[#060b16] p-3">
