@@ -52,6 +52,14 @@ export default async function FreeFireTopUpPage() {
     },
   });
 
+  // Harga khusus FF250 diselaraskan dengan modal provider terbaru
+  // yang teramati Rp28.787, dengan margin dasar toko.
+  const displayProducts = products.map((product) =>
+    product.sku === "FF250"
+      ? { ...product, price: 29990 }
+      : product
+  );
+
   return (
     <main className="min-h-screen bg-[#030712] text-white">
       <PromoBannerCarousel />
@@ -90,7 +98,7 @@ export default async function FreeFireTopUpPage() {
       </section>
 
       <div className="pb-16 sm:pb-20">
-        <TopUpClient products={products} />
+        <TopUpClient products={displayProducts} />
 
         <OrderStatusCheck />
 
