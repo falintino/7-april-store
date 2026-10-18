@@ -29,6 +29,21 @@ const questions = [
       "Pesanan mulai diproses setelah pembayaran berhasil dikonfirmasi. Waktu pengiriman bergantung pada status sistem dan ketersediaan produk dari penyedia. Status pembayaran berhasil belum berarti top up sudah terkirim; periksa juga status top up pada halaman pesanan.",
   },
   {
+    question: "Pembayaran berhasil (PAID), tetapi Diamond belum masuk padahal status top up berhasil. Apa yang harus saya lakukan?",
+    answer:
+      "Status pembayaran PAID hanya menandakan pembayaran sudah dikonfirmasi; status itu tidak selalu membuktikan Diamond sudah masuk ke akun. Periksa UID Free Fire dan detail invoice, lalu cek saldo Diamond di game dan muat ulang game bila perlu. Jika Diamond tetap belum masuk, jangan membeli ulang. Hubungi admin melalui WhatsApp dengan nomor invoice, UID, waktu transaksi, dan bukti pembayaran. Admin akan memeriksa referensi transaksi dan status pengiriman provider.",
+  },
+  {
+    question: "Saya sudah membayar, tetapi status top up gagal atau REFUND_REQUIRED. Bagaimana?",
+    answer:
+      "Jangan membayar ulang atau membuat pesanan kedua untuk nominal yang sama. Simpan nomor invoice dan bukti pembayaran, lalu hubungi admin melalui halaman Kontak/WhatsApp. Admin perlu memeriksa respons provider dan memastikan apakah pesanan bisa diproses ulang atau harus ditangani sebagai pengembalian dana. Status REFUND_REQUIRED bukan bukti bahwa dana sudah dikembalikan; tunggu konfirmasi admin.",
+  },
+  {
+    question: "Pembayaran sudah terpotong tetapi status masih pending. Apakah perlu bayar lagi?",
+    answer:
+      "Tidak. Jangan membayar ulang pesanan yang sama selama statusnya masih pending. Simpan invoice dan bukti pembayaran, lalu periksa kembali statusnya. Jika status tidak berubah atau melewati waktu pemrosesan yang wajar, hubungi admin agar pembayaran dan status pesanan dapat diperiksa.",
+  },
+  {
     question: "Bagaimana cara mengecek status pesanan?",
     answer:
       "Simpan nomor pesanan atau invoice setelah checkout. Buka halaman detail pesanan yang diberikan setelah pembayaran atau gunakan fitur cek status pesanan di halaman Top Up Free Fire untuk melihat perkembangan pembayaran dan top up.",
