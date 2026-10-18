@@ -182,13 +182,10 @@ export default function TopUpClient({
    * Aturan:
    *
    * 1–49 DM:
-   * fee QRIS = Rp0
+   * fee QRIS = Rp0 (ditanggung toko)
    *
-   * 50+ DM:
-   * fee QRIS = 0,7%
-   *
-   * Membership:
-   * fee = Rp0
+   * 50+ DM dan Membership:
+   * fee QRIS = 0,7% (dibayar pelanggan)
    *
    * Perhitungan menggunakan helper
    * yang sama dengan backend.
@@ -1147,11 +1144,19 @@ export default function TopUpClient({
               {selectedPaymentMethod ===
                 "qris" &&
                 selectedProduct &&
-                previewPaymentFee ===
-                  0 && (
+                getDiamondAmount(selectedProduct.name, selectedProduct.sku) !== null &&
+                getDiamondAmount(selectedProduct.name, selectedProduct.sku)! <= 49 &&
+                previewPaymentFee === 0 && (
                   <p className="mt-2 text-xs text-emerald-400">
-                    Untuk nominal di bawah 50 DM, biaya QRIS ditanggung oleh
-                    7 April Store.
+                    Untuk nominal 1–49 DM, biaya QRIS ditanggung oleh 7 April Store.
+                  </p>
+                )}
+              {selectedPaymentMethod === "qris" &&
+                selectedProduct &&
+                (getDiamondAmount(selectedProduct.name, selectedProduct.sku) === null ||
+                  getDiamondAmount(selectedProduct.name, selectedProduct.sku)! >= 50) && (
+                  <p className="mt-2 text-xs leading-5 text-amber-300">
+                    Biaya layanan QRIS sebesar 0,7% ditambahkan ke total pembayaran dan ditanggung oleh pelanggan.
                   </p>
                 )}
             </div>
