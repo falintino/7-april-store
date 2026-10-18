@@ -246,12 +246,16 @@ export async function POST(request: Request) {
      * Harga jual dipasang Rp29.990 agar tidak lagi memakai harga lama
      * yang berada di bawah modal tersebut.
      */
+    const fixedSalePrices: Record<string, number> = {
+      FF250: 30547,
+      FF2160: 246190,
+      FF2000: 229791,
+      FF1450: 165613,
+      FF1440: 164123,
+      FF1075: 123100,
+    };
     const effectiveSalePrice =
-      product.sku === "FF250"
-        ? 30547
-        : product.sku === "FF2160"
-          ? 246190
-          : product.price;
+      fixedSalePrices[product.sku] ?? product.price;
 
     const effectiveProviderPrice =
       product.sku === "FF250" ? 28787 : product.providerPrice;
