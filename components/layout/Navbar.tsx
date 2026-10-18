@@ -10,7 +10,6 @@ import {
   Menu,
   User,
   X,
-  WalletCards,
   PackageCheck,
   AlertTriangle,
 } from "lucide-react";
