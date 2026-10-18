@@ -255,7 +255,7 @@ async function main() {
       name: "250 Diamond",
       sku: "FF250",
       providerCode: "ff250",
-      price: 29990,
+      price: 30547,
       providerPrice: 28787,
       popular: false,
       active: true,
