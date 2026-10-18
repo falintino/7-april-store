@@ -547,22 +547,21 @@ export default async function OrderPage({
         )}
 
         {paymentPaid &&
-          providerPending && (
+          (providerPending || providerProcessing) && (
             <div className="mt-6 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-6">
               <p className="text-lg font-bold text-yellow-400">
-                Pembayaran Diterima
+                Pembayaran Diterima — Mohon Tunggu
               </p>
-
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Pembayaran sudah berhasil.
-                Top up sedang menunggu hasil
-                dari provider.
+                Diamond murah terkadang masuk cepat, tetapi terkadang membutuhkan waktu lebih lama karena proses dari penyedia. Tunggu sekitar 3–5 menit dan biarkan halaman ini memperbarui status secara otomatis.
               </p>
-
-              <p className="mt-3 text-xs text-slate-500">
-                Status transaksi akan diperbarui
-                otomatis di halaman ini.
-              </p>
+              <div className="mt-4 rounded-xl border border-yellow-400/20 bg-black/20 p-4 text-sm leading-6 text-slate-300">
+                <p className="font-bold text-white">Penting: Diamond mungkin sudah masuk walaupun status masih PENDING.</p>
+                Periksa saldo Diamond di game dan muat ulang game jika perlu. Jika setelah 3–5 menit Diamond belum masuk atau status tetap tidak berubah, hubungi bantuan dengan menyertakan nomor invoice ini. Jangan membuat pesanan atau pembayaran kedua.
+              </div>
+              <a href={`https://wa.me/6285960237306?text=${encodeURIComponent(`Halo admin 7 April Store, mohon bantu cek pesanan ${order.invoice}. Pembayaran sudah berhasil, tetapi status top up masih ${order.providerStatus}. UID: ${order.uid}.`)}`} target="_blank" rel="noreferrer" className="mt-4 inline-flex rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-500">
+                Hubungi Bantuan WhatsApp
+              </a>
             </div>
           )}
 
@@ -589,9 +588,16 @@ export default async function OrderPage({
               </p>
 
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Pesanan berhasil diproses oleh
-                provider.
+                Pesanan berhasil diproses oleh provider. Namun, jika Diamond belum terlihat, periksa UID dan saldo di game, lalu muat ulang game. Status berhasil dari provider tidak selalu berarti Diamond langsung terlihat di layar.
               </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link href="/topup/free-fire" className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-500">
+                  Top Up Lagi
+                </Link>
+                <a href={`https://wa.me/6285960237306?text=${encodeURIComponent(`Halo admin 7 April Store, saya ingin memberikan ulasan untuk pesanan ${order.invoice}.`)}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-xl border border-white/15 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/5">
+                  Beri Ulasan
+                </a>
+              </div>
 
               {order.providerSn && (
                 <div className="mt-4 rounded-xl border border-green-500/20 bg-black/20 p-4">
@@ -617,10 +623,11 @@ export default async function OrderPage({
               </p>
 
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Pembayaran sudah diterima,
-                tetapi provider tidak berhasil
-                memproses top up.
+                Pembayaran sudah diterima, tetapi provider melaporkan kegagalan. Jangan membayar ulang dan jangan membuat pesanan kedua. Hubungi bantuan agar admin memeriksa apakah pesanan bisa diproses kembali atau perlu penanganan refund. Status ini bukan berarti dana sudah dikembalikan.
               </p>
+              <a href={`https://wa.me/6285960237306?text=${encodeURIComponent(`Halo admin 7 April Store, pembayaran pesanan ${order.invoice} sudah berhasil tetapi status top up ${order.providerStatus}. Mohon bantu periksa. UID: ${order.uid}.`)}`} target="_blank" rel="noreferrer" className="mt-4 inline-flex rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-500">
+                Laporkan Masalah Pembayaran
+              </a>
 
               {order.providerMessage && (
                 <div className="mt-4 rounded-xl border border-red-500/20 bg-black/20 p-4">
@@ -642,6 +649,20 @@ export default async function OrderPage({
               </p>
             </div>
           )}
+
+        {paymentPaid && ["REFUND_REQUIRED", "REFUND_PROCESSING", "REFUND_PENDING", "PARTIAL_REFUND"].includes(order.providerStatus) && (
+          <div className="mt-6 rounded-2xl border border-orange-500/30 bg-orange-500/10 p-6">
+            <h2 className="text-lg font-bold text-orange-300">Pembayaran berhasil, tetapi pesanan perlu bantuan</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-300">Jangan bayar lagi. Status ini belum membuktikan refund sudah selesai. Hubungi admin untuk memeriksa transaksi dan langkah berikutnya.</p>
+            <a href={`https://wa.me/6285960237306?text=${encodeURIComponent(`Halo admin 7 April Store, saya sudah membayar invoice ${order.invoice}, tetapi status top up ${order.providerStatus}. Mohon bantu periksa. UID: ${order.uid}.`)}`} target="_blank" rel="noreferrer" className="mt-4 inline-flex rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-500">Laporkan Masalah Pembayaran</a>
+          </div>
+        )}
+
+        <div className="mt-6 rounded-2xl border border-green-500/20 bg-slate-900/60 p-5">
+          <h2 className="font-bold text-white">Info promo dan update 7 April FF</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-300">Gabung saluran WhatsApp resmi untuk mendapatkan informasi promo dan update terkait top up.</p>
+          <a href="https://whatsapp.com/channel/0029VbByfE60VycAQEP6Tz1b" target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm font-bold text-green-300 transition hover:bg-green-500/20">Gabung Saluran WhatsApp 7 April FF</a>
+        </div>
 
         <div className="mt-6 flex justify-center">
           <Link
