@@ -61,6 +61,8 @@ export default async function FreeFireTopUpPage() {
       return { ...product, price: 246190 };
     }
     const updatedPrices: Record<string, number> = {
+      FF40: 5690,
+      FF50: 5950,
       FF2000: 229791,
       FF1450: 165613,
       FF1440: 164123,
