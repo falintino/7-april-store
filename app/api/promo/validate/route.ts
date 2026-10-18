@@ -668,14 +668,30 @@ export async function POST(
      * =========================================
      */
 
-    if (
-      promo.productId !== null
-    ) {
-      if (
-        !product ||
-        product.id !==
-          promo.productId
-      ) {
+    if (promo.productId !== null) {
+      const promoTargetProduct = await prisma.product.findUnique({
+        where: { id: promo.productId },
+        select: { id: true, name: true, price: true, game: true },
+      });
+
+      const normalizeProductName = (value: string) =>
+        value.trim().toLowerCase().replace(/\s+/g, " ");
+
+      // Exact ID first; fall back only to an identical game/name/price.
+      const sameTargetProduct = Boolean(
+        product &&
+        promoTargetProduct &&
+        (
+          product.id === promoTargetProduct.id ||
+          (
+            normalizeProductName(product.game) === normalizeProductName(promoTargetProduct.game) &&
+            normalizeProductName(product.name) === normalizeProductName(promoTargetProduct.name) &&
+            product.price === promoTargetProduct.price
+          )
+        )
+      );
+
+      if (!sameTargetProduct) {
         return invalidPromo(
           "Promo ini tidak berlaku untuk nominal yang dipilih."
         );
