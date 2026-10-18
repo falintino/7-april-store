@@ -247,8 +247,10 @@ export async function POST(request: Request) {
      * yang berada di bawah modal tersebut.
      */
     const fixedSalePrices: Record<string, number> = {
+      FF15: 2250,
       FF40: 5690,
       FF50: 5950,
+      FF60: 7623,
       FF250: 30547,
       FF2160: 246190,
       FF2180: 248650,
