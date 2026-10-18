@@ -247,7 +247,7 @@ export async function POST(request: Request) {
      * yang berada di bawah modal tersebut.
      */
     const effectiveSalePrice =
-      product.sku === "FF250" ? 29990 : product.price;
+      product.sku === "FF250" ? 30547 : product.price;
 
     const effectiveProviderPrice =
       product.sku === "FF250" ? 28787 : product.providerPrice;
