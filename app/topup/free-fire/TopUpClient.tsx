@@ -106,8 +106,10 @@ export default function TopUpClient({
   const [selectedProductId, setSelectedProductId] =
     useState("");
 
+  // QRIS adalah metode pembayaran yang tersedia, jadi pilih otomatis
+  // agar estimasi biaya dan total checkout langsung akurat.
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<PaymentMethod | null>(null);
+    useState<PaymentMethod | null>("qris");
 
   const [activeCategory, setActiveCategory] =
     useState<"diamond" | "membership">(
