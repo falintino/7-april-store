@@ -52,13 +52,16 @@ export default async function FreeFireTopUpPage() {
     },
   });
 
-  // Harga khusus FF250 diselaraskan dengan modal provider terbaru
-  // yang teramati Rp28.787, dengan margin dasar toko.
-  const displayProducts = products.map((product) =>
-    product.sku === "FF250"
-      ? { ...product, price: 30547 }
-      : product
-  );
+  // Harga khusus mengikuti modal provider terbaru.
+  const displayProducts = products.map((product) => {
+    if (product.sku === "FF250") {
+      return { ...product, price: 30547 };
+    }
+    if (product.sku === "FF2160") {
+      return { ...product, price: 246190 };
+    }
+    return product;
+  });
 
   return (
     <main className="min-h-screen bg-[#030712] text-white">
