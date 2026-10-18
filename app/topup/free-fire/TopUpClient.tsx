@@ -72,19 +72,19 @@ export default function TopUpClient({
       const storedIds = JSON.parse(
         window.localStorage.getItem("7as_ff_uid_history") ?? "[]",
       );
-      if (Array.isArray(storedIds)) {
-        setSavedGameIds(
-          storedIds
+      const cleanedIds = Array.isArray(storedIds)
+        ? storedIds
             .filter((value): value is string => typeof value === "string")
             .map((value) => value.replace(/\\D/g, "").slice(0, 20))
             .filter((value) => value.length >= 6)
             .filter((value, index, values) => values.indexOf(value) === index)
-            .slice(0, 5),
-        );
-      }
-      setAutoFillGameId(
-        window.localStorage.getItem("7as_ff_uid_autofill") !== "false",
-      );
+            .slice(0, 5)
+        : [];
+      setSavedGameIds(cleanedIds);
+      const shouldAutoFill =
+        window.localStorage.getItem("7as_ff_uid_autofill") !== "false";
+      setAutoFillGameId(shouldAutoFill);
+      if (shouldAutoFill && cleanedIds[0]) setUid(cleanedIds[0]);
     } catch {
       // Jika penyimpanan browser tidak tersedia, input UID tetap bisa dipakai manual.
     } finally {
