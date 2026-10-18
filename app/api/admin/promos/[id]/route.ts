@@ -356,7 +356,8 @@ export async function PATCH(
         : normalizeOptionalInteger(
             body.minimumMargin,
             {
-              min: 0,
+              min: -1_000_000,
+              max: 1_000_000,
             }
           );
 
