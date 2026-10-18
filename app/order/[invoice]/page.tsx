@@ -659,9 +659,9 @@ export default async function OrderPage({
         )}
 
         <div className="mt-6 rounded-2xl border border-green-500/20 bg-slate-900/60 p-5">
-          <h2 className="font-bold text-white">Info promo dan update 7 April FF</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-300">Gabung saluran WhatsApp resmi untuk mendapatkan informasi promo dan update terkait top up.</p>
-          <a href="https://whatsapp.com/channel/0029VbByfE60VycAQEP6Tz1b" target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm font-bold text-green-300 transition hover:bg-green-500/20">Gabung Saluran WhatsApp 7 April FF</a>
+          <h2 className="font-bold text-white">Cari Kode Promo? Cek Saluran WhatsApp 7 April FF!</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-300">Kode promo dan informasi promo tertentu dibagikan melalui saluran WhatsApp resmi kami. Gabung supaya tidak ketinggalan promo berikutnya.</p>
+          <a href="https://whatsapp.com/channel/0029VbByfE60VycAQEP6Tz1b" target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm font-bold text-green-300 transition hover:bg-green-500/20">Cari Kode Promo di Saluran WA</a>
         </div>
 
         <div className="mt-6 flex justify-center">
