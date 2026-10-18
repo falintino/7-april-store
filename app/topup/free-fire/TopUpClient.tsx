@@ -126,6 +126,7 @@ export default function TopUpClient({
     useState(false);
 
   const [promoCode, setPromoCode] = useState("");
+  const [showPromoCode, setShowPromoCode] = useState(false);
   const [appliedPromo, setAppliedPromo] = useState<{
     code: string;
     discountAmount: number;
@@ -1183,26 +1184,38 @@ export default function TopUpClient({
             Cari Kode Promo di Saluran WA <span aria-hidden="true">↗</span>
           </a>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            <input
-              type="text"
-              value={promoCode}
-              disabled={loading || validatingPromo}
-              onChange={(event) => {
-                setPromoCode(event.target.value);
-                setAppliedPromo(null);
-                setPromoMessage("");
-                setLoginRequired(false);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  void handleApplyPromo();
-                }
-              }}
-              placeholder="Masukkan kode promo"
-              autoCapitalize="characters"
-              className="h-14 min-w-0 w-full flex-1 rounded-xl border border-white/10 bg-[#030712] px-4 text-base font-semibold uppercase tracking-wide text-white outline-none placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-500 focus:border-blue-500 disabled:opacity-60 sm:h-12 sm:text-sm"
-            />
+            <div className="flex min-w-0 flex-1 gap-2">
+              <input
+                type={showPromoCode ? "text" : "password"}
+                value={promoCode}
+                disabled={loading || validatingPromo}
+                onChange={(event) => {
+                  setPromoCode(event.target.value.toUpperCase());
+                  setAppliedPromo(null);
+                  setPromoMessage("");
+                  setLoginRequired(false);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void handleApplyPromo();
+                  }
+                }}
+                placeholder="Masukkan kode promo"
+                autoCapitalize="characters"
+                autoComplete="off"
+                className="h-14 min-w-0 w-full flex-1 rounded-xl border border-white/10 bg-[#030712] px-4 text-base font-semibold uppercase tracking-wide text-white outline-none placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-500 focus:border-blue-500 disabled:opacity-60 sm:h-12 sm:text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPromoCode((visible) => !visible)}
+                disabled={loading || validatingPromo}
+                className="h-14 shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 text-xs font-bold text-slate-300 transition hover:bg-white/10 disabled:opacity-60 sm:h-12"
+                aria-label={showPromoCode ? "Sembunyikan kode promo" : "Tampilkan kode promo"}
+              >
+                {showPromoCode ? "🙈 Sembunyikan" : "👁 Tampilkan"}
+              </button>
+            </div>
             <button
               type="button"
               onClick={() => void handleApplyPromo()}
