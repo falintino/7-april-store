@@ -26,7 +26,7 @@ const questions = [
   {
     question: "Kapan Diamond dikirim?",
     answer:
-      "Pesanan mulai diproses setelah pembayaran berhasil dikonfirmasi. Waktu pengiriman bergantung pada status sistem dan ketersediaan produk dari penyedia. Status pembayaran berhasil belum berarti top up sudah terkirim; periksa juga status top up pada halaman pesanan.",
+      "Pesanan mulai diproses setelah pembayaran berhasil dikonfirmasi. Waktu pengiriman dapat berbeda-beda; untuk nominal murah terkadang cepat, terkadang membutuhkan waktu lebih lama. Tunggu sekitar 3–5 menit sambil memeriksa status invoice. Diamond mungkin sudah masuk meskipun status website masih pending, jadi cek saldo di game dan muat ulang game bila perlu. Jika setelah 3–5 menit belum masuk atau status tetap bermasalah, hubungi admin dengan nomor invoice. Jangan membayar ulang.",
   },
   {
     question: "Pembayaran berhasil (PAID), tetapi Diamond belum masuk padahal status top up berhasil. Apa yang harus saya lakukan?",
@@ -51,7 +51,7 @@ const questions = [
   {
     question: "Bagaimana jika pembayaran berhasil tetapi top up masih pending?",
     answer:
-      "Status pending berarti pesanan masih menunggu hasil pemrosesan dari penyedia produk. Jangan membayar ulang pesanan yang sama. Periksa kembali statusnya dan hubungi layanan pelanggan jika membutuhkan bantuan dengan menyertakan nomor pesanan serta bukti pembayaran.",
+      "Status pending berarti sistem masih menunggu hasil pemrosesan dari penyedia. Terkadang Diamond sudah masuk sebelum status website berubah, jadi periksa saldo di game dan muat ulang game. Tunggu sekitar 3–5 menit. Jika Diamond belum masuk atau status tetap pending setelah itu, hubungi admin dengan nomor invoice dan bukti pembayaran. Jangan membayar ulang.",
   },
   {
     question: "Apa yang terjadi jika UID yang saya masukkan salah?",
@@ -66,7 +66,7 @@ const questions = [
   {
     question: "Bagaimana cara menghubungi 7 April Store?",
     answer:
-      "Hubungi kami melalui WhatsApp atau email yang tercantum pada halaman Kontak. Sertakan nomor pesanan, waktu transaksi, dan bukti pembayaran bila berkaitan dengan transaksi. Jangan pernah membagikan password, PIN, atau OTP.",
+      "Hubungi kami melalui WhatsApp 0859-6023-7306 atau email yang tercantum pada halaman Kontak. Sertakan nomor invoice dan bukti pembayaran bila berkaitan dengan transaksi. Untuk informasi promo dan update top up, gabung saluran WhatsApp 7 April FF: https://whatsapp.com/channel/0029VbByfE60VycAQEP6Tz1b. Jangan pernah membagikan password, PIN, atau OTP.",
   },
 ];
 
