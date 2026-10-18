@@ -38,7 +38,7 @@ export default function RetryDigiflazzButton({
     if (!confirmed || loading) return;
 
     setLoading(true);
-    setMessage("");
+    setMessage("Permintaan retry sedang dikirim. Tunggu hasilnya dan jangan klik ulang.");
     setDiagnostics("");
 
     try {
@@ -50,7 +50,13 @@ export default function RetryDigiflazzButton({
         body: JSON.stringify({ invoice }),
       });
 
-      const result = await response.json();
+      const responseText = await response.text();
+      let result: Record<string, any>;
+      try {
+        result = JSON.parse(responseText) as Record<string, any>;
+      } catch {
+        throw new Error(`Server mengembalikan respons yang tidak terbaca (HTTP ${response.status}). Buka Vercel Logs untuk pemeriksaan; jangan retry lagi dulu.`);
+      }
 
       if (!response.ok || !result.success) {
         setMessage(
@@ -66,9 +72,11 @@ export default function RetryDigiflazzButton({
         setDiagnostics(JSON.stringify(result.providerResponse, null, 2));
       }
       router.refresh();
-    } catch {
+    } catch (error) {
       setMessage(
-        "Permintaan retry gagal dikirim. Periksa status invoice sebelum mencoba lagi.",
+        error instanceof Error
+          ? error.message
+          : "Permintaan retry gagal dikirim. Periksa status invoice sebelum mencoba lagi.",
       );
     } finally {
       setLoading(false);
