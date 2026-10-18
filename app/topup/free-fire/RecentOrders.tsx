@@ -25,6 +25,28 @@ type StatusResponse = {
 const STORAGE_KEY =
   "7aprilstore_order_history";
 
+// Riwayat perangkat hanya ditampilkan selama 24 jam.
+const HISTORY_MAX_AGE_MS =
+  24 * 60 * 60 * 1000;
+
+function isWithinHistoryWindow(
+  order: SavedOrder,
+  now = Date.now()
+) {
+  const createdAt = new Date(
+    order.createdAt
+  ).getTime();
+
+  if (
+    !Number.isFinite(createdAt) ||
+    createdAt > now
+  ) {
+    return false;
+  }
+
+  return now - createdAt < HISTORY_MAX_AGE_MS;
+}
+
 function formatRupiah(value: number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -99,7 +121,7 @@ export default function RecentOrders() {
           return;
         }
 
-        const savedOrders =
+        const validOrders =
           parsed.filter(
             (
               order
@@ -118,6 +140,20 @@ export default function RecentOrders() {
               typeof order.createdAt ===
                 "string"
           );
+
+        // Hapus riwayat yang sudah berumur 24 jam.
+        const savedOrders =
+          validOrders.filter(
+            (order) =>
+              isWithinHistoryWindow(order)
+          );
+
+        // Bersihkan localStorage agar riwayat lama
+        // tidak muncul lagi pada kunjungan berikutnya.
+        window.localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(savedOrders)
+        );
 
         if (cancelled) {
           return;
