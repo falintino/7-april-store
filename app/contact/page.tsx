@@ -17,12 +17,12 @@ export const metadata: Metadata = {
 };
 
 const whatsappUrl =
-  "https://wa.me/62895704041437?text=Halo%207%20April%20Store%2C%20saya%20memerlukan%20bantuan.";
+  "https://wa.me/6285960237306?text=Halo%207%20April%20Store%2C%20saya%20memerlukan%20bantuan.";
 
 const contactItems = [
   {
     title: "WhatsApp Customer Service",
-    value: "0895-7040-41437",
+    value: "0859-6023-7306",
     description: "Untuk bantuan pesanan dan informasi layanan.",
     href: whatsappUrl,
     icon: MessageCircle,
