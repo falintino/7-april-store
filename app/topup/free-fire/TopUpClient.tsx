@@ -1162,8 +1162,16 @@ export default function TopUpClient({
         <div className="mt-5 rounded-xl border border-blue-500/25 bg-[#060b16] p-4">
           <h3 className="text-sm font-bold text-white">Punya Kode Promo?</h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
-            Masukkan kode promo yang kamu punya, lalu tekan Terapkan sebelum konfirmasi pesanan.
+            Punya kode? Masukkan di sini lalu tekan Terapkan sebelum konfirmasi pesanan. Belum punya? Kode promo dan info promo tertentu dibagikan lewat saluran WhatsApp 7 April FF.
           </p>
+          <a
+            href="https://whatsapp.com/channel/0029VbByfE60VycAQEP6Tz1b"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs font-bold text-green-300 transition hover:bg-green-500/20"
+          >
+            Cari Kode Promo di Saluran WA <span aria-hidden="true">↗</span>
+          </a>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
