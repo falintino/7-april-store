@@ -775,7 +775,6 @@ export default function TopUpClient({
               className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
             />
 
-    </label>
 
             {savedGameIds.length > 0 && (
               <div className="mt-3 rounded-xl border border-white/10 bg-[#060b16] p-3">
