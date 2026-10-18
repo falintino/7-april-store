@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 
 import AdminLogoutButton from "./AdminLogoutButton";
 import RetryDigiflazzButton from "./RetryDigiflazzButton";
+import AdminHorizontalScroll from "./AdminHorizontalScroll";
 
 export const dynamic = "force-dynamic";
 
@@ -993,7 +994,7 @@ export default async function AdminPage({
           {/* TABLE */}
           {filteredOrders.length >
           0 ? (
-            <div className="overflow-x-auto">
+            <AdminHorizontalScroll>
               <table className="w-full min-w-[2100px] text-left">
                 <thead>
                   <tr className="border-b border-white/10 bg-slate-950/70 text-[10px] uppercase tracking-wider text-slate-500">
@@ -1300,7 +1301,7 @@ export default async function AdminPage({
                   )}
                 </tbody>
               </table>
-            </div>
+            </AdminHorizontalScroll>
           ) : (
             <div className="p-12 text-center">
               <div className="text-3xl">
