@@ -60,6 +60,15 @@ export default async function FreeFireTopUpPage() {
     if (product.sku === "FF2160") {
       return { ...product, price: 246190 };
     }
+    const updatedPrices: Record<string, number> = {
+      FF2000: 229791,
+      FF1450: 165613,
+      FF1440: 164123,
+      FF1075: 123100,
+    };
+    if (updatedPrices[product.sku] !== undefined) {
+      return { ...product, price: updatedPrices[product.sku] };
+    }
     return product;
   });
 
