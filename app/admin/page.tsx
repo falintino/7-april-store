@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import AdminLogoutButton from "./AdminLogoutButton";
 import RetryDigiflazzButton from "./RetryDigiflazzButton";
 import AdminHorizontalScroll from "./AdminHorizontalScroll";
+import AdminAutoRefresh from "./AdminAutoRefresh";
 
 export const dynamic = "force-dynamic";
 
@@ -985,9 +986,12 @@ export default async function AdminPage({
               {filteredCount} transaksi
             </p>
 
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-2.5 py-1.5 text-[10px] font-bold text-green-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
-              Database Online
+            <div className="flex flex-wrap items-center gap-2">
+              <AdminAutoRefresh />
+              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-2.5 py-1.5 text-[10px] font-bold text-green-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+                Database Online
+              </div>
             </div>
           </div>
 
