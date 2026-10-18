@@ -6,9 +6,13 @@ import { useEffect, useState } from "react";
 import {
   ChevronRight,
   CircleHelp,
+  MessageCircle,
   Menu,
   User,
   X,
+  WalletCards,
+  PackageCheck,
+  AlertTriangle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -43,6 +47,9 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const [isMenuOpen, setIsMenuOpen] =
+    useState(false);
+
+  const [isSupportOpen, setIsSupportOpen] =
     useState(false);
 
   const [customer, setCustomer] =
@@ -362,6 +369,92 @@ export default function Navbar() {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {!pathname.startsWith("/admin") && (
+        <div className="fixed bottom-5 left-4 z-[70] sm:bottom-6 sm:left-6">
+          {isSupportOpen && (
+            <section
+              aria-label="Pusat bantuan 7 April Store"
+              className="mb-3 w-[min(360px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-blue-400/20 bg-[#07101f] text-white shadow-2xl shadow-black/50"
+            >
+              <div className="flex items-start justify-between border-b border-white/10 bg-gradient-to-r from-blue-600/20 to-transparent p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 text-blue-300">
+                    <MessageCircle size={21} />
+                  </div>
+                  <div>
+                    <h2 className="font-bold">Pusat Bantuan</h2>
+                    <p className="mt-1 text-xs text-slate-400">Ada kendala dengan pesananmu?</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSupportOpen(false)}
+                  className="rounded-lg p-1 text-slate-400 transition hover:bg-white/10 hover:text-white"
+                  aria-label="Tutup bantuan"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-3 p-3">
+                <Link
+                  href="/faq"
+                  onClick={() => setIsSupportOpen(false)}
+                  className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 transition hover:border-blue-400/40 hover:bg-blue-500/10"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-300">
+                    <PackageCheck size={19} />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold">Pembayaran berhasil, diamond belum masuk</span>
+                    <span className="mt-1 block text-xs leading-5 text-slate-400">Cek status top up, simpan invoice, dan jangan bayar ulang.</span>
+                  </span>
+                </Link>
+
+                <Link
+                  href="/faq"
+                  onClick={() => setIsSupportOpen(false)}
+                  className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 transition hover:border-amber-400/40 hover:bg-amber-500/10"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-300">
+                    <AlertTriangle size={19} />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold">Sudah bayar, tetapi status gagal/pending</span>
+                    <span className="mt-1 block text-xs leading-5 text-slate-400">Pesanan perlu diperiksa admin. Jangan membuat pembayaran kedua.</span>
+                  </span>
+                </Link>
+
+                <a
+                  href="https://wa.me/62895704041437?text=Halo%207%20April%20Store%2C%20saya%20butuh%20bantuan%20pesanan.%20Saya%20sudah%20membayar%20tetapi%20ada%20kendala%20status%20atau%20pengiriman.%20Mohon%20dibantu%20cek."
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-500"
+                >
+                  <MessageCircle size={17} />
+                  Hubungi Admin via WhatsApp
+                </a>
+
+                <p className="px-1 pb-1 text-[11px] leading-4 text-slate-500">
+                  Siapkan nomor invoice dan bukti pembayaran. Jangan kirim PIN, OTP, atau kata sandi. Status pembayaran PAID tidak selalu berarti diamond sudah terkirim.
+                </p>
+              </div>
+            </section>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setIsSupportOpen((current) => !current)}
+            aria-expanded={isSupportOpen}
+            aria-label={isSupportOpen ? "Tutup pusat bantuan" : "Buka pusat bantuan"}
+            className="flex items-center gap-2 rounded-full border border-blue-300/30 bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-xl shadow-blue-950/40 transition hover:-translate-y-0.5 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            {isSupportOpen ? <X size={19} /> : <CircleHelp size={20} />}
+            <span>{isSupportOpen ? "Tutup" : "Bantuan Pesanan"}</span>
+          </button>
         </div>
       )}
     </header>
