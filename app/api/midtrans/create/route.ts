@@ -651,21 +651,37 @@ export async function POST(
        * =========================================
        */
 
-      if (
-        promo.productId !== null &&
-        promo.productId !==
-          order.productId
-      ) {
-        return NextResponse.json(
-          {
-            success: false,
-            message:
-              "Promo ini tidak berlaku untuk nominal yang dipilih.",
-          },
-          {
-            status: 400,
-          }
+      if (promo.productId !== null) {
+        const promoTargetProduct = await prisma.product.findUnique({
+          where: { id: promo.productId },
+          select: { id: true, name: true, price: true, game: true },
+        });
+
+        const normalizeProductName = (value: string) =>
+          value.trim().toLowerCase().replace(/\s+/g, " ");
+
+        const sameTargetProduct = Boolean(
+          promoTargetProduct &&
+          order.product &&
+          (
+            order.productId === promoTargetProduct.id ||
+            (
+              normalizeProductName(order.product.game) === normalizeProductName(promoTargetProduct.game) &&
+              normalizeProductName(order.product.name) === normalizeProductName(promoTargetProduct.name) &&
+              order.product.price === promoTargetProduct.price
+            )
+          )
         );
+
+        if (!sameTargetProduct) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: "Promo ini tidak berlaku untuk nominal yang dipilih.",
+            },
+            { status: 400 }
+          );
+        }
       }
 
       /*
