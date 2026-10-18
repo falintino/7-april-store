@@ -897,7 +897,8 @@ export async function POST(
       !Number.isInteger(
         promo.minimumMargin
       ) ||
-      promo.minimumMargin < 0
+      promo.minimumMargin < -1_000_000 ||
+      promo.minimumMargin > 1_000_000
     ) {
       console.error(
         "PROMO INVALID MINIMUM MARGIN:",
