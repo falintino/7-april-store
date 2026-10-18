@@ -2,11 +2,11 @@ const QRIS_FEE_RATE = 0.007;
 
 /*
  * 1–49 Diamond:
- * tidak ada fee pembayaran.
+ * biaya QRIS ditanggung toko (Rp0).
  *
- * 50 Diamond ke atas:
- * customer dikenakan fee QRIS 0,7%
- * seperti model Banana.
+ * 50 Diamond ke atas dan Membership:
+ * biaya QRIS 0,7% ditambahkan ke total
+ * yang dibayar pelanggan.
  */
 
 export function getPaymentFee({
@@ -42,16 +42,6 @@ export function getPaymentFee({
   if (
     diamondAmount !== null &&
     diamondAmount <= 49
-  ) {
-    return 0;
-  }
-
-  /*
-   * Membership / produk tanpa jumlah
-   * Diamond tidak dikenakan fee di sini.
-   */
-  if (
-    diamondAmount === null
   ) {
     return 0;
   }
