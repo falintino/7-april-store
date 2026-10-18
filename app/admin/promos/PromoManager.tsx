@@ -1209,12 +1209,13 @@ export default function PromoManager({
 
           <div>
             <label className="mb-2 block text-xs font-bold text-slate-300">
-              Margin Minimal Tersisa
+              Margin Minimal Tersisa (boleh negatif)
             </label>
 
             <input
               type="number"
-              min="0"
+              min="-1000000"
+              max="1000000"
               value={
                 minimumMargin
               }
@@ -1229,6 +1230,9 @@ export default function PromoManager({
               placeholder="0"
               className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none focus:border-blue-500"
             />
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Nilai positif menjaga margin toko. Nilai negatif mengizinkan subsidi kerugian oleh toko; contoh -1000 berarti harga promo boleh sampai Rp1.000 di bawah modal supplier.
+            </p>
           </div>
 
           <div>
