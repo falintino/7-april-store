@@ -44,15 +44,15 @@ export async function GET(request: NextRequest) {
   onrender.searchParams.set("region", "ID");
   onrender.searchParams.set("uid", uid);
 
+  // The documented /api/nick endpoint searches configured regions when region is omitted.
+  // Do not force "ind", which may exclude Indonesian accounts.
   const squareweb = new URL("https://freefirefwx-beta.squareweb.app/api/nick");
   squareweb.searchParams.set("id", uid);
-  squareweb.searchParams.set("region", "ind");
 
   const freefireapis = new URL("https://freefireapis.lat/info-player");
   freefireapis.searchParams.set("uid", uid);
   freefireapis.searchParams.set("region", "ID");
 
-  // Query providers concurrently so a sleeping API does not block every fallback.
   const results = await Promise.allSettled(
     [onrender, squareweb, freefireapis].map((url) => readNickname(url, uid)),
   );
