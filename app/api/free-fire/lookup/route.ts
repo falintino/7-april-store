@@ -2,48 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
 const noStore = { "Cache-Control": "no-store" };
 
 async function readNickname(url: URL, uid: string) {
   const response = await fetch(url, {
-    method: "GET",
     headers: { Accept: "application/json" },
     cache: "no-store",
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(6500),
   });
-
   if (!response.ok) return null;
 
   const data = await response.json();
+  const basic = data?.basicInfo ?? data?.result?.basicInfo ?? data?.accountBasicInfo?.[0];
   const nicknameCandidates = [
-    data?.basicInfo?.nickname,
-    data?.basicinfo?.nickname,
+    basic?.nickname,
     data?.player_nickname,
     data?.nickname,
     data?.name,
   ];
-
   const nickname = nicknameCandidates.find(
     (value) => typeof value === "string" && value.trim().length > 0,
   )?.trim();
 
   const accountId = String(
-    data?.basicInfo?.accountId ??
-    data?.basicinfo?.accountid ??
-    data?.account_id ??
-    data?.uid ??
-    data?.account_uid ??
-    "",
+    basic?.accountId ?? basic?.account_id ?? data?.account_id ?? data?.uid ?? data?.account_uid ?? "",
   );
-
   if (!nickname || (accountId && accountId !== uid)) return null;
   return nickname;
 }
 
 export async function GET(request: NextRequest) {
   const uid = (request.nextUrl.searchParams.get("uid") ?? "").trim();
-
   if (!/^\d{6,20}$/.test(uid)) {
     return NextResponse.json(
       { ok: false, message: "UID harus berupa 6–20 digit angka." },
@@ -51,38 +40,41 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Try the original free endpoint first, then a documented fallback.
-  const primary = new URL("https://free-ff-api-src-5plp.onrender.com/api/v1/account");
-  primary.searchParams.set("region", "ID");
-  primary.searchParams.set("uid", uid);
+  const onrender = new URL("https://free-ff-api-src-5plp.onrender.com/api/v1/account");
+  onrender.searchParams.set("region", "ID");
+  onrender.searchParams.set("uid", uid);
 
-  const fallback = new URL("https://freefirefwx-beta.squareweb.app/api/nick");
-  fallback.searchParams.set("id", uid);
+  const squareweb = new URL("https://freefirefwx-beta.squareweb.app/api/nick");
+  squareweb.searchParams.set("id", uid);
+  squareweb.searchParams.set("region", "ind");
 
-  for (const endpoint of [primary, fallback]) {
-    try {
-      const nickname = await readNickname(endpoint, uid);
-      if (nickname) {
-        return NextResponse.json(
-          { ok: true, uid, nickname, region: "ID" },
-          {
-            headers: {
-              ...noStore,
-              "X-Content-Type-Options": "nosniff",
-            },
-          },
-        );
-      }
-    } catch {
-      // Continue to the next free provider if this one times out or fails.
-    }
+  const freefireapis = new URL("https://freefireapis.lat/info-player");
+  freefireapis.searchParams.set("uid", uid);
+  freefireapis.searchParams.set("region", "ID");
+
+  // Query providers concurrently so a sleeping API does not block every fallback.
+  const results = await Promise.allSettled(
+    [onrender, squareweb, freefireapis].map((url) => readNickname(url, uid)),
+  );
+  const nickname = results
+    .filter((result): result is PromiseFulfilledResult<string | null> => result.status === "fulfilled")
+    .map((result) => result.value)
+    .find((value): value is string => Boolean(value));
+
+  if (!nickname) {
+    return NextResponse.json(
+      { ok: false, message: "Layanan cek ID gratis sedang tidak merespons. Coba lagi nanti." },
+      { status: 503, headers: noStore },
+    );
   }
 
   return NextResponse.json(
+    { ok: true, uid, nickname, region: "ID" },
     {
-      ok: false,
-      message: "Layanan cek ID gratis sedang tidak merespons. Coba lagi nanti.",
+      headers: {
+        ...noStore,
+        "X-Content-Type-Options": "nosniff",
+      },
     },
-    { status: 503, headers: noStore },
   );
 }
