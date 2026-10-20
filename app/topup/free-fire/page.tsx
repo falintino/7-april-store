@@ -29,6 +29,51 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+const whatsappChannelUrl =
+  "https://www.whatsapp.com/channel/0029VbByfE60VycAQEP6Tz1b";
+
+function WhatsAppPromoBanner() {
+  return (
+    <section className="bg-[#030712] px-5 py-5 sm:px-8 sm:py-7">
+      <div className="relative mx-auto max-w-7xl overflow-hidden rounded-2xl border border-emerald-400/40 bg-[radial-gradient(ellipse_at_15%_50%,rgba(34,197,94,0.22),transparent_38%),linear-gradient(115deg,#03170d,#06120e_48%,#031b11)] p-5 shadow-[0_18px_55px_rgba(0,255,100,0.12)] sm:rounded-3xl sm:px-9 sm:py-7">
+        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="relative flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          <div className="max-w-3xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-lime-300">
+              🎁 Kode Promo 7 April Store
+            </span>
+            <h2 className="mt-4 text-3xl font-black uppercase leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+              Cari Kode Promo
+              <span className="block bg-gradient-to-r from-lime-300 via-emerald-300 to-green-500 bg-clip-text text-transparent">
+                di Saluran WhatsApp!
+              </span>
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50/75 sm:text-base">
+              Gabung saluran resmi 7 April Store untuk melihat informasi kode
+              promo dan kabar promo terbaru.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-white/90 sm:text-sm">
+              <span className="rounded-full border border-white/10 bg-black/20 px-3 py-2">🏷️ Info kode promo</span>
+              <span className="rounded-full border border-white/10 bg-black/20 px-3 py-2">🎁 Update promo</span>
+              <span className="rounded-full border border-white/10 bg-black/20 px-3 py-2">💚 Saluran WhatsApp</span>
+            </div>
+          </div>
+          <a
+            href={whatsappChannelUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-14 shrink-0 items-center justify-center gap-3 rounded-xl border border-green-200/40 bg-gradient-to-r from-lime-300 to-emerald-400 px-6 py-4 text-center text-sm font-black uppercase tracking-wide text-green-950 shadow-[0_8px_30px_rgba(34,197,94,0.25)] transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:text-base"
+          >
+            <span aria-hidden="true" className="text-2xl">◉</span>
+            Gabung Saluran WA
+            <span aria-hidden="true" className="text-xl">➜</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default async function FreeFireTopUpPage() {
   // Pastikan produk kecil ini tersedia di database produksi.
   // Harga modal diverifikasi dari daftar Digiflazz Buyer:
@@ -130,6 +175,7 @@ export default async function FreeFireTopUpPage() {
   return (
     <main className="min-h-screen bg-[#030712] text-white">
       <PromoBannerCarousel />
+      <WhatsAppPromoBanner />
 
       <section className="border-y border-white/10 bg-gradient-to-b from-blue-950/30 to-[#030712]">
         <div className="mx-auto max-w-7xl px-6 py-14">
