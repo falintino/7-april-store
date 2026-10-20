@@ -63,6 +63,10 @@ export default function TopUpClient({
   products,
 }: TopUpClientProps) {
   const [uid, setUid] = useState("");
+  const [uidLookupLoading, setUidLookupLoading] = useState(false);
+  const [uidLookupResult, setUidLookupResult] = useState<{ uid: string; nickname: string } | null>(null);
+  const [uidLookupMessage, setUidLookupMessage] = useState("");
+
   const [savedGameIds, setSavedGameIds] = useState<string[]>([]);
   const [gameIdHistoryReady, setGameIdHistoryReady] = useState(false);
 
@@ -407,6 +411,36 @@ export default function TopUpClient({
     );
 
     setErrorMessage("");
+  }
+
+  async function handleLookupUid() {
+    const cleanUid = uid.trim();
+    if (!/^\d{6,20}$/.test(cleanUid)) {
+      setUidLookupResult(null);
+      setUidLookupMessage("Masukkan UID 6–20 digit terlebih dahulu.");
+      return;
+    }
+
+    setUidLookupLoading(true);
+    setUidLookupResult(null);
+    setUidLookupMessage("");
+    try {
+      const response = await fetch(`/api/free-fire/lookup?uid=${encodeURIComponent(cleanUid)}`, {
+        method: "GET",
+        cache: "no-store",
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok || !result.nickname) {
+        setUidLookupMessage(result.message || "Nickname tidak ditemukan. Periksa UID.");
+        return;
+      }
+      setUidLookupResult({ uid: cleanUid, nickname: String(result.nickname) });
+      setUidLookupMessage("Nickname ditemukan. Pastikan ini akun yang benar sebelum membayar.");
+    } catch {
+      setUidLookupMessage("Cek ID gagal terhubung. Coba lagi sebentar.");
+    } finally {
+      setUidLookupLoading(false);
+    }
   }
 
   function handleWhatsappChange(
@@ -775,6 +809,28 @@ export default function TopUpClient({
               className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
             />
 
+            <button
+              type="button"
+              onClick={() => void handleLookupUid()}
+              disabled={uidLookupLoading || loading || uid.replace(/\D/g, "").length < 6}
+              className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-xs font-bold text-cyan-200 transition hover:bg-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {uidLookupLoading ? "Mengecek nickname..." : "Cek ID Otomatis (Gratis)"}
+            </button>
+
+            {uidLookupMessage && (
+              <p role="status" className={`mt-2 text-xs leading-5 ${uidLookupResult ? "text-emerald-300" : "text-amber-300"}`}>
+                {uidLookupMessage}
+              </p>
+            )}
+
+            {uidLookupResult && uidLookupResult.uid === uid && (
+              <div className="mt-3 rounded-xl border border-emerald-400/25 bg-emerald-400/5 p-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Nickname ditemukan</p>
+                <p className="mt-1 break-words text-base font-black text-white">{uidLookupResult.nickname}</p>
+                <p className="mt-1 text-[11px] text-slate-400">UID: {uidLookupResult.uid} · Region: Indonesia</p>
+              </div>
+            )}
 
             {savedGameIds.length > 0 && (
               <div className="mt-3 rounded-xl border border-white/10 bg-[#060b16] p-3">
