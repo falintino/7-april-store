@@ -7,15 +7,21 @@ import { useEffect, useState } from "react";
 const banners = [
   {
     src: "/images/banners/7-april-store-promo.webp",
-    alt: "Promo Top Up Free Fire 7 April Store, harga hemat dan proses cepat mulai Rp750",
+    alt: "Promo Top Up Free Fire 7 April Store, harga hemat dan proses cepat",
     href: "/topup/free-fire",
     position: "object-[34%_center] sm:object-center",
   },
   {
     src: "/images/banners/7-april-store-safe.webp",
-    alt: "Transaksi aman dan transparan dengan status pembayaran dan top up yang dapat dipantau",
+    alt: "Transaksi aman dan transparan di 7 April Store",
     href: "/profil",
     position: "object-[38%_center] sm:object-center",
+  },
+  {
+    src: "/images/banners/7-april-store-partnership.webp",
+    alt: "Informasi kemitraan 7 April Store",
+    href: "/profil",
+    position: "object-center",
   },
 ];
 
