@@ -7,6 +7,7 @@ import {
 import GamesGrid from "@/components/games/GamesGrid";
 import Hero from "@/components/hero/Hero";
 import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
+import StaticPromoBanners from "@/components/ads/StaticPromoBanners";
 import QuickMenu from "@/components/quick-menu/QuickMenu";
 import ServicesGrid from "@/components/services/ServicesGrid";
 import SiteFooter from "@/components/layout/SiteFooter";
@@ -56,6 +57,7 @@ export default function Home() {
   return (
     <main className="bg-[#030712]">
       <PromoBannerCarousel />
+      <StaticPromoBanners />
       <Hero />
       <QuickMenu />
       <ServicesGrid />
