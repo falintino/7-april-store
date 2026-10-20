@@ -316,6 +316,16 @@ export default async function OrderPage({
 
             <div>
               <p className="text-xs uppercase tracking-wider text-slate-500">
+                Nama Akun Free Fire
+              </p>
+
+              <p className="mt-2 font-semibold text-white">
+                {order.playerNickname || "Belum tersedia"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wider text-slate-500">
                 WhatsApp
               </p>
 
