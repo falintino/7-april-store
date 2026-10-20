@@ -1104,11 +1104,17 @@ export default async function AdminPage({
                           </p>
                         </td>
 
-                        {/* UID */}
-                        <td className="whitespace-nowrap px-3 py-3 align-top font-medium text-slate-300">
-                          {maskUid(
-                            order.uid,
-                          )}
+                        {/* UID + NAMA ID */}
+                        <td className="whitespace-nowrap px-3 py-3 align-top">
+                          <p className="font-medium text-slate-300">
+                            {maskUid(order.uid)}
+                          </p>
+                          <p
+                            className="mt-1 max-w-[180px] truncate text-[10px] font-semibold text-cyan-300"
+                            title={order.playerNickname ?? ""}
+                          >
+                            {order.playerNickname || "Nama ID belum tersedia"}
+                          </p>
                         </td>
 
                         {/* TOTAL */}
