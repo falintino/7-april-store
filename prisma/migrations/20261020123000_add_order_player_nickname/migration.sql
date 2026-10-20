@@ -1,1 +1,1 @@
-ALTER TABLE "Order" ADD COLUMN "playerNickname" TEXT;
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "playerNickname" TEXT;
