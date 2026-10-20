@@ -23,6 +23,24 @@ const banners = [
     href: "/profil",
     position: "object-center",
   },
+  {
+    src: "/images/banners/banner-1-promo-diskon.jpg",
+    alt: "Promo diskon top up Free Fire 7 April Store",
+    href: "/topup/free-fire",
+    position: "object-center",
+  },
+  {
+    src: "/images/banners/banner-2-qris-otomatis.jpg",
+    alt: "Top up Free Fire bayar menggunakan QRIS",
+    href: "/topup/free-fire",
+    position: "object-center",
+  },
+  {
+    src: "/images/banners/banner-3-produk-layanan.jpg",
+    alt: "Produk dan layanan Free Fire dari 7 April Store",
+    href: "/",
+    position: "object-center",
+  },
 ];
 
 export default function PromoBannerCarousel() {
