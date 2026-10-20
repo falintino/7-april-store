@@ -163,6 +163,50 @@ export default async function OrderPage({
     notFound();
   }
 
+  // Pesanan lama mungkin dibuat sebelum nickname disimpan. Coba pulihkan
+  // nickname melalui endpoint lookup yang sama, lalu simpan sebagai snapshot.
+  let playerNickname = order.playerNickname;
+  const normalizedGame = order.product.game
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\\s+/g, " ");
+
+  if (!playerNickname && normalizedGame === "free fire") {
+    try {
+      const lookupUrl = new URL(
+        "/api/free-fire/lookup",
+        "https://store.falintino.com",
+      );
+      lookupUrl.searchParams.set("uid", order.uid);
+
+      const lookupResponse = await fetch(lookupUrl, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(9000),
+      });
+
+      if (lookupResponse.ok) {
+        const lookup = await lookupResponse.json();
+        const foundUid = String(lookup.uid ?? "");
+        const foundNickname =
+          typeof lookup.nickname === "string"
+            ? lookup.nickname.trim().slice(0, 80)
+            : "";
+
+        if (lookup.ok === true && foundUid === order.uid && foundNickname) {
+          const updatedOrder = await prisma.order.update({
+            where: { invoice },
+            data: { playerNickname: foundNickname },
+            select: { playerNickname: true },
+          });
+          playerNickname = updatedOrder.playerNickname;
+        }
+      }
+    } catch {
+      // Jangan gagalkan invoice jika layanan lookup sedang tidak tersedia.
+    }
+  }
+
   const paymentPending =
     order.paymentStatus === "PENDING";
 
@@ -320,7 +364,7 @@ export default async function OrderPage({
               </p>
 
               <p className="mt-2 font-semibold text-white">
-                {order.playerNickname || "Belum tersedia"}
+                {playerNickname || "Belum tersedia"}
               </p>
             </div>
 
