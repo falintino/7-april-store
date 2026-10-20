@@ -626,6 +626,11 @@ export default function TopUpClient({
               JSON.stringify({
                 uid,
 
+                playerNickname:
+                  uidLookupResult?.uid === uid.trim()
+                    ? uidLookupResult.nickname
+                    : null,
+
                 whatsapp,
 
                 productId:
