@@ -10,6 +10,7 @@ import AdminLogoutButton from "./AdminLogoutButton";
 import RetryDigiflazzButton from "./RetryDigiflazzButton";
 import AdminHorizontalScroll from "./AdminHorizontalScroll";
 import AdminAutoRefresh from "./AdminAutoRefresh";
+import AdminOrderNotifications from "./AdminOrderNotifications";
 
 export const dynamic = "force-dynamic";
 
@@ -610,6 +611,7 @@ export default async function AdminPage({
 
   return (
     <main className="min-h-screen bg-[#030712] px-4 py-6 text-white sm:px-6">
+      <AdminOrderNotifications />
       <div className="mx-auto max-w-[1800px]">
 
         {/* HEADER */}
