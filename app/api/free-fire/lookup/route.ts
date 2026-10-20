@@ -3,62 +3,86 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const noStore = { "Cache-Control": "no-store" };
+
+async function readNickname(url: URL, uid: string) {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+    signal: AbortSignal.timeout(8000),
+  });
+
+  if (!response.ok) return null;
+
+  const data = await response.json();
+  const nicknameCandidates = [
+    data?.basicInfo?.nickname,
+    data?.basicinfo?.nickname,
+    data?.player_nickname,
+    data?.nickname,
+    data?.name,
+  ];
+
+  const nickname = nicknameCandidates.find(
+    (value) => typeof value === "string" && value.trim().length > 0,
+  )?.trim();
+
+  const accountId = String(
+    data?.basicInfo?.accountId ??
+    data?.basicinfo?.accountid ??
+    data?.account_id ??
+    data?.uid ??
+    data?.account_uid ??
+    "",
+  );
+
+  if (!nickname || (accountId && accountId !== uid)) return null;
+  return nickname;
+}
+
 export async function GET(request: NextRequest) {
   const uid = (request.nextUrl.searchParams.get("uid") ?? "").trim();
 
   if (!/^\d{6,20}$/.test(uid)) {
     return NextResponse.json(
       { ok: false, message: "UID harus berupa 6–20 digit angka." },
-      { status: 400, headers: { "Cache-Control": "no-store" } },
+      { status: 400, headers: noStore },
     );
   }
 
-  const endpoint = new URL("https://free-ff-api-src-5plp.onrender.com/api/v1/account");
-  endpoint.searchParams.set("region", "ID");
-  endpoint.searchParams.set("uid", uid);
+  // Try the original free endpoint first, then a documented fallback.
+  const primary = new URL("https://free-ff-api-src-5plp.onrender.com/api/v1/account");
+  primary.searchParams.set("region", "ID");
+  primary.searchParams.set("uid", uid);
 
-  try {
-    const response = await fetch(endpoint, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-      signal: AbortSignal.timeout(10000),
-    });
+  const fallback = new URL("https://freefirefwx-beta.squareweb.app/api/nick");
+  fallback.searchParams.set("id", uid);
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { ok: false, message: "Layanan cek ID sedang tidak tersedia. Coba lagi nanti." },
-        { status: 502, headers: { "Cache-Control": "no-store" } },
-      );
+  for (const endpoint of [primary, fallback]) {
+    try {
+      const nickname = await readNickname(endpoint, uid);
+      if (nickname) {
+        return NextResponse.json(
+          { ok: true, uid, nickname, region: "ID" },
+          {
+            headers: {
+              ...noStore,
+              "X-Content-Type-Options": "nosniff",
+            },
+          },
+        );
+      }
+    } catch {
+      // Continue to the next free provider if this one times out or fails.
     }
-
-    const data = await response.json();
-    const nickname =
-      typeof data?.basicInfo?.nickname === "string"
-        ? data.basicInfo.nickname.trim()
-        : "";
-    const accountId = String(data?.basicInfo?.accountId ?? "");
-
-    if (!nickname || (accountId && accountId !== uid)) {
-      return NextResponse.json(
-        { ok: false, message: "Nickname tidak ditemukan. Periksa UID atau coba lagi nanti." },
-        { status: 404, headers: { "Cache-Control": "no-store" } },
-      );
-    }
-
-    return NextResponse.json(
-      { ok: true, uid, nickname, region: "ID" },
-      {
-        headers: {
-          "Cache-Control": "no-store",
-          "X-Content-Type-Options": "nosniff",
-        },
-      },
-    );
-  } catch {
-    return NextResponse.json(
-      { ok: false, message: "API cek ID gratis sedang lambat atau tidak merespons. Coba lagi sebentar." },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
-    );
   }
+
+  return NextResponse.json(
+    {
+      ok: false,
+      message: "Layanan cek ID gratis sedang tidak merespons. Coba lagi nanti.",
+    },
+    { status: 503, headers: noStore },
+  );
 }
