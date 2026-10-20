@@ -170,7 +170,7 @@ export default async function OrderPage({
     .trim()
     .toLowerCase()
     .replace(/[_-]+/g, " ")
-    .replace(/\\s+/g, " ");
+    .replace(/\s+/g, " ");
 
   if (!playerNickname && normalizedGame === "free fire") {
     try {
