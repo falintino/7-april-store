@@ -73,6 +73,8 @@ export async function POST(request: Request) {
 
     const uid = String(body.uid ?? "").trim();
 
+    const playerNickname = String(body.playerNickname ?? "").trim().slice(0, 80) || null;
+
     const whatsapp = String(body.whatsapp ?? "").trim();
 
     const productId = String(body.productId ?? "").trim();
@@ -501,6 +503,8 @@ export async function POST(request: Request) {
         invoice,
 
         uid,
+
+        playerNickname,
 
         server: null,
 
