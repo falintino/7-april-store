@@ -75,6 +75,7 @@ model Order {
   id             String   @id @default(cuid())
   invoice        String   @unique
   uid            String
+  playerNickname String?
   server         String?
   whatsapp       String
   paymentMethod  String
