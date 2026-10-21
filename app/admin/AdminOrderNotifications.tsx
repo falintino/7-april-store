@@ -27,27 +27,42 @@ function playTone(kind: "paid" | "success") {
     if (!AudioContextClass) return;
 
     const context = new AudioContextClass();
-    const now = context.currentTime;
+    if (context.state === "suspended") void context.resume();
+
+    // PAID: dua bunyi "ding" yang hangat. SUCCESS: tiga nada naik yang lebih tegas.
+    // Volume tetap dibatasi agar jelas tanpa terlalu keras.
     const notes =
       kind === "paid"
-        ? [{ frequency: 740, start: 0, duration: 0.12 }, { frequency: 980, start: 0.15, duration: 0.18 }]
-        : [{ frequency: 660, start: 0, duration: 0.12 }, { frequency: 880, start: 0.14, duration: 0.12 }, { frequency: 1175, start: 0.28, duration: 0.25 }];
+        ? [
+            { frequency: 880, start: 0, duration: 0.18 },
+            { frequency: 1175, start: 0.2, duration: 0.28 },
+          ]
+        : [
+            { frequency: 784, start: 0, duration: 0.16 },
+            { frequency: 988, start: 0.18, duration: 0.16 },
+            { frequency: 1319, start: 0.36, duration: 0.34 },
+          ];
 
     for (const note of notes) {
       const oscillator = context.createOscillator();
       const gain = context.createGain();
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(note.frequency, now + note.start);
-      gain.gain.setValueAtTime(0.0001, now + note.start);
-      gain.gain.exponentialRampToValueAtTime(0.16, now + note.start + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + note.start + note.duration);
+      const startAt = context.currentTime + note.start;
+      const endAt = startAt + note.duration;
+
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(note.frequency, startAt);
+      gain.gain.setValueAtTime(0.0001, startAt);
+      gain.gain.exponentialRampToValueAtTime(0.22, startAt + 0.025);
+      gain.gain.setValueAtTime(0.22, Math.max(startAt + 0.03, endAt - 0.08));
+      gain.gain.exponentialRampToValueAtTime(0.0001, endAt);
+
       oscillator.connect(gain);
       gain.connect(context.destination);
-      oscillator.start(now + note.start);
-      oscillator.stop(now + note.start + note.duration + 0.02);
+      oscillator.start(startAt);
+      oscillator.stop(endAt + 0.02);
     }
 
-    window.setTimeout(() => void context.close(), 1200);
+    window.setTimeout(() => void context.close(), 1800);
   } catch {
     // Audio may be blocked until the user interacts with the page.
   }
