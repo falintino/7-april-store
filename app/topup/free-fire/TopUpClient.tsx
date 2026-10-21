@@ -62,6 +62,13 @@ function formatRupiah(value: number) {
 export default function TopUpClient({
   products,
 }: TopUpClientProps) {
+  const uidInputRef = useRef<HTMLInputElement>(null);
+  const whatsappInputRef = useRef<HTMLInputElement>(null);
+  const productSectionRef = useRef<HTMLDivElement>(null);
+  const paymentSectionRef = useRef<HTMLDivElement>(null);
+  const termsSectionRef = useRef<HTMLDivElement>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
   const [uid, setUid] = useState("");
   const [uidLookupLoading, setUidLookupLoading] = useState(false);
   const [uidLookupResult, setUidLookupResult] = useState<{ uid: string; nickname: string } | null>(null);
@@ -582,14 +589,43 @@ export default function TopUpClient({
   }
 
   async function handleConfirm() {
-    if (
-      !formValid ||
-      !selectedProduct ||
-      !selectedPaymentMethod ||
-      loading
-    ) {
+    if (loading) return;
+
+    setSubmitAttempted(true);
+
+    // Arahkan pelanggan ke isian pertama yang belum lengkap.
+    if (!uidValid) {
+      uidInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      uidInputRef.current?.focus({ preventScroll: true });
+      setErrorMessage("UID Free Fire belum valid. Periksa kolom UID yang ditandai merah.");
       return;
     }
+    if (!whatsappValid) {
+      whatsappInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      whatsappInputRef.current?.focus({ preventScroll: true });
+      setErrorMessage("Nomor WhatsApp belum valid. Periksa kolom yang ditandai merah.");
+      return;
+    }
+    if (!productValid) {
+      productSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setErrorMessage("Pilih nominal produk terlebih dahulu.");
+      return;
+    }
+    if (!paymentValid) {
+      paymentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setErrorMessage("Pilih metode pembayaran terlebih dahulu.");
+      return;
+    }
+    if (!acceptedTerms) {
+      termsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setErrorMessage("Centang persetujuan sebelum melanjutkan.");
+      return;
+    }
+    if (!promoReady || validatingPromo) {
+      setErrorMessage("Periksa kode promo terlebih dahulu atau terapkan kode promo yang dimasukkan.");
+      return;
+    }
+    if (!selectedProduct || !selectedPaymentMethod) return;
 
     try {
       setLoading(true);
@@ -800,6 +836,7 @@ export default function TopUpClient({
             </label>
 
             <input
+              ref={uidInputRef}
               type="text"
               inputMode="numeric"
               value={uid}
@@ -811,8 +848,12 @@ export default function TopUpClient({
               }
               placeholder="Contoh: 123456789"
               onBlur={() => rememberGameId(uid)}
-              className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className={`h-12 w-full rounded-xl border bg-[#060b16] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60 ${submitAttempted && !uidValid ? "border-red-500 ring-2 ring-red-500/20" : "border-white/10"}`}
             />
+
+            {submitAttempted && !uidValid && (
+              <p className="mt-2 text-xs font-semibold text-red-400">UID wajib diisi minimal 6 angka.</p>
+            )}
 
             <button
               type="button"
@@ -884,6 +925,7 @@ export default function TopUpClient({
             </label>
 
             <input
+              ref={whatsappInputRef}
               type="tel"
               inputMode="numeric"
               autoComplete="tel"
@@ -895,8 +937,11 @@ export default function TopUpClient({
                 )
               }
               placeholder="Contoh: 081234567890"
-              className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className={`h-12 w-full rounded-xl border bg-[#060b16] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60 ${submitAttempted && !whatsappValid ? "border-red-500 ring-2 ring-red-500/20" : "border-white/10"}`}
             />
+            {submitAttempted && !whatsappValid && (
+              <p className="mt-2 text-xs font-semibold text-red-400">Nomor WhatsApp wajib diisi 10–15 angka.</p>
+            )}
             <p className="mt-2 text-sm leading-6 text-blue-200">
               Nomor ini digunakan admin untuk menghubungimu jika pesanan mengalami kendala, misalnya pembayaran berhasil tetapi diamond belum masuk atau status pesanan bermasalah. Pastikan nomor WhatsApp aktif dan bisa dihubungi.
             </p>
@@ -920,7 +965,7 @@ export default function TopUpClient({
 
       {/* STEP 2 */}
 
-      <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+      <div ref={productSectionRef} className={`mt-5 rounded-2xl border bg-slate-900/60 p-5 ${submitAttempted && !productValid ? "border-red-500 ring-2 ring-red-500/20" : "border-white/10"}`}>
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-black">
             2
@@ -1172,7 +1217,7 @@ export default function TopUpClient({
 
       {/* STEP 4 */}
 
-      <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+      <div ref={termsSectionRef} className={`mt-5 rounded-2xl border bg-slate-900/60 p-5 ${submitAttempted && !acceptedTerms ? "border-red-500 ring-2 ring-red-500/20" : "border-white/10"}`}>
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-black">
             4
@@ -1502,10 +1547,8 @@ export default function TopUpClient({
 
         <button
           type="button"
-          disabled={!formValid}
-          onClick={
-            handleConfirm
-          }
+          disabled={loading}
+          onClick={handleConfirm}
           className={[
             "mt-5 h-14 w-full rounded-xl text-sm font-black transition",
 
@@ -1519,13 +1562,13 @@ export default function TopUpClient({
             : "Konfirmasi Pesanan"}
         </button>
 
-        {!formValid &&
-          !loading && (
-            <p className="mt-3 text-center text-xs text-slate-500">
-              Lengkapi data akun, pilih nominal dan metode pembayaran, lalu
-              setujui ketentuan transaksi.
-            </p>
-          )}
+        {!formValid && !loading && (
+          <p className={`mt-3 text-center text-xs ${submitAttempted ? "font-semibold text-red-400" : "text-slate-500"}`}>
+            {submitAttempted
+              ? "Masih ada data yang belum lengkap. Kolom yang perlu diperbaiki ditandai merah."
+              : "Lengkapi data akun, pilih nominal dan metode pembayaran, lalu setujui ketentuan transaksi."}
+          </p>
+        )}
       </div>
     </section>
   );
