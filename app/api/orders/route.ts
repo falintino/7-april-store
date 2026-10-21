@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
     const uid = String(body.uid ?? "").trim();
 
-    const playerNickname = String(body.playerNickname ?? "").trim().slice(0, 80) || null;
+    let playerNickname = String(body.playerNickname ?? "").trim().slice(0, 80) || null;
 
     const whatsapp = String(body.whatsapp ?? "").trim();
 
@@ -472,6 +472,44 @@ export async function POST(request: Request) {
           status: 409,
         },
       );
+    }
+
+    /*
+     * =====================================
+     * LOOKUP NICKNAME OTOMATIS SAAT CHECKOUT
+     * =====================================
+     *
+     * Jangan bergantung pada tombol "Cek ID" di browser.
+     * Server mencoba mengambil nickname dari UID saat order dibuat,
+     * lalu memvalidasi UID yang dikembalikan layanan lookup.
+     * Jika layanan lookup sedang gangguan, checkout tetap berjalan.
+     */
+    try {
+      const lookupUrl = new URL(
+        "/api/free-fire/lookup",
+        new URL(request.url).origin,
+      );
+      lookupUrl.searchParams.set("uid", uid);
+
+      const lookupResponse = await fetch(lookupUrl, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(9000),
+      });
+
+      if (lookupResponse.ok) {
+        const lookup = await lookupResponse.json();
+        const lookupUid = String(lookup.uid ?? "");
+        const lookupNickname =
+          typeof lookup.nickname === "string"
+            ? lookup.nickname.trim().slice(0, 80)
+            : "";
+
+        if (lookup.ok === true && lookupUid === uid && lookupNickname) {
+          playerNickname = lookupNickname;
+        }
+      }
+    } catch {
+      // Jangan gagalkan order jika layanan lookup nickname tidak tersedia.
     }
 
     /*
