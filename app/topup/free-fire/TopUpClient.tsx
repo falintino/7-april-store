@@ -1095,7 +1095,7 @@ export default function TopUpClient({
 
       {/* STEP 3 PAYMENT */}
 
-      <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+      <div ref={paymentSectionRef} className={`mt-5 rounded-2xl border bg-slate-900/60 p-5 ${submitAttempted && !paymentValid ? "border-red-500 ring-2 ring-red-500/20" : "border-white/10"}`}>
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-black">
             3
@@ -1549,13 +1549,7 @@ export default function TopUpClient({
           type="button"
           disabled={loading}
           onClick={handleConfirm}
-          className={[
-            "mt-5 h-14 w-full rounded-xl text-sm font-black transition",
-
-            formValid
-              ? "bg-blue-600 text-white hover:bg-blue-500"
-              : "cursor-not-allowed bg-blue-600/20 text-white/30",
-          ].join(" ")}
+          className="mt-5 h-14 w-full rounded-xl bg-blue-600 text-sm font-black text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading
             ? "Menyiapkan Pembayaran..."
