@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 type Purchase = {
   productName: string;
+  userId: string;
   createdAt: string;
 };
 
@@ -109,8 +110,9 @@ export default function FreeFireLiveActivity() {
             <div className="min-w-0">
               <p className="text-xs font-semibold text-emerald-400">Transaksi berhasil</p>
               <p className="mt-0.5 text-sm leading-5 text-white">
-                Seseorang membeli <strong>{purchase.productName}</strong>
+                Pembelian <strong>{purchase.productName}</strong>
               </p>
+              <p className="mt-1 text-xs text-slate-300">UID: <strong>{purchase.userId}</strong></p>
               <p className="mt-1 text-xs text-slate-400">{timeAgo(purchase.createdAt)}</p>
             </div>
           </div>
