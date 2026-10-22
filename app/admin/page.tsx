@@ -655,6 +655,13 @@ export default async function AdminPage({
             </Link>
 
             <Link
+              href="/admin/reviews"
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 text-xs font-bold text-amber-300 transition hover:bg-amber-500/20"
+            >
+              ⭐ Ulasan
+            </Link>
+
+            <Link
               href="/topup/free-fire"
               className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-xs font-bold transition hover:bg-blue-500"
             >
