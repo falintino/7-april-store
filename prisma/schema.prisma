@@ -576,8 +576,28 @@ model Review {
   rating      Int
   comment     String   @db.VarChar(500)
   displayName String   @default("Pelanggan")
-  approved    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  approved         Boolean  @default(true)
+  moderationStatus String   @default("VISIBLE")
+  moderationReason String?
+  moderatedAt      DateTime?
+  moderatedBy      String?
+  createdAt        DateTime @default(now())
+
+  auditLogs ReviewAudit[]
 
   @@index([approved, createdAt])
+  @@index([moderationStatus, createdAt])
+}
+
+model ReviewAudit {
+  id              String   @id @default(cuid())
+  reviewId        String
+  review          Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  action          String
+  reason          String?  @db.VarChar(500)
+  adminIdentifier String   @default("admin")
+  createdAt       DateTime @default(now())
+
+  @@index([reviewId, createdAt])
+  @@index([action, createdAt])
 }
