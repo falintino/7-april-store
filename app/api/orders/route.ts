@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getEffectiveSellingPrice } from "@/lib/pricing";
 
 function generateInvoice() {
   const now = new Date();
@@ -261,8 +262,12 @@ export async function POST(request: Request) {
       FF1440: 164123,
       FF1075: 123100,
     };
-    const effectiveSalePrice =
-      fixedSalePrices[product.sku] ?? product.price;
+    const effectiveSalePrice = getEffectiveSellingPrice({
+      name: product.name,
+      sku: product.sku,
+      providerPrice: product.sku === "FF250" ? 28787 : product.providerPrice,
+      fallbackPrice: fixedSalePrices[product.sku] ?? product.price,
+    });
 
     const effectiveProviderPrice =
       product.sku === "FF250" ? 28787 : product.providerPrice;
