@@ -746,19 +746,21 @@ async function syncPrices(
       let newSellingPrice =
         calculatedPrice;
 
-      if (
-        diamondAmount !== null
-      ) {
-        newSellingPrice =
-          enforceMinimumSellingPrice({
+      if (diamondAmount !== null) {
+        const ownerApprovedPromoAmounts = new Set([
+          5, 10, 12, 20, 25, 30, 50,
+        ]);
+
+        // Untuk nominal promo yang ditetapkan pemilik toko,
+        // izinkan harga turun sesuai target meskipun di bawah modal.
+        if (!ownerApprovedPromoAmounts.has(diamondAmount)) {
+          newSellingPrice = enforceMinimumSellingPrice({
             calculatedPrice,
-
-            previousSellingPrice:
-              previousDiamondSellingPrice,
+            previousSellingPrice: previousDiamondSellingPrice,
           });
+        }
 
-        previousDiamondSellingPrice =
-          newSellingPrice;
+        previousDiamondSellingPrice = newSellingPrice;
       }
 
       /*
