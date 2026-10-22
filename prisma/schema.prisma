@@ -136,6 +136,7 @@ model Order {
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   payment Payment?
+  review  Review?
 
   /*
    * =========================================
@@ -565,4 +566,18 @@ model PasswordResetToken {
 
   @@index([customerId])
   @@index([expiresAt])
+}
+
+
+model Review {
+  id          String   @id @default(cuid())
+  orderId     String   @unique
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  rating      Int
+  comment     String   @db.VarChar(500)
+  displayName String   @default("Pelanggan")
+  approved    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([approved, createdAt])
 }
