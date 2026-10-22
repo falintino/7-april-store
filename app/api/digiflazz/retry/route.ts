@@ -215,10 +215,10 @@ export async function POST(
      * Dikembalikan ke PENDING.
      */
 
-    const normalRetry =
-      ["02", "41", "43", "44", "45", "69", "70"].includes(
-        providerRc
-      );
+    // Allow manual recovery for any known provider RC after admin confirms
+    // the old transaction failed and the seller/SKU is corrected.
+    // RC70 remains a status check using the existing ref_id, never a new sale.
+    const normalRetry = providerRc.length > 0;
 
     /*
      * RC69 khusus order lama.
@@ -480,16 +480,7 @@ export async function POST(
                   order.invoice,
               }
             : {
-                providerRc: {
-                  in: [
-                    "02",
-                    "41",
-                    "43",
-                    "44",
-                    "45",
-                    "69",
-                  ],
-                },
+                providerRc,
               }),
         },
 
