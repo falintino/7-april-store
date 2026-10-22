@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getEffectiveSellingPrice } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -588,6 +589,17 @@ export async function POST(
           "Produk sedang tidak aktif."
         );
       }
+
+      // Samakan harga promo dengan harga efektif yang ditampilkan di katalog.
+      product.price = getEffectiveSellingPrice({
+        name: product.name,
+        sku: (await prisma.product.findUnique({
+          where: { id: product.id },
+          select: { sku: true },
+        }))?.sku ?? "",
+        providerPrice: product.providerPrice,
+        fallbackPrice: product.price,
+      });
 
       /*
        * =========================================
