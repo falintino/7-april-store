@@ -7,7 +7,6 @@ import { getEffectiveSellingPrice } from "@/lib/pricing";
 
 import OrderStatusCheck from "./OrderStatusCheck";
 import RecentOrders from "./RecentOrders";
-import FreeFireLiveActivity from "./FreeFireLiveActivity";
 import FreeFireReviews from "./FreeFireReviews";
 import TopUpClient from "./TopUpClient";
 
@@ -177,7 +176,6 @@ export default async function FreeFireTopUpPage() {
       </section>
 
       <div className="pb-16 sm:pb-20">
-        <FreeFireLiveActivity />
         <TopUpClient products={displayProducts} />
 
         <OrderStatusCheck />
