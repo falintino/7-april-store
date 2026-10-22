@@ -338,7 +338,7 @@ export function getEffectiveSellingPrice({
     return fallbackPrice;
   }
 
-  // Sinkronkan harga efektif dengan pengaman checkout:
-  // harga jual tidak boleh lebih rendah dari modal provider.
-  return Math.max(target, providerPrice);
+  // Harga promo yang ditetapkan pemilik toko digunakan apa adanya.
+  // Nominal tertentu boleh disubsidi toko meskipun di bawah modal provider.
+  return target;
 }
