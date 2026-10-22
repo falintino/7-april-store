@@ -206,10 +206,9 @@ export function calculateBaseSellingPrice({
     /*
      * Jangan pernah menjual di bawah modal.
      */
-    return Math.max(
-      providerPrice,
-      competitorTarget,
-    );
+    // Harga target yang ditetapkan pemilik toko dipakai apa adanya,
+    // meskipun untuk nominal promo ini margin menjadi negatif.
+    return competitorTarget;
   }
 
   /*
@@ -339,5 +338,6 @@ export function getEffectiveSellingPrice({
     return fallbackPrice;
   }
 
-  return Math.max(target, providerPrice);
+  // Harga target boleh berada di bawah modal jika pemilik toko memilih promo rugi.
+  return target;
 }
