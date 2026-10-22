@@ -1323,7 +1323,9 @@ export default function TopUpClient({
 
                   <span className="text-xl font-black text-blue-400">
                     {formatRupiah(
-                      previewCustomerTotal,
+                      appliedPromoMatches && appliedPromo?.paymentFeeWaived
+                        ? effectiveProductPrice
+                        : previewCustomerTotal,
                     )}
                   </span>
                 </div>
@@ -1475,7 +1477,7 @@ export default function TopUpClient({
             )}
             <div className="mt-3 flex items-center justify-between gap-4 border-t border-emerald-500/20 pt-3">
               <span className="font-bold text-white">Total setelah promo</span>
-              <span className="text-lg font-black text-emerald-300">{formatRupiah(previewCustomerTotal)}</span>
+              <span className="text-lg font-black text-emerald-300">{formatRupiah(appliedPromoMatches && appliedPromo?.paymentFeeWaived ? effectiveProductPrice : previewCustomerTotal)}</span>
             </div>
           </div>
         )}
