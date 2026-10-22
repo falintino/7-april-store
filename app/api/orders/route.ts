@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getEffectiveSellingPrice } from "@/lib/pricing";
+import { getDiamondAmount, getEffectiveSellingPrice } from "@/lib/pricing";
 
 function generateInvoice() {
   const now = new Date();
@@ -460,17 +460,18 @@ export async function POST(request: Request) {
      * sudah dijual rugi.
      */
 
-    if (subtotal < providerPriceSnapshot) {
+    const diamondAmount = getDiamondAmount(product.name, product.sku);
+    const storeSubsidizedPromo = diamondAmount === 5 || diamondAmount === 10;
+
+    if (subtotal < providerPriceSnapshot && !storeSubsidizedPromo) {
       console.error("CREATE ORDER BELOW PROVIDER PRICE:", {
         productId: product.id,
-
         sku: product.sku,
       });
 
       return NextResponse.json(
         {
           success: false,
-
           message: "Harga produk sedang diperbarui. Silakan coba lagi.",
         },
         {
