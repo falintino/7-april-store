@@ -3,6 +3,7 @@ import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
 import WhatsAppPromoBanner from "@/components/ads/WhatsAppPromoBanner";
 import SiteFooter from "@/components/layout/SiteFooter";
 import { prisma } from "@/lib/prisma";
+import { getEffectiveSellingPrice } from "@/lib/pricing";
 
 import OrderStatusCheck from "./OrderStatusCheck";
 import RecentOrders from "./RecentOrders";
@@ -97,35 +98,36 @@ export default async function FreeFireTopUpPage() {
       name: true,
       sku: true,
       price: true,
+      providerPrice: true,
       popular: true,
     },
   });
 
   // Harga khusus mengikuti modal provider terbaru.
   const displayProducts = products.map((product) => {
-    if (product.sku === "FF250") {
-      return { ...product, price: 30547 };
-    }
-    if (product.sku === "FF2160") {
-      return { ...product, price: 246190 };
-    }
-    if (product.sku === "FF2180") {
-      return { ...product, price: 248650 };
-    }
-    const updatedPrices: Record<string, number> = {
+    const fixedPrices: Record<string, number> = {
       FF15: 2250,
       FF40: 5690,
       FF50: 5950,
       FF60: 7623,
+      FF250: 30547,
+      FF2160: 246190,
+      FF2180: 248650,
       FF2000: 229791,
       FF1450: 165613,
       FF1440: 164123,
       FF1075: 123100,
     };
-    if (updatedPrices[product.sku] !== undefined) {
-      return { ...product, price: updatedPrices[product.sku] };
-    }
-    return product;
+
+    const basePrice = fixedPrices[product.sku] ?? product.price;
+    const effectivePrice = getEffectiveSellingPrice({
+      name: product.name,
+      sku: product.sku,
+      providerPrice: product.providerPrice,
+      fallbackPrice: basePrice,
+    });
+
+    return { ...product, price: effectivePrice };
   });
 
   return (
