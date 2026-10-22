@@ -19,9 +19,11 @@ export default function RetryDigiflazzButton({
   const [message, setMessage] = useState("");
   const [diagnostics, setDiagnostics] = useState("");
 
+  // Show recovery for every paid order awaiting refund with a known provider RC.
+  // RC70 is handled safely by the backend using the existing ref_id.
   const allowedRetry =
     providerStatus === "REFUND_REQUIRED" &&
-    ["02", "41", "43", "44", "45", "69"].includes(providerRc ?? "");
+    Boolean(providerRc?.trim());
 
   if (!allowedRetry) {
     return null;
@@ -29,7 +31,7 @@ export default function RetryDigiflazzButton({
 
   async function retryOrder() {
     const confirmed = window.confirm(
-      `Hit ulang transaksi Digiflazz untuk invoice ${invoice}? Pastikan laporan kegagalan sudah dikonfirmasi, kode SKU dan seller sudah benar/aktif, harga sesuai batas, dan saldo Digiflazz cukup. Retry akan memakai Ref ID baru agar tidak sekadar mengecek transaksi lama.`,
+      `Pulihkan order ${invoice} (RC ${providerRc})? Pastikan seller/SKU sudah diperbaiki dan transaksi lama benar-benar gagal atau tidak terbentuk. Untuk RC selain timeout, sistem akan membuat Ref ID baru; RC70 hanya dikembalikan ke pengecekan dengan Ref ID yang sama. Pastikan harga dan saldo mencukupi.`,
     );
 
     if (!confirmed || loading) return;
