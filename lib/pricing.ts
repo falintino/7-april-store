@@ -13,12 +13,12 @@ const ONE_PERCENT_MAX = 70;
  * biaya QRIS. Biaya QRIS tetap dihitung terpisah.
  */
 const COMPETITOR_TARGET_PRICES: Record<number, number> = {
-  5: 737,
-  10: 1480,
-  12: 1650,
-  20: 3060,
-  25: 3830,
-  30: 4590,
+  5: 728,
+  10: 1456,
+  12: 1643,
+  20: 2999,
+  25: 3749,
+  30: 4499,
 
   50: 6090,
   55: 6860,
