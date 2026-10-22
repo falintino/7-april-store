@@ -338,6 +338,7 @@ export function getEffectiveSellingPrice({
     return fallbackPrice;
   }
 
-  // Harga target boleh berada di bawah modal jika pemilik toko memilih promo rugi.
-  return target;
+  // Sinkronkan harga efektif dengan pengaman checkout:
+  // harga jual tidak boleh lebih rendah dari modal provider.
+  return Math.max(target, providerPrice);
 }
