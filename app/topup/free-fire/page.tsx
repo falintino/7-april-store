@@ -183,7 +183,7 @@ export default async function FreeFireTopUpPage() {
         <OrderStatusCheck />
 
         <RecentOrders />
-        <FreeFireReviews />
+        <FreeFireReviews showForm={false} />
       </div>
 
       <SiteFooter />
