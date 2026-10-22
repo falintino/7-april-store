@@ -316,3 +316,28 @@ export function calculateSellingPrice({
     providerPrice,
   });
 }
+
+/**
+ * Harga jual efektif untuk nominal yang ditetapkan secara khusus.
+ * Harga target hanya digunakan jika tidak berada di bawah modal provider.
+ */
+export function getEffectiveSellingPrice({
+  name,
+  sku,
+  providerPrice,
+  fallbackPrice,
+}: {
+  name: string;
+  sku: string;
+  providerPrice: number;
+  fallbackPrice: number;
+}) {
+  const amount = getDiamondAmount(name, sku);
+  const target = amount === null ? null : COMPETITOR_TARGET_PRICES[amount];
+
+  if (target === undefined || target === null) {
+    return fallbackPrice;
+  }
+
+  return Math.max(target, providerPrice);
+}
