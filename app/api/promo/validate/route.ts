@@ -555,6 +555,7 @@ export async function POST(
           id: string;
           game: string;
           name: string;
+          sku: string;
           price: number;
           providerPrice: number;
           active: boolean;
@@ -572,6 +573,7 @@ export async function POST(
             id: true,
             game: true,
             name: true,
+            sku: true,
             price: true,
             providerPrice: true,
             active: true,
@@ -593,10 +595,7 @@ export async function POST(
       // Samakan harga promo dengan harga efektif yang ditampilkan di katalog.
       product.price = getEffectiveSellingPrice({
         name: product.name,
-        sku: (await prisma.product.findUnique({
-          where: { id: product.id },
-          select: { sku: true },
-        }))?.sku ?? "",
+        sku: product.sku,
         providerPrice: product.providerPrice,
         fallbackPrice: product.price,
       });
