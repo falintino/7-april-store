@@ -7,14 +7,18 @@ const headers = { "Cache-Control": "no-store, max-age=0" };
 
 export async function GET() {
   try {
-    const reviews = await prisma.review.findMany({
-      where: { approved: true, order: { product: { game: "Free Fire" }, paymentStatus: { in: ["PAID", "SUCCESS"] }, providerStatus: { in: ["SUCCESS", "SUKSES"] } } },
-      orderBy: { createdAt: "desc" },
-      take: 30,
-      select: { id: true, rating: true, comment: true, displayName: true, createdAt: true },
-    });
-    const count = reviews.length;
-    const average = count ? Math.round((reviews.reduce((sum, review) => sum + review.rating, 0) / count) * 10) / 10 : 0;
+    const where = { approved: true, order: { product: { game: "Free Fire" }, paymentStatus: { in: ["PAID", "SUCCESS"] }, providerStatus: { in: ["SUCCESS", "SUKSES"] } } };
+    const [reviews, count, aggregate] = await Promise.all([
+      prisma.review.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        take: 30,
+        select: { id: true, rating: true, comment: true, displayName: true, createdAt: true },
+      }),
+      prisma.review.count({ where }),
+      prisma.review.aggregate({ where, _avg: { rating: true } }),
+    ]);
+    const average = aggregate._avg.rating ? Math.round(aggregate._avg.rating * 10) / 10 : 0;
     return NextResponse.json({ count, average, reviews: reviews.map((review) => ({ ...review, createdAt: review.createdAt.toISOString() })) }, { headers });
   } catch (error) {
     console.error("Gagal memuat ulasan Free Fire:", error);
