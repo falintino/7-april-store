@@ -9,7 +9,6 @@ type Purchase = {
 };
 
 type LiveStats = {
-  totalTransactions: number;
   recentPurchases: Purchase[];
 };
 
@@ -47,12 +46,7 @@ export default function FreeFireLiveActivity() {
             })
           : [];
 
-        setStats({
-          totalTransactions: Number.isFinite(data.totalTransactions)
-            ? data.totalTransactions
-            : 0,
-          recentPurchases: recent,
-        });
+        setStats({ recentPurchases: recent });
         setActiveIndex((current) => recent.length ? current % recent.length : 0);
       } catch {
         // Social proof is optional; never interrupt checkout if stats are unavailable.
@@ -90,14 +84,6 @@ export default function FreeFireLiveActivity() {
 
   return (
     <>
-      {stats && (
-        <div className="mx-auto mt-5 w-fit rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-300">
-          <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-          <strong>{stats.totalTransactions.toLocaleString("id-ID")}</strong> transaksi berhasil
-          <span className="ml-2 text-emerald-100/60">· diperbarui tiap 30 detik</span>
-        </div>
-      )}
-
       {purchase && (
         <aside
           aria-live="polite"
