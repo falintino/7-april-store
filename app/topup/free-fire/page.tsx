@@ -7,6 +7,7 @@ import { getEffectiveSellingPrice } from "@/lib/pricing";
 
 import OrderStatusCheck from "./OrderStatusCheck";
 import RecentOrders from "./RecentOrders";
+import FreeFireLiveActivity from "./FreeFireLiveActivity";
 import TopUpClient from "./TopUpClient";
 
 export const metadata: Metadata = {
@@ -169,6 +170,7 @@ export default async function FreeFireTopUpPage() {
       </section>
 
       <div className="pb-16 sm:pb-20">
+        <FreeFireLiveActivity />
         <TopUpClient products={displayProducts} />
 
         <OrderStatusCheck />
