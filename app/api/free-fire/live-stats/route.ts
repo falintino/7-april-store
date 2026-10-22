@@ -23,6 +23,7 @@ export async function GET() {
         take: 8,
         select: {
           createdAt: true,
+          uid: true,
           product: { select: { name: true, game: true } },
         },
       }),
@@ -35,6 +36,8 @@ export async function GET() {
           .filter((order) => order.product.game.toLowerCase().includes("free fire"))
           .map((order) => ({
             productName: order.product.name,
+            // Public activity uses a masked UID to avoid exposing a full player identifier.
+            userId: order.uid.length > 5 ? `${order.uid.slice(0, 2)}***${order.uid.slice(-3)}` : "***",
             createdAt: order.createdAt.toISOString(),
           })),
         updatedAt: new Date().toISOString(),
