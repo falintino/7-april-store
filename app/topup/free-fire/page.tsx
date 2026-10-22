@@ -8,6 +8,7 @@ import { getEffectiveSellingPrice } from "@/lib/pricing";
 import OrderStatusCheck from "./OrderStatusCheck";
 import RecentOrders from "./RecentOrders";
 import FreeFireLiveActivity from "./FreeFireLiveActivity";
+import FreeFireReviews from "./FreeFireReviews";
 import TopUpClient from "./TopUpClient";
 
 export const metadata: Metadata = {
@@ -136,6 +137,12 @@ export default async function FreeFireTopUpPage() {
       <PromoBannerCarousel />
       <WhatsAppPromoBanner />
 
+      <section className="mx-auto max-w-7xl px-4 pt-5 sm:px-6">
+        <div className="relative overflow-hidden rounded-2xl border border-blue-400/20 bg-slate-950 shadow-2xl">
+          <img src="/free-fire-banner.svg" alt="Banner 7 April Store untuk top up Diamond Free Fire" className="block h-auto max-h-[360px] w-full object-cover" />
+        </div>
+      </section>
+
       <section className="border-y border-white/10 bg-gradient-to-b from-blue-950/30 to-[#030712]">
         <div className="mx-auto max-w-7xl px-6 py-14">
           <div className="max-w-3xl">
@@ -176,6 +183,7 @@ export default async function FreeFireTopUpPage() {
         <OrderStatusCheck />
 
         <RecentOrders />
+        <FreeFireReviews />
       </div>
 
       <SiteFooter />
