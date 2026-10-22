@@ -32,7 +32,7 @@ function findNickname(data: any): string | null {
 }
 
 async function readOmegaNickname(uid: string, apiKey: string): Promise<string | null> {
-  const url = new URL("https://api.omegatronik.co.id/api/game/free-fire");
+  const url = new URL("https://api.omegatronik.co.id/api/game/freefire-dg");
   url.searchParams.set("id", uid);
   url.searchParams.set("key", apiKey);
 
