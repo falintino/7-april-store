@@ -216,7 +216,7 @@ export async function POST(
      */
 
     const normalRetry =
-      ["02", "41", "44", "45", "69", "70"].includes(
+      ["02", "41", "43", "44", "45", "69", "70"].includes(
         providerRc
       );
 
@@ -484,6 +484,7 @@ export async function POST(
                   in: [
                     "02",
                     "41",
+                    "43",
                     "44",
                     "45",
                     "69",
