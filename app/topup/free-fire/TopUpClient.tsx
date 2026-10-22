@@ -303,8 +303,13 @@ export default function TopUpClient({
       ? 0
       : recalculatedPayment.paymentFee;
 
+  // Promo FREE_PAYMENT_FEE membebaskan seluruh biaya QRIS.
+  // Saat promo cocok, total preview harus persis harga produk setelah diskon,
+  // bukan total lama yang masih memasukkan biaya pembayaran.
   const previewCustomerTotal =
-    effectiveProductPrice + previewPaymentFee;
+    appliedPromoMatches && appliedPromo?.paymentFeeWaived
+      ? effectiveProductPrice
+      : recalculatedPayment.customerTotal;
 
   /*
    * ================================
@@ -1341,6 +1346,7 @@ export default function TopUpClient({
                 )}
               {selectedPaymentMethod === "qris" &&
                 selectedProduct &&
+                !(appliedPromoMatches && appliedPromo?.paymentFeeWaived) &&
                 (getDiamondAmount(selectedProduct.name, selectedProduct.sku) === null ||
                   getDiamondAmount(selectedProduct.name, selectedProduct.sku)! >= 50) && (
                   <p className="mt-2 text-xs leading-5 text-amber-300">
