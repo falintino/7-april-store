@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import PaymentStatusClient from "./PaymentStatusClient";
+import OrderReviewForm from "./OrderReviewForm";
 
 type PageProps = {
   searchParams: Promise<{
@@ -469,6 +470,12 @@ export default async function PaymentFinishPage({
                 </p>
               </div>
             )}
+
+            {/* REVIEW: hanya tampil setelah top up benar-benar sukses */}
+            {["SUCCESS", "SUKSES"].includes(order.providerStatus.toUpperCase()) &&
+              order.product.game.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ") === "free fire" && (
+                <OrderReviewForm invoice={order.invoice} uid={order.uid} />
+              )}
 
             {/* BUTTONS */}
             <div className="grid gap-3 sm:grid-cols-2">
