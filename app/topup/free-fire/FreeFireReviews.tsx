@@ -19,6 +19,7 @@ export default function FreeFireReviews({ showForm = true }: { showForm?: boolea
   const [comment, setComment] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [confirmLowRating, setConfirmLowRating] = useState(false);
 
   async function loadReviews() {
     try {
@@ -35,10 +36,10 @@ export default function FreeFireReviews({ showForm = true }: { showForm?: boolea
 
   useEffect(() => { void loadReviews(); }, []);
 
-  async function submitReview(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function sendReview() {
     setSubmitting(true);
     setMessage("");
+    setConfirmLowRating(false);
     try {
       const response = await fetch("/api/free-fire/reviews", {
         method: "POST",
@@ -48,7 +49,7 @@ export default function FreeFireReviews({ showForm = true }: { showForm?: boolea
       const result = await response.json() as { message?: string };
       setMessage(result.message ?? (response.ok ? "Ulasan terkirim." : "Ulasan gagal dikirim."));
       if (response.ok) {
-        setInvoice(""); setUid(""); setDisplayName(""); setComment("");
+        setInvoice(""); setUid(""); setDisplayName(""); setComment(""); setRating(5);
         await loadReviews();
       }
     } catch {
@@ -56,6 +57,16 @@ export default function FreeFireReviews({ showForm = true }: { showForm?: boolea
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function submitReview(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (rating <= 4) {
+      setConfirmLowRating(true);
+      setMessage("");
+      return;
+    }
+    await sendReview();
   }
 
   return (
@@ -87,20 +98,30 @@ export default function FreeFireReviews({ showForm = true }: { showForm?: boolea
           {showForm && <form onSubmit={submitReview} className="space-y-3 rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-5">
             <h3 className="font-bold text-white">Tulis ulasan pembelian</h3>
             <label className="block text-sm text-slate-300">Nomor invoice
-              <input required value={invoice} onChange={(e) => setInvoice(e.target.value)} maxLength={100} placeholder="Contoh: INV-..." className="mt-1.5 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500" />
+              <input required value={invoice} onChange={(e) => { setInvoice(e.target.value); setConfirmLowRating(false); }} maxLength={100} placeholder="Contoh: INV-..." className="mt-1.5 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500" />
             </label>
             <label className="block text-sm text-slate-300">UID Free Fire
               <input required value={uid} onChange={(e) => setUid(e.target.value.replace(/\D/g, "").slice(0, 20))} inputMode="numeric" minLength={6} maxLength={20} placeholder="UID yang digunakan saat order" className="mt-1.5 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500" />
             </label>
             <label className="block text-sm text-slate-300">Nama tampilan (opsional)
-              <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={40} placeholder="Pelanggan" className="mt-1.5 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500" />
+              <input value={displayName} onChange={(e) => { setDisplayName(e.target.value); setConfirmLowRating(false); }} maxLength={40} placeholder="Pelanggan" className="mt-1.5 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500" />
             </label>
-            <div><p className="mb-1.5 text-sm text-slate-300">Rating kamu</p><div className="flex gap-1">{[1,2,3,4,5].map((n) => <button key={n} type="button" onClick={() => setRating(n)} aria-label={`${n} bintang`} className={`text-3xl transition ${n <= rating ? "text-amber-400" : "text-slate-600"}`}>★</button>)}</div></div>
+            <div><p className="mb-1.5 text-sm text-slate-300">Rating kamu</p><div className="flex gap-1">{[1,2,3,4,5].map((n) => <button key={n} type="button" onClick={() => { setRating(n); setConfirmLowRating(false); }} aria-label={`${n} bintang`} className={`text-3xl transition ${n <= rating ? "text-amber-400" : "text-slate-600"}`}>★</button>)}</div></div>
             <label className="block text-sm text-slate-300">Ulasan
-              <textarea required minLength={5} maxLength={500} rows={3} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Ceritakan pengalaman top up kamu…" className="mt-1.5 w-full resize-y rounded-xl border border-white/10 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500" />
+              <textarea required minLength={5} maxLength={500} rows={3} value={comment} onChange={(e) => { setComment(e.target.value); setConfirmLowRating(false); }} placeholder="Ceritakan pengalaman top up kamu…" className="mt-1.5 w-full resize-y rounded-xl border border-white/10 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500" />
             </label>
+            {confirmLowRating && (
+              <div role="alert" className="space-y-3 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4">
+                <p className="font-bold text-amber-200">Kamu memilih {rating} bintang. Sudah sesuai dengan pengalamanmu?</p>
+                <p className="text-sm leading-6 text-slate-300">Kalau tidak sengaja memilih rating atau ingin memperbaiki komentar, kamu bisa periksa dan ubah dulu. Rating rendah tetap boleh dikirim dan tidak akan memengaruhi kemampuanmu untuk top up.</p>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <button type="button" onClick={() => setConfirmLowRating(false)} className="flex-1 rounded-lg border border-white/15 px-3 py-2.5 text-sm font-bold text-white hover:bg-white/5">Periksa / ubah ulasan</button>
+                  <button type="button" disabled={submitting} onClick={() => void sendReview()} className="flex-1 rounded-lg bg-amber-500 px-3 py-2.5 text-sm font-bold text-slate-950 hover:bg-amber-400 disabled:opacity-60">{submitting ? "Mengirim…" : "Ya, kirim rating ini"}</button>
+                </div>
+              </div>
+            )}
             {message && <p role="status" className="text-sm text-blue-300">{message}</p>}
-            <button disabled={submitting} className="w-full rounded-xl bg-blue-600 px-4 py-3 font-bold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60">{submitting ? "Mengirim…" : "Kirim Ulasan"}</button>
+            {!confirmLowRating && <button disabled={submitting} className="w-full rounded-xl bg-blue-600 px-4 py-3 font-bold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60">{submitting ? "Mengirim…" : "Kirim Ulasan"}</button>}
             <p className="text-xs leading-5 text-slate-500">Invoice dan UID hanya dipakai untuk memverifikasi transaksi, tidak ditampilkan pada ulasan publik.</p>
           </form>}
         </div>
