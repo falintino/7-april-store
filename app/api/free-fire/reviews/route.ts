@@ -7,7 +7,15 @@ const headers = { "Cache-Control": "no-store, max-age=0" };
 
 export async function GET() {
   try {
-    const where = { approved: true, order: { product: { game: "Free Fire" }, paymentStatus: { in: ["PAID", "SUCCESS"] }, providerStatus: { in: ["SUCCESS", "SUKSES"] } } };
+    const where = {
+      approved: true,
+      moderationStatus: "VISIBLE",
+      order: {
+        product: { game: "Free Fire" },
+        paymentStatus: { in: ["PAID", "SUCCESS"] },
+        providerStatus: { in: ["SUCCESS", "SUKSES"] },
+      },
+    };
     const [reviews, count, aggregate] = await Promise.all([
       prisma.review.findMany({
         where,
@@ -53,13 +61,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Pesanan berhasil untuk invoice dan UID tersebut tidak ditemukan. Ulasan hanya untuk pembeli terverifikasi." }, { status: 403, headers });
     }
 
-    const review = await prisma.review.create({
-      data: { orderId: order.id, rating, comment, displayName, approved: true },
-      select: { id: true },
+    const needsReview = rating <= 4;
+    const review = await prisma.$transaction(async (tx) => {
+      const created = await tx.review.create({
+        data: {
+          orderId: order.id,
+          rating,
+          comment,
+          displayName,
+          approved: !needsReview,
+          moderationStatus: needsReview ? "PENDING_REVIEW" : "VISIBLE",
+        },
+        select: { id: true },
+      });
+      if (needsReview) {
+        await tx.reviewAudit.create({
+          data: {
+            reviewId: created.id,
+            action: "FLAGGED_LOW_RATING",
+            reason: "Rating 1–4 otomatis masuk antrean pemeriksaan.",
+            adminIdentifier: "system",
+          },
+        });
+      }
+      return created;
     });
-    return NextResponse.json({ ok: true, reviewId: review.id, message: "Terima kasih! Ulasan pembelianmu berhasil dikirim." }, { status: 201, headers });
+
+    return NextResponse.json({
+      ok: true,
+      reviewId: review.id,
+      moderationStatus: needsReview ? "PENDING_REVIEW" : "VISIBLE",
+      message: needsReview
+        ? "Terima kasih! Ulasanmu diterima dan akan diperiksa admin sebelum ditampilkan."
+        : "Terima kasih! Rating dan ulasanmu berhasil dikirim.",
+    }, { status: 201, headers });
   } catch (error) {
-    // Prisma P2002: one review per order.
     if (typeof error === "object" && error !== null && "code" in error && error.code === "P2002") {
       return NextResponse.json({ message: "Pesanan ini sudah memiliki ulasan." }, { status: 409, headers });
     }
