@@ -31,7 +31,7 @@ export default function RetryDigiflazzButton({
   }
 
   async function retryOrder(approveOverThreshold = false) {
-    if (loading) return;
+    if (loading && !approveOverThreshold) return;
     const confirmed = window.confirm(
       `Pulihkan order ${invoice} (RC ${providerRc})? Pastikan transaksi sebelumnya sudah dipastikan gagal. ${maxPrice.trim() ? `max_price yang akan dipakai: Rp${Number(maxPrice).toLocaleString("id-ID")}.` : "Tidak ada override max_price."} RC70 hanya akan dicek ulang dengan Ref ID yang sama.`,
     );
