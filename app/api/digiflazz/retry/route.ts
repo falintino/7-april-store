@@ -357,10 +357,8 @@ export async function POST(
           providerStatus:
             "REFUND_REQUIRED",
 
-          /*
-           * Untuk VEXXA / retry khusus,
-           * wajib RC69.
-           */
+          providerRc,
+
           ...(priceRetry && retryMaxPrice !== null
             ? { providerPriceSnapshot: retryMaxPrice, providerMessage: `Retry manual dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Perkiraan subsidi Rp${estimatedSubsidy.toLocaleString("id-ID")}; biaya aktual mengikuti respons provider.` }
             : { providerMessage: "Retry Digiflazz dijalankan setelah konfigurasi diperbaiki." }),
