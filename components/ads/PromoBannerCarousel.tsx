@@ -6,20 +6,20 @@ import { useEffect, useState } from "react";
 
 const banners = [
   {
-    src: "/images/banners/7-april-store-promo.webp",
-    alt: "Promo Top Up Free Fire 7 April Store, harga hemat dan proses cepat",
+    src: "/images/banners/banner-1-promo-diskon.jpg",
+    alt: "Banner promo diskon top up Free Fire 7 April Store",
     href: "/topup/free-fire",
-    position: "object-[34%_center] sm:object-center",
+    position: "object-center",
   },
   {
-    src: "/images/banners/7-april-store-safe.webp",
-    alt: "Transaksi aman dan transparan di 7 April Store",
+    src: "/images/banners/banner-2-qris-otomatis.jpg",
+    alt: "Banner pembayaran QRIS otomatis 7 April Store",
     href: "/profil",
-    position: "object-[38%_center] sm:object-center",
+    position: "object-center",
   },
   {
-    src: "/images/banners/7-april-store-partnership.webp",
-    alt: "Informasi kemitraan 7 April Store",
+    src: "/images/banners/banner-3-produk-layanan.jpg",
+    alt: "Banner produk dan layanan 7 April Store",
     href: "/profil",
     position: "object-center",
   },
@@ -41,7 +41,7 @@ export default function PromoBannerCarousel() {
 
   return (
     <section
-      className="bg-[#030712] px-5 pb-3 pt-8 sm:px-8"
+      className="bg-[#050b18] px-3 pb-4 pt-5 sm:px-8 sm:pb-6 sm:pt-8"
       aria-label="Promo 7 April Store"
     >
       <div
@@ -51,7 +51,7 @@ export default function PromoBannerCarousel() {
         onFocusCapture={() => setPaused(true)}
         onBlurCapture={() => setPaused(false)}
       >
-        <div className="relative aspect-[2/1] overflow-hidden rounded-2xl border border-blue-400/20 bg-[#041126] shadow-[0_20px_70px_rgba(0,82,255,0.18)] sm:aspect-[5/1] sm:rounded-3xl">
+        <div className="relative aspect-[1.6/1] overflow-hidden rounded-xl border border-cyan-400/25 bg-[#050b18] shadow-[0_18px_60px_rgba(0,82,255,0.2)] sm:aspect-[5/1] sm:rounded-2xl">
           {banners.map((banner, index) => {
             const active = index === activeIndex;
 
