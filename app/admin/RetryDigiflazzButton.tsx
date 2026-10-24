@@ -18,6 +18,7 @@ export default function RetryDigiflazzButton({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [diagnostics, setDiagnostics] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   // Show recovery for every paid order awaiting refund with a known provider RC.
   // RC70 is handled safely by the backend using the existing ref_id.
@@ -29,12 +30,12 @@ export default function RetryDigiflazzButton({
     return null;
   }
 
-  async function retryOrder() {
+  async function retryOrder(approveOverThreshold = false) {
+    if (loading) return;
     const confirmed = window.confirm(
-      `Pulihkan order ${invoice} (RC ${providerRc})? Pastikan seller/SKU sudah diperbaiki dan transaksi lama benar-benar gagal atau tidak terbentuk. Untuk RC selain timeout, sistem akan membuat Ref ID baru; RC70 hanya dikembalikan ke pengecekan dengan Ref ID yang sama. Pastikan harga dan saldo mencukupi.`,
+      `Pulihkan order ${invoice} (RC ${providerRc})? Pastikan transaksi sebelumnya sudah dipastikan gagal. ${maxPrice.trim() ? `max_price yang akan dipakai: Rp${Number(maxPrice).toLocaleString("id-ID")}.` : "Tidak ada override max_price."} RC70 hanya akan dicek ulang dengan Ref ID yang sama.`,
     );
-
-    if (!confirmed || loading) return;
+    if (!confirmed) return;
 
     setLoading(true);
     setMessage("Permintaan retry sedang dikirim. Tunggu hasilnya dan jangan klik ulang.");
@@ -46,7 +47,7 @@ export default function RetryDigiflazzButton({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ invoice }),
+        body: JSON.stringify({ invoice, ...(maxPrice.trim() ? { maxPrice: Number(maxPrice) } : {}), ...(approveOverThreshold ? { approveOverThreshold: true } : {}) }),
       });
 
       const responseText = await response.text();
@@ -58,9 +59,11 @@ export default function RetryDigiflazzButton({
       }
 
       if (!response.ok || !result.success) {
-        setMessage(
-          result.message || "Retry gagal dijalankan.",
-        );
+        if (result.requiresApproval) {
+          const accepted = window.confirm(`${result.message}\\n\\nInvoice: ${result.invoice}\\nPembayaran pelanggan: Rp${Number(result.customerTotal).toLocaleString("id-ID")}\\nmax_price: Rp${Number(result.maxPrice).toLocaleString("id-ID")}\\nPerkiraan subsidi: Rp${Number(result.estimatedSubsidy).toLocaleString("id-ID")}\\nBatas tanpa persetujuan: Rp${Number(result.subsidyLimit).toLocaleString("id-ID")}\\n\\nSetujui dan lanjutkan retry?`);
+          if (accepted) { await retryOrder(true); return; }
+        }
+        setMessage(result.message || "Retry gagal dijalankan.");
         return;
       }
 
@@ -84,9 +87,14 @@ export default function RetryDigiflazzButton({
 
   return (
     <div className="flex flex-col gap-2">
+      <label className="flex max-w-[260px] flex-col gap-1 text-[10px] text-slate-300">
+        max_price Digiflazz (opsional, Rp)
+        <input type="number" min="1" step="1" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="Isi sesuai harga buyer Digiflazz" className="h-8 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs text-white outline-none focus:border-amber-400" />
+        <span className="text-slate-500">Jika perkiraan subsidi di atas Rp25.000, sistem meminta persetujuan tambahan.</span>
+      </label>
       <button
         type="button"
-        onClick={retryOrder}
+        onClick={() => retryOrder(false)}
         disabled={loading}
         className="inline-flex h-8 items-center justify-center rounded-md border border-amber-400/30 bg-amber-400/10 px-3 text-[10px] font-bold text-amber-200 transition hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
