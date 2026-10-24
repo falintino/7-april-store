@@ -552,9 +552,16 @@ export async function processDigiflazzOrder(
      * =====================================
      */
 
-    const providerMaxPrice =
-      order.providerPriceSnapshot ??
-      Math.max(order.total, order.product.providerPrice);
+    /*
+     * Jangan biarkan snapshot modal lama membuat max_price
+     * lebih rendah dari harga produk atau modal provider saat ini.
+     * Ini penting untuk mencegah RC 69 akibat batas harga terlalu rendah.
+     */
+    const providerMaxPrice = Math.max(
+      order.providerPriceSnapshot ?? 0,
+      order.product.providerPrice,
+      order.total,
+    );
 
     if (
       !Number.isInteger(
