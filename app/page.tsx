@@ -5,7 +5,6 @@ import {
 } from "lucide-react";
 
 import GamesGrid from "@/components/games/GamesGrid";
-import Hero from "@/components/hero/Hero";
 import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
 import StaticPromoBanners from "@/components/ads/StaticPromoBanners";
 import QuickMenu from "@/components/quick-menu/QuickMenu";
@@ -57,11 +56,10 @@ export default function Home() {
   return (
     <main className="bg-[#030712]">
       <PromoBannerCarousel />
-      <StaticPromoBanners />
-      <Hero />
       <QuickMenu />
-      <ServicesGrid />
       <GamesGrid />
+      <StaticPromoBanners />
+      <ServicesGrid />
 
       <section className="border-t border-slate-800 bg-[#050b18] py-16">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
