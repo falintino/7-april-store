@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import { getEffectiveSellingPrice } from "@/lib/pricing";
 
 import PromoManager from "./PromoManager";
 
@@ -156,31 +157,61 @@ export default async function AdminPromosPage() {
    * komponen client.
    */
 
-  const products =
+  const productRows =
     await prisma.product.findMany({
       where: {
         active: true,
-
         game: {
-          equals:
-            "Free Fire",
-          mode:
-            "insensitive",
+          equals: "Free Fire",
+          mode: "insensitive",
         },
       },
-
       orderBy: {
         price: "asc",
       },
-
       select: {
         id: true,
         name: true,
         sku: true,
         price: true,
+        providerPrice: true,
         active: true,
       },
     });
+
+  // Gunakan aturan harga efektif yang sama dengan halaman Top Up.
+  // Beberapa SKU memiliki harga jual khusus yang bukan nilai mentah Product.price.
+  const fixedPrices: Record<string, number> = {
+    FF15: 2250,
+    FF40: 5690,
+    FF50: 5950,
+    FF60: 7623,
+    FF250: 30547,
+    FF2160: 246190,
+    FF2180: 248650,
+    FF2000: 229791,
+    FF1450: 165613,
+    FF1440: 164123,
+    FF1075: 123100,
+  };
+
+  const products = productRows.map((product) => {
+    const basePrice = fixedPrices[product.sku] ?? product.price;
+    const price = getEffectiveSellingPrice({
+      name: product.name,
+      sku: product.sku,
+      providerPrice: product.providerPrice,
+      fallbackPrice: basePrice,
+    });
+
+    return {
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      price,
+      active: product.active,
+    };
+  }).sort((a, b) => a.price - b.price);
 
   /*
    * ===============================
