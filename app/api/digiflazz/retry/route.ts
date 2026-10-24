@@ -9,56 +9,11 @@ export const dynamic = "force-dynamic";
 
 type RequestBody = {
   invoice?: unknown;
+  maxPrice?: unknown;
+  approveOverThreshold?: unknown;
 };
 
-/*
- * Order khusus lama:
- *
- * Customer sudah membayar.
- * Retry ini hanya digunakan untuk
- * pemulihan transaksi provider.
- */
-const SPECIAL_RETRY_INVOICE =
-  "7A-20261005-665076";
-
-const SPECIAL_RETRY_MAX_PRICE = 795;
-
-/*
- * TEST KHUSUS VEXXA
- *
- * Hanya invoice ini yang boleh
- * retry RC69 dengan max_price 6025.
- *
- * Tujuannya untuk menguji apakah
- * seller VEXXA / FF50 benar-benar
- * bisa memproses UID customer.
- *
- * Jangan dipakai untuk invoice lain.
- */
-const VEXXA_TEST_INVOICE =
-  "7A-20261005-324423";
-
-const VEXXA_TEST_MAX_PRICE = 6025;
-
-/* RC69 khusus invoice 250 Diamond yang sedang dipulihkan. */
-const CURRENT_RC69_RETRY_INVOICE = "7A-20261017-179905";
-const CURRENT_RC69_RETRY_MAX_PRICE = 32000;
-
-/* Retry khusus invoice 160 Diamond setelah pergantian seller. */
-const CURRENT_SELLER_RETRY_INVOICE = "7A-20261018-496191";
-const CURRENT_SELLER_RETRY_MAX_PRICE = 20000;
-
-/* Retry khusus invoice 40 Diamond; toko menanggung selisih harga seller. */
-const CURRENT_40DM_RETRY_INVOICE = "7A-20261018-303451";
-const CURRENT_40DM_RETRY_MAX_PRICE = 6000;
-
-/* Retry khusus promo 100 Diamond setelah seller diganti ke Omah Pulsa. */
-const CURRENT_100DM_PROMO_RETRY_INVOICE = "7A-20261018-907520";
-const CURRENT_100DM_PROMO_RETRY_MAX_PRICE = 12000;
-
-/* Retry khusus invoice promo teman untuk 355 Diamond; toko menanggung diskon. */
-const CURRENT_355DM_PROMO_RETRY_INVOICE = "7A-20261024-747258";
-const CURRENT_355DM_PROMO_RETRY_MAX_PRICE = 41255;
+const MAX_UNAPPROVED_SUBSIDY = 25_000;
 
 export async function POST(
   request: Request
@@ -149,6 +104,10 @@ export async function POST(
             true,
 
           total: true,
+
+          subtotal: true,
+
+          discountAmount: true,
         },
       });
 
@@ -219,82 +178,15 @@ export async function POST(
      * Dikembalikan ke PENDING.
      */
 
-    // Allow manual recovery for any known provider RC after admin confirms
-    // the old transaction failed and the seller/SKU is corrected.
-    // RC70 remains a status check using the existing ref_id, never a new sale.
+    const requestedMaxPrice = body.maxPrice === undefined || body.maxPrice === null || body.maxPrice === "" ? null : Number(body.maxPrice);
+    if (requestedMaxPrice !== null && (!Number.isSafeInteger(requestedMaxPrice) || requestedMaxPrice <= 0)) return NextResponse.json({ success: false, message: "max_price harus berupa angka rupiah bulat yang lebih besar dari 0." }, { status: 400 });
+    const priceRetry = requestedMaxPrice !== null;
+    const retryMaxPrice = requestedMaxPrice;
     const normalRetry = providerRc.length > 0;
-
-    /*
-     * RC69 khusus order lama.
-     */
-
-    const specialPriceRetry =
-      order.invoice ===
-        SPECIAL_RETRY_INVOICE &&
-      providerRc ===
-        "69";
-
-    /*
-     * RC69 khusus test VEXXA.
-     */
-
-    const vexxaTestRetry =
-      order.invoice ===
-        VEXXA_TEST_INVOICE &&
-      providerRc ===
-        "69";
-
-    /*
-     * Apakah retry ini termasuk
-     * retry dengan harga khusus?
-     */
-
-    const currentInvoicePriceRetry =
-      order.invoice === CURRENT_RC69_RETRY_INVOICE &&
-      ["69", "02"].includes(providerRc);
-
-    const currentInvoiceSellerRetry =
-      order.invoice === CURRENT_SELLER_RETRY_INVOICE &&
-      providerRc === "02";
-
-    const currentInvoice40DmRetry =
-      order.invoice === CURRENT_40DM_RETRY_INVOICE &&
-      ["69", "02"].includes(providerRc);
-
-    const currentInvoice100DmPromoRetry =
-      order.invoice === CURRENT_100DM_PROMO_RETRY_INVOICE &&
-      providerRc === "02";
-
-    const currentInvoice355DmPromoRetry =
-      order.invoice === CURRENT_355DM_PROMO_RETRY_INVOICE &&
-      providerRc === "69";
-
-    const currentInvoiceSpecialRetry =
-      currentInvoicePriceRetry || currentInvoiceSellerRetry || currentInvoice40DmRetry || currentInvoice100DmPromoRetry || currentInvoice355DmPromoRetry;
-
-    const priceRetry =
-      specialPriceRetry ||
-      vexxaTestRetry ||
-      currentInvoiceSpecialRetry;
-
-    /*
-     * max_price yang akan dipakai.
-     */
-
-    const retryMaxPrice =
-      vexxaTestRetry
-        ? VEXXA_TEST_MAX_PRICE
-        : currentInvoicePriceRetry
-          ? CURRENT_RC69_RETRY_MAX_PRICE
-          : currentInvoiceSellerRetry
-            ? CURRENT_SELLER_RETRY_MAX_PRICE
-            : currentInvoice40DmRetry
-              ? CURRENT_40DM_RETRY_MAX_PRICE
-              : currentInvoice100DmPromoRetry
-                ? CURRENT_100DM_PROMO_RETRY_MAX_PRICE
-                : currentInvoice355DmPromoRetry
-                  ? CURRENT_355DM_PROMO_RETRY_MAX_PRICE
-                  : SPECIAL_RETRY_MAX_PRICE;
+    if (priceRetry && !["69", "02"].includes(providerRc)) return NextResponse.json({ success: false, message: "Override harga hanya diperbolehkan untuk RC69 atau RC02." }, { status: 409 });
+    const estimatedSubsidy = priceRetry ? Math.max(0, requestedMaxPrice! - Math.max(0, order.total)) : 0;
+    const overThreshold = estimatedSubsidy > MAX_UNAPPROVED_SUBSIDY;
+    if (overThreshold && body.approveOverThreshold !== true) return NextResponse.json({ success: false, requiresApproval: true, message: "Perkiraan subsidi melewati batas Rp25.000. Tinjau nominal dan kirim ulang dengan persetujuan admin eksplisit.", invoice: order.invoice, customerTotal: order.total, maxPrice: requestedMaxPrice, estimatedSubsidy, subsidyLimit: MAX_UNAPPROVED_SUBSIDY }, { status: 409 });
 
     /*
      * =========================================
@@ -305,8 +197,7 @@ export async function POST(
     if (
       order.providerStatus !==
         "REFUND_REQUIRED" ||
-      (!normalRetry &&
-        !priceRetry)
+      !normalRetry
     ) {
       return NextResponse.json(
         {
@@ -358,14 +249,7 @@ export async function POST(
       return `${prefix}${nextAttempt}`;
     }
 
-    const refId =
-      (providerRc !== "70" && (normalRetry || currentInvoiceSellerRetry || currentInvoice40DmRetry || currentInvoice100DmPromoRetry || currentInvoice355DmPromoRetry))
-        ? nextSellerRetryRefId(
-            order.invoice,
-            order.providerRefId
-          )
-        : order.providerRefId ||
-          order.invoice;
+    const refId = providerRc !== "70" ? nextSellerRetryRefId(order.invoice, order.providerRefId) : order.providerRefId || order.invoice;
 
     /*
      * =========================================
@@ -477,54 +361,9 @@ export async function POST(
            * Untuk VEXXA / retry khusus,
            * wajib RC69.
            */
-          ...(priceRetry
-            ? {
-                providerRc:
-                  currentInvoiceSpecialRetry ? providerRc : "69",
-
-                /*
-                 * Jangan sampai invoice
-                 * lain lolos sebagai VEXXA.
-                 */
-                invoice:
-                  order.invoice,
-              }
-            : {
-                providerRc,
-              }),
-        },
-
-        data: {
-          providerStatus:
-            "PENDING",
-
-          providerRefId:
-            refId,
-
-          ...(priceRetry
-            ? {
-                providerPriceSnapshot:
-                  retryMaxPrice,
-
-                providerMessage:
-                  vexxaTestRetry
-                    ? "Test VEXXA FF50 dengan batas harga Rp6.025. Selisih harga provider ditanggung toko khusus untuk pengujian invoice ini."
-                    : currentInvoicePriceRetry
-                      ? `Retry pemulihan khusus invoice ini (RC ${providerRc}) menggunakan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}; selisih harga ditanggung toko.`
-                      : currentInvoiceSellerRetry
-                        ? `Retry khusus invoice 160 Diamond setelah pergantian seller (RC ${providerRc}) menggunakan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
-                        : currentInvoice40DmRetry
-                          ? `Retry khusus invoice 40 Diamond (RC ${providerRc}) menggunakan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Selisih harga seller ditanggung toko.`
-                          : currentInvoice100DmPromoRetry
-                            ? `Retry khusus invoice promo 100 Diamond (RC ${providerRc}) menggunakan Ref ID baru dan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Selisih harga seller ditanggung toko.`
-                            : currentInvoice355DmPromoRetry
-                              ? `Retry khusus invoice promo teman 355 Diamond (RC ${providerRc}) menggunakan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Diskon ditanggung toko.`
-                              : "Retry Digiflazz dengan batas harga Rp795. Selisih harga seller Rp45 ditanggung toko.",
-              }
-            : {
-                providerMessage:
-                  "Retry Digiflazz dijalankan setelah konfigurasi diperbaiki.",
-              }),
+          ...(priceRetry && retryMaxPrice !== null
+            ? { providerPriceSnapshot: retryMaxPrice, providerMessage: `Retry manual dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Perkiraan subsidi Rp${estimatedSubsidy.toLocaleString("id-ID")}; biaya aktual mengikuti respons provider.` }
+            : { providerMessage: "Retry Digiflazz dijalankan setelah konfigurasi diperbaiki." }),
 
           providerUpdatedAt:
             new Date(),
@@ -578,22 +417,7 @@ export async function POST(
         deferred:
           false,
 
-        message:
-          vexxaTestRetry
-            ? "Test VEXXA FF50 dengan batas harga Rp6.025 selesai diproses."
-            : currentInvoicePriceRetry
-              ? `Retry pemulihan khusus invoice ini (RC awal ${providerRc}) selesai diproses dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
-              : currentInvoiceSellerRetry
-                ? `Retry invoice 160 Diamond setelah pergantian seller selesai diproses dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
-                : currentInvoice40DmRetry
-                  ? `Retry invoice 40 Diamond selesai diproses dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
-                  : currentInvoice100DmPromoRetry
-                    ? `Retry invoice promo 100 Diamond selesai diproses dengan Ref ID baru dan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
-                    : currentInvoice355DmPromoRetry
-                      ? `Retry invoice promo teman 355 Diamond selesai diproses dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
-                      : specialPriceRetry
-                ? "Retry Digiflazz dengan batas harga Rp795 selesai diproses."
-                : "Retry Digiflazz selesai diproses.",
+        message: priceRetry ? `Retry selesai dengan max_price Rp${retryMaxPrice!.toLocaleString("id-ID")}. Estimasi subsidi Rp${estimatedSubsidy.toLocaleString("id-ID")}.` : "Retry Digiflazz selesai diproses.",
 
         invoice:
           order.invoice,
@@ -635,37 +459,12 @@ export async function POST(
           result.price ??
           null,
 
-        specialPriceRetry,
-
-        vexxaTestRetry,
-
-        currentInvoicePriceRetry,
-
-        currentInvoiceSellerRetry,
-
-        currentInvoice40DmRetry,
-
-        currentInvoice100DmPromoRetry,
-
-        maxPrice:
-          priceRetry
-            ? retryMaxPrice
-            : null,
-
-        /*
-         * Test VEXXA:
-         * 6025 - 5565 = 460
-         */
-        storeAbsorbsDifference:
-          vexxaTestRetry
-            ? 460
-            : specialPriceRetry
-              ? 45
-              : currentInvoice40DmRetry
-                ? 135
-                : currentInvoice100DmPromoRetry
-                  ? 6430
-                  : 0,
+        priceRetry,
+        maxPrice: retryMaxPrice,
+        customerTotal: order.total,
+        estimatedSubsidy,
+        subsidyLimit: MAX_UNAPPROVED_SUBSIDY,
+        approvalRequired: overThreshold,
       });
     } catch (error) {
       console.error(
