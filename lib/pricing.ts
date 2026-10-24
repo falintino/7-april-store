@@ -36,6 +36,7 @@ const COMPETITOR_TARGET_PRICES: Record<number, number> = {
   190: 22480,
 
   210: 24580,
+  250: 30547,
   280: 32770,
   300: 35840,
   355: 41420,
