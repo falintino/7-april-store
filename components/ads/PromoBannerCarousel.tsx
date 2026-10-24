@@ -41,7 +41,7 @@ export default function PromoBannerCarousel() {
 
   return (
     <section
-      className="bg-[#050b18] px-3 pb-4 pt-5 sm:px-8 sm:pb-6 sm:pt-8"
+      className="bg-[#020617] px-3 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-7"
       aria-label="Promo 7 April Store"
     >
       <div
@@ -51,7 +51,7 @@ export default function PromoBannerCarousel() {
         onFocusCapture={() => setPaused(true)}
         onBlurCapture={() => setPaused(false)}
       >
-        <div className="relative aspect-[1.6/1] overflow-hidden rounded-xl border border-cyan-400/25 bg-[#050b18] shadow-[0_18px_60px_rgba(0,82,255,0.2)] sm:aspect-[5/1] sm:rounded-2xl">
+        <div className="relative aspect-[1.55/1] overflow-hidden rounded-xl border border-cyan-400/25 bg-[#020617] shadow-[0_18px_60px_rgba(0,82,255,0.2)] sm:aspect-[5.7/1] sm:rounded-2xl">
           {banners.map((banner, index) => {
             const active = index === activeIndex;
 
