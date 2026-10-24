@@ -348,23 +348,24 @@ export async function POST(
     const claimed =
       await prisma.order.updateMany({
         where: {
-          id:
-            order.id,
-
-          paymentStatus:
-            "PAID",
-
-          providerStatus:
-            "REFUND_REQUIRED",
-
+          id: order.id,
+          paymentStatus: "PAID",
+          providerStatus: "REFUND_REQUIRED",
           providerRc,
-
+        },
+        data: {
+          providerStatus: "PENDING",
+          providerRefId: refId,
           ...(priceRetry && retryMaxPrice !== null
-            ? { providerPriceSnapshot: retryMaxPrice, providerMessage: `Retry manual dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Perkiraan subsidi Rp${estimatedSubsidy.toLocaleString("id-ID")}; biaya aktual mengikuti respons provider.` }
-            : { providerMessage: "Retry Digiflazz dijalankan setelah konfigurasi diperbaiki." }),
-
-          providerUpdatedAt:
-            new Date(),
+            ? {
+                providerPriceSnapshot: retryMaxPrice,
+                providerMessage: `Retry manual dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Perkiraan selisih Rp${estimatedSubsidy.toLocaleString("id-ID")}; biaya aktual mengikuti respons provider.`,
+              }
+            : {
+                providerMessage:
+                  "Retry Digiflazz dijalankan setelah konfigurasi diperbaiki.",
+              }),
+          providerUpdatedAt: new Date(),
         },
       });
 
