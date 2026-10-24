@@ -56,6 +56,10 @@ const CURRENT_40DM_RETRY_MAX_PRICE = 6000;
 const CURRENT_100DM_PROMO_RETRY_INVOICE = "7A-20261018-907520";
 const CURRENT_100DM_PROMO_RETRY_MAX_PRICE = 12000;
 
+/* Retry khusus invoice promo teman untuk 355 Diamond; toko menanggung diskon. */
+const CURRENT_355DM_PROMO_RETRY_INVOICE = "7A-20261024-747258";
+const CURRENT_355DM_PROMO_RETRY_MAX_PRICE = 41255;
+
 export async function POST(
   request: Request
 ) {
@@ -261,8 +265,12 @@ export async function POST(
       order.invoice === CURRENT_100DM_PROMO_RETRY_INVOICE &&
       providerRc === "02";
 
+    const currentInvoice355DmPromoRetry =
+      order.invoice === CURRENT_355DM_PROMO_RETRY_INVOICE &&
+      providerRc === "69";
+
     const currentInvoiceSpecialRetry =
-      currentInvoicePriceRetry || currentInvoiceSellerRetry || currentInvoice40DmRetry || currentInvoice100DmPromoRetry;
+      currentInvoicePriceRetry || currentInvoiceSellerRetry || currentInvoice40DmRetry || currentInvoice100DmPromoRetry || currentInvoice355DmPromoRetry;
 
     const priceRetry =
       specialPriceRetry ||
@@ -284,7 +292,9 @@ export async function POST(
               ? CURRENT_40DM_RETRY_MAX_PRICE
               : currentInvoice100DmPromoRetry
                 ? CURRENT_100DM_PROMO_RETRY_MAX_PRICE
-                : SPECIAL_RETRY_MAX_PRICE;
+                : currentInvoice355DmPromoRetry
+                  ? CURRENT_355DM_PROMO_RETRY_MAX_PRICE
+                  : SPECIAL_RETRY_MAX_PRICE;
 
     /*
      * =========================================
@@ -349,7 +359,7 @@ export async function POST(
     }
 
     const refId =
-      (providerRc !== "70" && (normalRetry || currentInvoiceSellerRetry || currentInvoice40DmRetry || currentInvoice100DmPromoRetry))
+      (providerRc !== "70" && (normalRetry || currentInvoiceSellerRetry || currentInvoice40DmRetry || currentInvoice100DmPromoRetry || currentInvoice355DmPromoRetry))
         ? nextSellerRetryRefId(
             order.invoice,
             order.providerRefId
@@ -507,7 +517,9 @@ export async function POST(
                           ? `Retry khusus invoice 40 Diamond (RC ${providerRc}) menggunakan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Selisih harga seller ditanggung toko.`
                           : currentInvoice100DmPromoRetry
                             ? `Retry khusus invoice promo 100 Diamond (RC ${providerRc}) menggunakan Ref ID baru dan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Selisih harga seller ditanggung toko.`
-                            : "Retry Digiflazz dengan batas harga Rp795. Selisih harga seller Rp45 ditanggung toko.",
+                            : currentInvoice355DmPromoRetry
+                              ? `Retry khusus invoice promo teman 355 Diamond (RC ${providerRc}) menggunakan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}. Diskon ditanggung toko.`
+                              : "Retry Digiflazz dengan batas harga Rp795. Selisih harga seller Rp45 ditanggung toko.",
               }
             : {
                 providerMessage:
@@ -577,7 +589,9 @@ export async function POST(
                   ? `Retry invoice 40 Diamond selesai diproses dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
                   : currentInvoice100DmPromoRetry
                     ? `Retry invoice promo 100 Diamond selesai diproses dengan Ref ID baru dan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
-                    : specialPriceRetry
+                    : currentInvoice355DmPromoRetry
+                      ? `Retry invoice promo teman 355 Diamond selesai diproses dengan max_price Rp${retryMaxPrice.toLocaleString("id-ID")}.`
+                      : specialPriceRetry
                 ? "Retry Digiflazz dengan batas harga Rp795 selesai diproses."
                 : "Retry Digiflazz selesai diproses.",
 
