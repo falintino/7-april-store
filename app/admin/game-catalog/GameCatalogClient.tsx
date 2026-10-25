@@ -151,7 +151,7 @@ export default function GameCatalogClient() {
                     <div className="text-right"><p className="text-xs text-slate-500">Modal Digiflazz</p><p className="font-black">{rupiah(item.providerPrice)}</p><p className="mt-1 text-xs text-slate-400">Saran harga awal {rupiah(item.suggestedPrice)}</p></div>
                   </div>
                   {item.description && <p className="mt-3 text-xs leading-5 text-slate-400">{item.description}</p>}
-                  <button onClick={() => void importProduct(item)} disabled={busySku === item.sku || imported} className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50">{imported ? "Sudah Diimpor" : busySku === item.sku ? "Mengimpor…" : "Impor sebagai Nonaktif"}</button>
+                  <button onClick={() => void importProduct(item)} disabled={Boolean(busySku) || imported} className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50">{imported ? "Sudah Diimpor" : busySku === item.sku ? "Mengimpor…" : "Impor sebagai Nonaktif"}</button>
                 </article>;
               })}
             </div>
