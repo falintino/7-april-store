@@ -135,7 +135,7 @@ export default async function FreeFireTopUpPage() {
   return (
     <main className="min-h-screen bg-[#030712] text-white">
       <section className="pt-4 sm:pt-6">
-        <div className="relative left-1/2 w-screen -translate-x-1/2 aspect-[5.63/1] overflow-hidden bg-[#06122e]">
+        <div className="relative left-1/2 w-screen -translate-x-1/2 aspect-[1.8/1] overflow-hidden bg-[#06122e] sm:aspect-[5.63/1]">
           <img
             src="/images/banners/7A_Store_banner_text_kecil_2048x364%20(1).png"
             alt="7 April Store — top up Diamond Free Fire"
@@ -143,23 +143,25 @@ export default async function FreeFireTopUpPage() {
           />
         </div>
 
-        <div className="mx-auto max-w-[1440px] px-3 sm:px-6">
-        <div className="relative mx-2 -mt-5 flex items-center gap-4 rounded-xl border border-white/10 bg-[#0b1222] p-3 shadow-xl sm:mx-8 sm:-mt-12 sm:gap-6 sm:p-5">
-          <img
-            src="/images/games/freefire.jpg"
-            alt="Free Fire"
-            className="h-20 w-20 shrink-0 rounded-xl border border-cyan-400/20 object-cover sm:h-32 sm:w-32 sm:rounded-2xl"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-base font-black tracking-wide text-white sm:text-xl">FREE FIRE</p>
-            <p className="mt-1 text-xs text-slate-400 sm:text-sm">Garena</p>
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[10px] font-semibold text-slate-300 sm:text-xs">
-              <span><span className="mr-1.5 text-amber-400">⚡</span>Proses cepat</span>
-              <span><span className="mr-1.5 text-blue-400">●</span>Bantuan pelanggan</span>
-              <span><span className="mr-1.5 text-emerald-400">✓</span>Pembayaran QRIS</span>
+        <div className="relative left-1/2 w-screen -translate-x-1/2 border-b border-cyan-400/30 bg-[repeating-linear-gradient(135deg,#0b1222_0px,#0b1222_22px,#111a2c_22px,#111a2c_44px)]">
+          <div className="mx-auto min-h-[150px] max-w-6xl px-4 sm:min-h-[138px] sm:px-6">
+            <div className="relative flex min-h-[150px] items-center sm:min-h-[138px]">
+              <img
+                src="/images/games/freefire.jpg"
+                alt="Free Fire"
+                className="absolute -top-7 left-0 z-10 h-[112px] w-[112px] rounded-xl border border-cyan-400/30 object-cover shadow-xl sm:-top-[92px] sm:h-[200px] sm:w-[176px] sm:rounded-2xl"
+              />
+              <div className="min-w-0 pl-[124px] sm:pl-[212px]">
+                <p className="text-base font-black tracking-wide text-white sm:text-xl">FREE FIRE</p>
+                <p className="mt-1 text-xs text-slate-300 sm:text-sm">Garena</p>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[10px] font-semibold text-slate-200 sm:text-xs">
+                  <span><span className="mr-1.5 text-amber-400">⚡</span>Proses Cepat</span>
+                  <span><span className="mr-1.5 text-indigo-400">●</span>Layanan Chat 24/7</span>
+                  <span><span className="mr-1.5 text-blue-400">●</span>Pembayaran Aman!</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </section>
 
