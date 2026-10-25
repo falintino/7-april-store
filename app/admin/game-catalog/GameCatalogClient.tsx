@@ -48,10 +48,9 @@ const recommendedPrices: Record<number, number> = {
 };
 
 function diamondAmount(product: StoredProduct): number | null {
-  const text = `${product.sku} ${product.name}`.toLowerCase();
-  const match = text.match(/(?:ml|mobile\s*legends?\s*)?(\d{1,4})\s*(?:diamond|dm|$)/i);
-  if (!match) return null;
-  const amount = Number(match[1]);
+  const skuMatch = product.sku.match(/^ml(\d{1,4})$/i);
+  const nameMatch = product.name.match(/\b(\d{1,4})\s*diamond\b/i);
+  const amount = Number(skuMatch?.[1] ?? nameMatch?.[1]);
   return Number.isSafeInteger(amount) && competitorPrices[amount] ? amount : null;
 }
 
