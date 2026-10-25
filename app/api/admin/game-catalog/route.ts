@@ -19,6 +19,9 @@ type PriceListItem = {
   desc?: string;
 };
 
+let fullCatalogCache: { expiresAt: number; items: PriceListItem[] } | null = null;
+let fullCatalogInFlight: Promise<PriceListItem[]> | null = null;
+
 function getConfig() {
   const username = process.env.DIGIFLAZZ_USERNAME?.trim();
   const mode = (process.env.DIGIFLAZZ_MODE ?? "development").trim().toLowerCase();
@@ -35,7 +38,10 @@ function getConfig() {
 }
 
 async function fetchGameCatalog(code?: string): Promise<PriceListItem[]> {
+  if (!code && fullCatalogCache && fullCatalogCache.expiresAt > Date.now()) return fullCatalogCache.items;
+  if (!code && fullCatalogInFlight) return fullCatalogInFlight;
   const config = getConfig();
+  const requestPromise = (async () => {
   const response = await fetch("https://gateway.falintino.com/v1/price-list", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -47,10 +53,21 @@ async function fetchGameCatalog(code?: string): Promise<PriceListItem[]> {
     throw new Error(`Gateway Digiflazz merespons HTTP ${response.status}.`);
   }
   const payload = await response.json() as { data?: unknown };
-  if (!Array.isArray(payload.data)) {
-    throw new Error("Respons daftar harga Digiflazz tidak sesuai format.");
+  const items = Array.isArray(payload.data)
+    ? payload.data as PriceListItem[]
+    : payload.data && typeof payload.data === "object"
+      ? [payload.data as PriceListItem]
+      : null;
+  if (!items) throw new Error("Respons daftar harga Digiflazz tidak sesuai format.");
+  if (!code) fullCatalogCache = { items, expiresAt: Date.now() + 4 * 60 * 1000 };
+  return items;
+  })();
+  if (!code) fullCatalogInFlight = requestPromise;
+  try {
+    return await requestPromise;
+  } finally {
+    if (!code) fullCatalogInFlight = null;
   }
-  return payload.data as PriceListItem[];
 }
 
 function classify(item: PriceListItem): "Mobile Legends" | "Roblox" | null {
