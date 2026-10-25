@@ -34,12 +34,12 @@ function getConfig() {
   };
 }
 
-async function fetchGameCatalog(): Promise<PriceListItem[]> {
+async function fetchGameCatalog(code?: string): Promise<PriceListItem[]> {
   const config = getConfig();
   const response = await fetch("https://gateway.falintino.com/v1/price-list", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cmd: "prepaid", username: config.username, sign: config.sign }),
+    body: JSON.stringify({ cmd: "prepaid", username: config.username, ...(code ? { code } : {}), sign: config.sign }),
     cache: "no-store",
     signal: AbortSignal.timeout(20000),
   });
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Produk atau game tidak valid." }, { status: 400 });
     }
 
-    const catalog = await fetchGameCatalog();
+    const catalog = await fetchGameCatalog(sku);
     const match = catalog.find((item) => String(item.buyer_sku_code ?? "").trim() === sku);
     const game = match ? classify(match) : null;
     const providerPrice = Number(match?.price);
