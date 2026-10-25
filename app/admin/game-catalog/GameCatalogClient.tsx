@@ -33,6 +33,28 @@ function rupiah(value: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
 }
 
+const competitorPrices: Record<number, number> = {
+  5: 1597, 10: 3194, 12: 3831, 18: 6014, 19: 6014,
+  28: 8748, 36: 11479, 44: 13133, 46: 14769, 54: 16422,
+  59: 17505, 71: 21335, 74: 22424, 85: 25163, 90: 26808,
+  110: 33903, 113: 33911,
+};
+
+const recommendedPrices: Record<number, number> = {
+  5: 1589, 10: 3189, 12: 3799, 18: 5999, 19: 5999,
+  28: 8699, 36: 11399, 44: 13099, 46: 14699, 54: 16399,
+  59: 17499, 71: 21299, 74: 22399, 85: 25099, 90: 26799,
+  110: 33899, 113: 33899,
+};
+
+function diamondAmount(product: StoredProduct): number | null {
+  const text = `${product.sku} ${product.name}`.toLowerCase();
+  const match = text.match(/(?:ml|mobile\s*legends?\s*)?(\d{1,4})\s*(?:diamond|dm|$)/i);
+  if (!match) return null;
+  const amount = Number(match[1]);
+  return Number.isSafeInteger(amount) && competitorPrices[amount] ? amount : null;
+}
+
 export default function GameCatalogClient() {
   const [candidates, setCandidates] = useState<CatalogItem[]>([]);
   const [products, setProducts] = useState<StoredProduct[]>([]);
@@ -169,6 +191,19 @@ export default function GameCatalogClient() {
                 <div><label className="mb-1 block text-xs text-slate-400">Modal Digiflazz</label><p className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm">{rupiah(product.providerPrice)}</p></div>
                 <div><label className="mb-1 block text-xs text-slate-400">Harga jual (Rp)</label><input type="number" min={product.providerPrice} step={1} value={prices[product.sku] ?? product.price} onChange={(e) => setPrices((current) => ({ ...current, [product.sku]: e.target.value }))} className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-blue-500" /></div>
               </div>
+              {product.game === "Mobile Legends" && (() => {
+                const amount = diamondAmount(product);
+                const target = amount === null ? null : recommendedPrices[amount];
+                const competitor = amount === null ? null : competitorPrices[amount];
+                const margin = target === null ? null : target - product.providerPrice;
+                return target !== null && competitor !== null && margin !== null ? (
+                  <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/5 p-3 text-xs">
+                    <p className="text-slate-300">Harga pesaing: <strong>{rupiah(competitor)}</strong> · Target 7 April Store: <strong>{rupiah(target)}</strong></p>
+                    <p className={margin > 0 ? "mt-1 text-green-300" : "mt-1 text-amber-300"}>Selisih dari modal: {rupiah(margin)}{margin <= 0 ? " — target ini tidak aman, jangan digunakan." : " sebelum biaya pembayaran."}</p>
+                    <button type="button" disabled={margin <= 0} onClick={() => setPrices((current) => ({ ...current, [product.sku]: String(target) }))} className="mt-2 rounded-lg border border-blue-400/30 px-3 py-2 font-bold text-blue-200 hover:bg-blue-500/10 disabled:cursor-not-allowed disabled:opacity-40">Pakai harga saingan</button>
+                  </div>
+                ) : null;
+              })()}
               <label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(active[product.sku])} onChange={(e) => setActive((current) => ({ ...current, [product.sku]: e.target.checked }))} /> Tampilkan dan izinkan pembelian di website</label>
               {product.game === "Roblox" && <label className="mt-3 flex items-start gap-2 rounded-lg border border-amber-400/20 bg-amber-400/5 p-3 text-xs leading-5 text-amber-100"><input type="checkbox" checked={Boolean(robloxConfirmed[product.sku])} onChange={(e) => setRobloxConfirmed((current) => ({ ...current, [product.sku]: e.target.checked }))} className="mt-1" /> Saya sudah memastikan SKU ini adalah top-up langsung, bukan voucher/kode redeem.</label>}
               <button onClick={() => void saveProduct(product)} disabled={busySku === product.sku} className="mt-4 rounded-lg bg-green-600 px-4 py-2 text-xs font-bold hover:bg-green-500 disabled:opacity-50">{busySku === product.sku ? "Menyimpan…" : "Simpan Pengaturan"}</button>
