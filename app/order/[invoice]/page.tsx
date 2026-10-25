@@ -354,23 +354,29 @@ export default async function OrderPage({
 
             <div>
               <p className="text-xs uppercase tracking-wider text-slate-500">
-                UID Free Fire
+                {order.product.game.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ") === "mobile legends"
+                  ? "User ID (Zone ID)"
+                  : order.product.game.trim().toLowerCase() === "roblox"
+                    ? "Username Roblox"
+                    : "UID Free Fire"}
               </p>
 
-              <p className="mt-2 font-semibold text-white">
+              <p className="mt-2 break-all font-semibold text-white">
                 {order.uid}
               </p>
             </div>
 
-            <div>
-              <p className="text-xs uppercase tracking-wider text-slate-500">
-                Nama Akun Free Fire
-              </p>
+            {order.product.game.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ") === "free fire" && (
+              <div>
+                <p className="text-xs uppercase tracking-wider text-slate-500">
+                  Nama Akun Free Fire
+                </p>
 
-              <p className="mt-2 font-semibold text-white">
-                {playerNickname || "Belum tersedia"}
-              </p>
-            </div>
+                <p className="mt-2 font-semibold text-white">
+                  {playerNickname || "Belum tersedia"}
+                </p>
+              </div>
+            )}
 
             <div>
               <p className="text-xs uppercase tracking-wider text-slate-500">
