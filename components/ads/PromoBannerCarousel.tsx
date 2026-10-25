@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 
 const banners = [
   {
-    src: "/images/banners/banner-1-promo-diskon.jpg",
-    alt: "Banner promo diskon top up Free Fire 7 April Store",
+    src: "/images/banners/7A_Store_banner_text_kecil_2048x364%20(1).png",
+    alt: "Banner 7A Store — top up Free Fire murah dan otomatis",
     href: "/topup/free-fire",
   },
   {
