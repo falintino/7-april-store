@@ -148,6 +148,13 @@ export async function POST(
       );
     }
 
+    if (order.providerMessage?.startsWith("[DIPENUHI_MANUAL]")) {
+      return NextResponse.json(
+        { success: false, message: "Pesanan sudah ditandai dipenuhi manual. Retry Digiflazz diblokir untuk mencegah pengiriman ganda." },
+        { status: 409 },
+      );
+    }
+
     const providerRc =
       String(
         order.providerRc ??
