@@ -19,7 +19,7 @@ import {
 import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
 
 export const metadata: Metadata = {
-  title: "Top Up Free Fire Murah",
+  title: "Top Up Game Murah | 7 April Store",
   description:
     "Pilih layanan top up Free Fire di 7 April Store. Cek nominal Diamond, harga, dan lanjutkan pembayaran secara online.",
   alternates: { canonical: "https://store.falintino.com/topup" },
@@ -37,6 +37,22 @@ const products = [
     image: "/images/games/freefire.jpg",
     tag: "TERPOPULER",
     price: "Mulai Rp750",
+  },
+  {
+    name: "Mobile Legends",
+    description:
+      "Diamond MLBB dengan input User ID dan Zone ID. Produk tampil setelah SKU Digiflazz diverifikasi.",
+    href: "/topup/mobile-legends",
+    tag: "GAME BARU",
+    price: "Cek katalog",
+  },
+  {
+    name: "Roblox",
+    description:
+      "Produk Roblox yang diverifikasi terlebih dahulu agar metode top-up sesuai dengan SKU provider.",
+    href: "/topup/roblox",
+    tag: "GAME BARU",
+    price: "Cek katalog",
   },
 ];
 
@@ -125,12 +141,12 @@ export default function TopUpPage() {
               </h2>
 
               <p className="mt-2 text-sm text-slate-500">
-                Harga dan nominal ditampilkan jelas sebelum pembayaran.
+                Pilih game favoritmu. Katalog yang belum aktif tidak bisa dibeli sampai SKU provider diverifikasi.
               </p>
             </div>
 
             <span className="hidden text-xs text-slate-600 sm:block">
-              1 game tersedia
+              3 game tersedia
             </span>
           </div>
 
@@ -142,13 +158,19 @@ export default function TopUpPage() {
                 className="group relative overflow-hidden rounded-[26px] border border-white/[0.07] bg-[#0b1120] p-3 transition duration-300 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-[0_20px_70px_rgba(37,99,235,0.12)]"
               >
                 <div className="relative h-44 overflow-hidden rounded-[20px]">
-                  <Image
-                    src={product.image}
-                    alt={`Top Up ${product.name}`}
-                    fill
-                    sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
-                  />
+                  {product.image ? (
+                    <Image
+                      src={product.image}
+                      alt={`Top Up ${product.name}`}
+                      fill
+                      sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className={`flex h-full w-full items-center justify-center text-5xl font-black transition duration-500 group-hover:scale-110 ${product.name === "Mobile Legends" ? "bg-gradient-to-br from-red-950 via-slate-900 to-blue-950 text-red-200" : "bg-gradient-to-br from-slate-800 via-black to-slate-950 text-white"}`}>
+                      {product.name === "Mobile Legends" ? "MLBB" : "R"}
+                    </div>
+                  )}
 
                   <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10" />
 
