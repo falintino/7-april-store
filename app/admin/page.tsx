@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 
 import AdminLogoutButton from "./AdminLogoutButton";
 import RetryDigiflazzButton from "./RetryDigiflazzButton";
+import ManualFulfillmentButton from "./ManualFulfillmentButton";
 import AdminHorizontalScroll from "./AdminHorizontalScroll";
 import AdminAutoRefresh from "./AdminAutoRefresh";
 import AdminOrderNotifications from "./AdminOrderNotifications";
@@ -434,6 +435,7 @@ export default async function AdminPage({
     paidOrders,
     pendingTopup,
     successTopup,
+    manualFulfilled,
     failedTopup,
     revenueResult,
     filteredCount,
@@ -469,6 +471,15 @@ export default async function AdminPage({
     prisma.order.count({
       where: {
         providerStatus: "SUCCESS",
+      },
+    }),
+
+    prisma.order.count({
+      where: {
+        paymentStatus: "PAID",
+        providerMessage: {
+          startsWith: "[DIPENUHI_MANUAL]",
+        },
       },
     }),
 
@@ -751,9 +762,9 @@ export default async function AdminPage({
             icon="✅"
             label="Top Up Sukses"
             value={String(
-              successTopup,
+              successTopup + manualFulfilled,
             )}
-            description="provider SUCCESS"
+            description={`${successTopup} provider + ${manualFulfilled} manual`}
             valueClass="text-green-400"
           />
 
@@ -1299,7 +1310,21 @@ export default async function AdminPage({
                               invoice={order.invoice}
                               providerStatus={order.providerStatus}
                               providerRc={order.providerRc}
+                              manualFulfilled={order.providerMessage?.startsWith("[DIPENUHI_MANUAL]") ?? false}
                             />
+
+                            <ManualFulfillmentButton
+                              invoice={order.invoice}
+                              paymentStatus={order.paymentStatus}
+                              providerStatus={order.providerStatus}
+                              providerMessage={order.providerMessage}
+                            />
+
+                            {order.providerMessage?.startsWith("[DIPENUHI_MANUAL]") && (
+                              <span className="inline-flex w-fit rounded-md border border-green-500/30 bg-green-500/10 px-2 py-1 text-[10px] font-bold text-green-300">
+                                DIPENUHI MANUAL
+                              </span>
+                            )}
 
                             {order.providerMessage && (
                               <span
