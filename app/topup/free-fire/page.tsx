@@ -134,56 +134,95 @@ export default async function FreeFireTopUpPage() {
 
   return (
     <main className="min-h-screen bg-[#030712] text-white">
-      <PromoBannerCarousel />
-      <WhatsAppPromoBanner />
-
-      <section className="mx-auto max-w-7xl px-4 pt-5 sm:px-6">
-        <div className="relative overflow-hidden rounded-2xl border border-blue-400/20 bg-slate-950 shadow-2xl">
-          <img src="/free-fire-banner.svg" alt="Banner 7 April Store untuk top up Diamond Free Fire" className="block h-auto max-h-[360px] w-full object-cover" />
+      <section className="mx-auto max-w-[1440px] px-3 pt-4 sm:px-6 sm:pt-6">
+        <div className="relative aspect-[1.55/1] overflow-hidden rounded-xl border border-cyan-400/25 bg-[#06122e] shadow-[0_18px_60px_rgba(0,82,255,0.18)] sm:aspect-[4.5/1] sm:rounded-2xl">
+          <img
+            src="/free-fire-banner.svg"
+            alt="7 April Store — top up Diamond Free Fire"
+            className="h-full w-full object-cover object-center"
+          />
         </div>
-      </section>
 
-      <section className="border-y border-white/10 bg-gradient-to-b from-blue-950/30 to-[#030712]">
-        <div className="mx-auto max-w-7xl px-6 py-14">
-          <div className="max-w-3xl">
-            <span className="inline-flex rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-400">
-              Top Up Free Fire
-            </span>
-
-            <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl">
-              Top Up Diamond Free Fire
-            </h1>
-
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
-              Masukkan UID, pilih nominal diamond, lalu lanjutkan ke
-              pembayaran. Pesanan akan diproses setelah pembayaran berhasil.
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
-                ⚡ Proses Cepat
-              </div>
-
-              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
-                🔒 Pembayaran QRIS melalui Midtrans
-              </div>
-
-              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
-                💎 Diproses Setelah Pembayaran
-              </div>
+        <div className="relative mx-2 -mt-5 flex items-center gap-4 rounded-xl border border-white/10 bg-[#0b1222] p-3 shadow-xl sm:mx-8 sm:-mt-12 sm:gap-6 sm:p-5">
+          <img
+            src="/images/games/freefire.jpg"
+            alt="Free Fire"
+            className="h-20 w-20 shrink-0 rounded-xl border border-cyan-400/20 object-cover sm:h-32 sm:w-32 sm:rounded-2xl"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-black tracking-wide text-white sm:text-xl">FREE FIRE</p>
+            <p className="mt-1 text-xs text-slate-400 sm:text-sm">Garena</p>
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[10px] font-semibold text-slate-300 sm:text-xs">
+              <span><span className="mr-1.5 text-amber-400">⚡</span>Proses cepat</span>
+              <span><span className="mr-1.5 text-blue-400">●</span>Bantuan pelanggan</span>
+              <span><span className="mr-1.5 text-emerald-400">✓</span>Pembayaran QRIS</span>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="pb-16 sm:pb-20">
+      <div className="mx-auto max-w-[1440px] px-3 pb-14 pt-6 sm:px-6 sm:pt-8">
+        <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-[#081120] px-3 py-3 text-center text-xs font-semibold text-slate-300">
+            <span className="text-blue-400">◇</span> Jaminan layanan
+          </div>
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-[#081120] px-3 py-3 text-center text-xs font-semibold text-slate-300">
+            <span className="text-emerald-400">▣</span> Pembayaran aman & terpercaya
+          </div>
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-[#081120] px-3 py-3 text-center text-xs font-semibold text-slate-300">
+            <span className="text-amber-400">ϟ</span> Proses cepat & otomatis
+          </div>
+        </div>
+
         <FreeFireLiveActivity />
-        <TopUpClient products={displayProducts} />
+
+        <div className="mt-5 grid min-w-0 grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px] xl:gap-7">
+          <div className="min-w-0">
+            <TopUpClient products={displayProducts} />
+          </div>
+
+          <aside className="space-y-4 lg:sticky lg:top-24">
+            <section className="rounded-2xl border border-white/10 bg-[#081120] p-5">
+              <p className="text-sm font-bold text-slate-300">Rating & ulasan</p>
+              <h2 className="mt-2 text-xl font-black text-white">Pengalaman pembeli</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Lihat ulasan pelanggan yang sudah menyelesaikan transaksi Free Fire di 7 April Store.
+              </p>
+              <a href="#ulasan-pelanggan" className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-bold text-blue-300 transition hover:bg-blue-500/20">
+                Lihat ulasan pelanggan
+              </a>
+            </section>
+
+            <section className="rounded-2xl border border-white/10 bg-[#081120] p-5">
+              <p className="text-sm font-bold text-white">Butuh bantuan?</p>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Jika pembayaran berhasil tetapi diamond belum masuk, hubungi admin dan sertakan nomor invoice.
+              </p>
+              <a href="https://wa.me/62895704041437" target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-emerald-500">
+                Hubungi admin WhatsApp ↗
+              </a>
+            </section>
+
+            <section className="rounded-2xl border border-cyan-400/15 bg-gradient-to-br from-cyan-500/[0.08] to-blue-500/[0.04] p-5">
+              <p className="text-sm font-bold text-white">Cara top up</p>
+              <ol className="mt-3 space-y-3 text-sm leading-5 text-slate-400">
+                <li><span className="mr-2 font-black text-cyan-300">1.</span>Masukkan UID dan nomor WhatsApp.</li>
+                <li><span className="mr-2 font-black text-cyan-300">2.</span>Pilih nominal Diamond.</li>
+                <li><span className="mr-2 font-black text-cyan-300">3.</span>Bayar melalui QRIS.</li>
+                <li><span className="mr-2 font-black text-cyan-300">4.</span>Pantau status pesanan.</li>
+              </ol>
+            </section>
+          </aside>
+        </div>
 
         <OrderStatusCheck />
-
         <RecentOrders />
-        <FreeFireReviews showForm={false} />
+        <section id="ulasan-pelanggan" className="scroll-mt-24">
+          <FreeFireReviews showForm={false} />
+        </section>
+        <div className="mt-8">
+          <WhatsAppPromoBanner />
+        </div>
       </div>
 
       <SiteFooter />
