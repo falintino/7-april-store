@@ -78,7 +78,7 @@ export default function GameTopUpClient({ game, products }: { game: Game; produc
         <p className="mt-2 text-sm text-slate-400">Periksa data sebelum melanjutkan. Pesanan digital yang sudah terkirim biasanya tidak dapat dibatalkan.</p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className={game === "Roblox" ? "sm:col-span-2" : ""}>
-            <label className="mb-2 block text-xs font-bold text-slate-300">{game === "Mobile Legends" ? "User ID" : "Username Roblox"}</label>
+            <label className="mb-2 block text-xs font-bold text-slate-300">{game === "Mobile Legends" ? "User ID" : "Username / User ID Roblox"}</label>
             <input value={playerId} onChange={(e) => setPlayerId(game === "Mobile Legends" ? e.target.value.replace(/\D/g, "").slice(0, 20) : e.target.value.replace(/[^A-Za-z0-9_]/g, "").slice(0, 20)} disabled={loading} placeholder={game === "Mobile Legends" ? "Contoh: 123456789" : "Contoh: RobloxUser"} className="h-12 w-full rounded-xl border border-white/10 bg-[#060b16] px-4 text-sm text-white outline-none focus:border-blue-500 disabled:opacity-60" />
           </div>
           {game === "Mobile Legends" && <div>
