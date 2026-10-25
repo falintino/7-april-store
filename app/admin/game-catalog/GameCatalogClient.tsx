@@ -27,7 +27,7 @@ type StoredProduct = {
   providerPrice: number;
   active: boolean;
 };
-type Payload = { success: boolean; message?: string; candidates?: CatalogItem[]; products?: StoredProduct[] };
+type Payload = { success: boolean; message?: string; catalogError?: boolean; candidates?: CatalogItem[]; products?: StoredProduct[] };
 
 function rupiah(value: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
@@ -39,6 +39,7 @@ export default function GameCatalogClient() {
   const [loading, setLoading] = useState(true);
   const [busySku, setBusySku] = useState("");
   const [message, setMessage] = useState("");
+  const [catalogError, setCatalogError] = useState(false);
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [active, setActive] = useState<Record<string, boolean>>({});
   const [robloxConfirmed, setRobloxConfirmed] = useState<Record<string, boolean>>({});
@@ -51,6 +52,7 @@ export default function GameCatalogClient() {
       if (!response.ok || !data.success) throw new Error(data.message || "Gagal memuat katalog.");
       setCandidates(data.candidates ?? []);
       setProducts(data.products ?? []);
+      setCatalogError(Boolean(data.catalogError));
       setPrices(Object.fromEntries((data.products ?? []).map((p) => [p.sku, String(p.price)])));
       setActive(Object.fromEntries((data.products ?? []).map((p) => [p.sku, p.active])));
       setMessage(data.message ?? "");
@@ -141,7 +143,7 @@ export default function GameCatalogClient() {
 
         <section className="mb-8">
           <h2 className="mb-3 text-xl font-black">Produk aktif di daftar harga Digiflazz</h2>
-          {loading ? <p className="text-sm text-slate-400">Mengambil daftar harga…</p> : candidates.length === 0 ? <p className="rounded-xl border border-white/10 p-5 text-sm text-slate-400">Tidak ada SKU Mobile Legends/Roblox yang aktif di daftar harga Buyer. Tambahkan dan aktifkan produk di panel Digiflazz, lalu muat ulang.</p> : (
+          {loading ? <p className="text-sm text-slate-400">Mengambil daftar harga…</p> : candidates.length === 0 ? <p className="rounded-xl border border-white/10 p-5 text-sm text-slate-400">{catalogError ? "Daftar harga belum berhasil dibaca. Produk yang sudah diimpor tetap dapat diatur di bawah; coba muat ulang beberapa saat lagi." : "Tidak ada SKU Mobile Legends/Roblox yang aktif di daftar harga Buyer. Tambahkan dan aktifkan produk di panel Digiflazz, lalu muat ulang."}</p> : (
             <div className="grid gap-3 lg:grid-cols-2">
               {candidates.map((item) => {
                 const imported = products.some((p) => p.sku === item.sku);
