@@ -213,8 +213,10 @@ export default async function OrderPage({
   const paymentPaid =
     order.paymentStatus === "PAID";
 
+  const manuallyFulfilled = order.providerMessage?.startsWith("[DIPENUHI_MANUAL]") ?? false;
+
   const providerSuccess =
-    order.providerStatus === "SUCCESS";
+    order.providerStatus === "SUCCESS" || manuallyFulfilled;
 
   const providerFailed =
     order.providerStatus === "FAILED";
@@ -226,10 +228,12 @@ export default async function OrderPage({
   const providerPending =
     order.providerStatus === "PENDING";
 
-  const providerStatus =
-    getProviderStatusConfig(
-      order.providerStatus
-    );
+  const providerStatus = manuallyFulfilled
+    ? {
+        label: "BERHASIL (DIPENUHI MANUAL)",
+        className: "border-green-500/30 bg-green-500/10 text-green-400",
+      }
+    : getProviderStatusConfig(order.providerStatus);
 
   const productPrice =
     order.subtotal ?? order.total;
@@ -273,7 +277,7 @@ export default async function OrderPage({
     <main className="min-h-screen bg-[#030712] px-6 py-12 text-white">
       <OrderAutoRefresh
         paymentStatus={order.paymentStatus}
-        providerStatus={order.providerStatus}
+        providerStatus={manuallyFulfilled ? "SUCCESS" : order.providerStatus}
       />
 
       <SaveOrderHistory
@@ -284,7 +288,7 @@ export default async function OrderPage({
           order.total
         }
         paymentStatus={order.paymentStatus}
-        providerStatus={order.providerStatus}
+        providerStatus={manuallyFulfilled ? "SUCCESS" : order.providerStatus}
         createdAt={order.createdAt.toISOString()}
       />
 
@@ -642,7 +646,9 @@ export default async function OrderPage({
               </p>
 
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Pesanan berhasil diproses oleh provider. Namun, jika Diamond belum terlihat, periksa UID dan saldo di game, lalu muat ulang game. Status berhasil dari provider tidak selalu berarti Diamond langsung terlihat di layar.
+                {manuallyFulfilled
+                  ? "Admin telah mengonfirmasi bahwa pesanan dipenuhi secara manual. Jika Diamond belum terlihat, periksa UID dan saldo di game, lalu hubungi bantuan dengan menyertakan invoice ini."
+                  : "Pesanan berhasil diproses oleh provider. Namun, jika Diamond belum terlihat, periksa UID dan saldo di game, lalu muat ulang game. Status berhasil dari provider tidak selalu berarti Diamond langsung terlihat di layar."}
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link href="/topup/free-fire" className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-500">
@@ -704,7 +710,7 @@ export default async function OrderPage({
             </div>
           )}
 
-        {paymentPaid && ["REFUND_REQUIRED", "REFUND_PROCESSING", "REFUND_PENDING", "PARTIAL_REFUND"].includes(order.providerStatus) && (
+        {paymentPaid && !manuallyFulfilled && ["REFUND_REQUIRED", "REFUND_PROCESSING", "REFUND_PENDING", "PARTIAL_REFUND"].includes(order.providerStatus) && (
           <div className="mt-6 rounded-2xl border border-orange-500/30 bg-orange-500/10 p-6">
             <h2 className="text-lg font-bold text-orange-300">Pembayaran berhasil, tetapi pesanan perlu bantuan</h2>
             <p className="mt-2 text-sm leading-6 text-slate-300">Jangan bayar lagi. Status ini belum membuktikan refund sudah selesai. Hubungi admin untuk memeriksa transaksi dan langkah berikutnya.</p>
