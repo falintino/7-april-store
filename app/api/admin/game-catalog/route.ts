@@ -169,7 +169,13 @@ export async function POST(request: Request) {
     const product = existing
       ? await prisma.product.update({
           where: { sku },
-          data: { game, name: String(match.product_name ?? match.desc ?? sku).trim().slice(0, 120), providerCode: sku, providerPrice },
+          data: {
+            game,
+            name: String(match.product_name ?? match.desc ?? sku).trim().slice(0, 120),
+            providerCode: sku,
+            providerPrice,
+            ...(existing.active && existing.price < providerPrice ? { active: false } : {}),
+          },
           select: { id: true, game: true, name: true, sku: true, price: true, providerPrice: true, active: true },
         })
       : await prisma.product.create({
