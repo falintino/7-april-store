@@ -21,7 +21,7 @@ import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
 export const metadata: Metadata = {
   title: "Top Up Game Murah | 7 April Store",
   description:
-    "Pilih layanan top up Free Fire di 7 April Store. Cek nominal Diamond, harga, dan lanjutkan pembayaran secara online.",
+    "Pilih layanan top up Free Fire, Mobile Legends, dan game lain yang tersedia di 7 April Store. Cek nominal, harga, dan lanjutkan pembayaran online.",
   alternates: { canonical: "https://store.falintino.com/topup" },
 };
 
@@ -73,11 +73,11 @@ export default function TopUpPage() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-xs font-semibold text-blue-300">
               <Sparkles size={14} />
-              Top Up Free Fire
+              Top Up Game
             </div>
 
             <h1 className="text-4xl font-black tracking-[-0.04em] sm:text-5xl lg:text-6xl">
-              Top Up Free Fire
+              Top Up Game Favoritmu
               <span className="block bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 bg-clip-text text-transparent">
                 Tanpa Ribet.
               </span>
@@ -139,7 +139,7 @@ export default function TopUpPage() {
               </div>
 
               <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
-                Top Up Free Fire
+                Pilih Game Favoritmu
               </h2>
 
               <p className="mt-2 text-sm text-slate-500">
