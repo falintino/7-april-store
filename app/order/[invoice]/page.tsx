@@ -219,7 +219,7 @@ export default async function OrderPage({
     order.providerStatus === "SUCCESS" || manuallyFulfilled;
 
   const providerFailed =
-    order.providerStatus === "FAILED";
+    order.providerStatus === "FAILED" && !manuallyFulfilled;
 
   const providerProcessing =
     order.providerStatus ===
