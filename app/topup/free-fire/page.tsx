@@ -135,7 +135,7 @@ export default async function FreeFireTopUpPage() {
   return (
     <main className="min-h-screen bg-[#030712] text-white">
       <section className="mx-auto max-w-[1440px] px-3 pt-4 sm:px-6 sm:pt-6">
-        <div className="relative aspect-[1.55/1] overflow-hidden rounded-xl border border-cyan-400/25 bg-[#06122e] shadow-[0_18px_60px_rgba(0,82,255,0.18)] sm:aspect-[4.5/1] sm:rounded-2xl">
+        <div className="relative aspect-[3.43/1] overflow-hidden rounded-xl border border-cyan-400/25 bg-[#06122e] shadow-[0_18px_60px_rgba(0,82,255,0.18)] sm:aspect-[3.43/1] sm:rounded-2xl">
           <img
             src="/free-fire-banner.svg"
             alt="7 April Store — top up Diamond Free Fire"
