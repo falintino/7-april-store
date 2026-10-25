@@ -29,7 +29,7 @@ export default async function MobileLegendsPage() {
           <div className="rounded-2xl border border-amber-400/20 bg-amber-400/5 p-6">
             <h2 className="text-lg font-black text-amber-100">Katalog Mobile Legends belum diaktifkan</h2>
             <p className="mt-2 text-sm leading-6 text-slate-300">Produk tidak akan ditampilkan sampai SKU aktif di Buyer Digiflazz diimpor dan diperiksa di panel admin. Ini mencegah harga atau kode produk yang belum terverifikasi dipakai untuk transaksi.</p>
-            <Link href="/admin/game-catalog" className="mt-4 inline-flex rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold">Buka Pengaturan Katalog</Link>
+            <Link href="/topup" className="mt-4 inline-flex rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold">Kembali ke daftar game</Link>
           </div>
         )}
       </div>
