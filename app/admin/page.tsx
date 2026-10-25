@@ -659,6 +659,13 @@ export default async function AdminPage({
             </Link>
 
             <Link
+              href="/admin/game-catalog"
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 text-xs font-bold text-emerald-300 transition hover:bg-emerald-500/20"
+            >
+              🎮 Katalog Game
+            </Link>
+
+            <Link
               href="/admin/promos"
               className="inline-flex h-10 items-center justify-center rounded-lg border border-violet-500/20 bg-violet-500/10 px-4 text-xs font-bold text-violet-300 transition hover:bg-violet-500/20"
             >
