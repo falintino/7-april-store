@@ -321,7 +321,7 @@ async function requestRefund(
           "REFUND_REQUIRED",
 
         providerMessage:
-          "Pengiriman gagal. Refund menunggu verifikasi dan aktivasi Refund API.",
+          `${order.providerMessage?.trim() ? `${order.providerMessage.trim()} — ` : ""}Pengiriman gagal. Refund menunggu verifikasi dan aktivasi Refund API.`,
 
         providerUpdatedAt:
           new Date(),
@@ -366,7 +366,7 @@ async function requestRefund(
           "REFUND_REQUIRED",
 
         providerMessage:
-          "Refund menunggu konfigurasi Midtrans.",
+          `${order.providerMessage?.trim() ? `${order.providerMessage.trim()} — ` : ""}Refund menunggu konfigurasi Midtrans.`,
 
         providerUpdatedAt:
           new Date(),
