@@ -94,14 +94,23 @@ export async function GET() {
     if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ success: false, message: "Akses ditolak." }, { status: 401 });
     }
-    const [catalog, storedProducts] = await Promise.all([
-      fetchGameCatalog(),
-      prisma.product.findMany({
-        where: { game: { in: ["Mobile Legends", "Roblox"] } },
-        orderBy: [{ game: "asc" }, { price: "asc" }],
-        select: { id: true, game: true, name: true, sku: true, providerCode: true, price: true, providerPrice: true, active: true },
-      }),
-    ]);
+    const storedProducts = await prisma.product.findMany({
+      where: { game: { in: ["Mobile Legends", "Roblox"] } },
+      orderBy: [{ game: "asc" }, { price: "asc" }],
+      select: { id: true, game: true, name: true, sku: true, providerCode: true, price: true, providerPrice: true, active: true },
+    });
+    let catalog: PriceListItem[];
+    try {
+      catalog = await fetchGameCatalog();
+    } catch (error) {
+      return NextResponse.json({
+        success: true,
+        catalogError: true,
+        candidates: [],
+        products: storedProducts,
+        message: "Daftar harga Digiflazz belum dapat dibaca: " + (error instanceof Error ? error.message : "error tidak diketahui") + ". Produk yang sudah diimpor tetap bisa dikelola di bawah.",
+      });
+    }
     const candidates = catalog
       .map((item) => {
         const game = classify(item);
@@ -127,6 +136,7 @@ export async function GET() {
       .filter((item) => item.buyerActive && item.sellerActive);
     return NextResponse.json({
       success: true,
+      catalogError: false,
       candidates,
       products: storedProducts,
       message: "Kandidat berasal dari daftar harga Buyer Digiflazz yang aktif. Produk baru tidak diaktifkan otomatis.",
