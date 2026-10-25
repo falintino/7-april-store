@@ -134,15 +134,16 @@ export default async function FreeFireTopUpPage() {
 
   return (
     <main className="min-h-screen bg-[#030712] text-white">
-      <section className="mx-auto max-w-[1440px] px-3 pt-4 sm:px-6 sm:pt-6">
-        <div className="relative aspect-[1.8/1] overflow-hidden rounded-xl border border-cyan-400/25 bg-[#06122e] shadow-[0_18px_60px_rgba(0,82,255,0.18)] sm:aspect-[5.63/1] sm:rounded-2xl">
+      <section className="pt-4 sm:pt-6">
+        <div className="relative left-1/2 w-screen -translate-x-1/2 aspect-[5.63/1] overflow-hidden bg-[#06122e]">
           <img
             src="/images/banners/7A_Store_banner_text_kecil_2048x364%20(1).png"
             alt="7 April Store — top up Diamond Free Fire"
-            className="h-full w-full object-cover object-[center_50%] sm:object-contain"
+            className="h-full w-full object-cover object-center"
           />
         </div>
 
+        <div className="mx-auto max-w-[1440px] px-3 sm:px-6">
         <div className="relative mx-2 -mt-5 flex items-center gap-4 rounded-xl border border-white/10 bg-[#0b1222] p-3 shadow-xl sm:mx-8 sm:-mt-12 sm:gap-6 sm:p-5">
           <img
             src="/images/games/freefire.jpg"
@@ -158,6 +159,7 @@ export default async function FreeFireTopUpPage() {
               <span><span className="mr-1.5 text-emerald-400">✓</span>Pembayaran QRIS</span>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
