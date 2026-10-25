@@ -7,12 +7,14 @@ type Props = {
   invoice: string;
   providerStatus: string;
   providerRc: string | null;
+  manualFulfilled?: boolean;
 };
 
 export default function RetryDigiflazzButton({
   invoice,
   providerStatus,
   providerRc,
+  manualFulfilled = false,
 }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -24,7 +26,8 @@ export default function RetryDigiflazzButton({
   // RC70 is handled safely by the backend using the existing ref_id.
   const allowedRetry =
     providerStatus === "REFUND_REQUIRED" &&
-    Boolean(providerRc?.trim());
+    Boolean(providerRc?.trim()) &&
+    !manualFulfilled;
 
   if (!allowedRetry) {
     return null;
