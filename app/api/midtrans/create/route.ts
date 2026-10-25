@@ -1274,11 +1274,18 @@ export async function POST(
      *   Fee tetap Rp0.
      */
 
+    const normalizedOrderGame = order.product.game
+      .trim()
+      .toLowerCase()
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ");
     const diamondAmount =
-      getDiamondAmount(
-        order.product.name,
-        order.product.sku
-      );
+      normalizedOrderGame === "free fire"
+        ? getDiamondAmount(
+            order.product.name,
+            order.product.sku
+          )
+        : null;
 
     let paymentFee = 0;
     let customerTotal =
