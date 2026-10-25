@@ -1194,6 +1194,11 @@ export default async function AdminPage({
                               order.providerStatus
                             }
                           </span>
+                          {order.providerMessage?.startsWith("[DIPENUHI_MANUAL]") && (
+                            <p className="mt-1 rounded-md border border-green-500/30 bg-green-500/10 px-2 py-1 text-[10px] font-bold text-green-300">
+                              DIPENUHI MANUAL
+                            </p>
+                          )}
                         </td>
 
                         {/* REF ID */}
