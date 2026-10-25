@@ -116,20 +116,13 @@ export async function POST(request: Request) {
     }
 
     /*
-     * =====================================
-     * VALIDASI UID FREE FIRE
-     * =====================================
+     * Validasi awal menerima format tujuan untuk game yang didukung.
+     * Validasi spesifik dilakukan setelah produk ditemukan.
      */
-
-    if (!/^\d{6,}$/.test(uid)) {
+    if (!/^(?:\d{6,20}|\d{5,20}\(\d{1,6}\)|[A-Za-z0-9_]{3,20})$/.test(uid)) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "UID Free Fire tidak valid.",
-        },
-        {
-          status: 400,
-        },
+        { success: false, message: "Format ID pemain tidak valid." },
+        { status: 400 },
       );
     }
 
@@ -228,15 +221,32 @@ export async function POST(request: Request) {
       .replace(/[_-]+/g, " ")
       .replace(/\s+/g, " ");
 
-    if (normalizedGame !== "free fire") {
+    const supportedGames = ["free fire", "mobile legends", "roblox"];
+    if (!supportedGames.includes(normalizedGame)) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Produk yang dipilih bukan produk Free Fire.",
-        },
-        {
-          status: 400,
-        },
+        { success: false, message: "Game ini belum didukung untuk checkout." },
+        { status: 400 },
+      );
+    }
+
+    if (normalizedGame === "free fire" && !/^\d{6,20}$/.test(uid)) {
+      return NextResponse.json(
+        { success: false, message: "UID Free Fire harus berupa 6–20 digit." },
+        { status: 400 },
+      );
+    }
+
+    if (normalizedGame === "mobile legends" && !/^\d{5,20}\(\d{1,6}\)$/.test(uid)) {
+      return NextResponse.json(
+        { success: false, message: "Tujuan Mobile Legends harus berupa UserID(ZoneID)." },
+        { status: 400 },
+      );
+    }
+
+    if (normalizedGame === "roblox" && !/^[A-Za-z0-9_]{3,20}$/.test(uid)) {
+      return NextResponse.json(
+        { success: false, message: "Username Roblox harus 3–20 huruf, angka, atau garis bawah." },
+        { status: 400 },
       );
     }
 
@@ -262,15 +272,17 @@ export async function POST(request: Request) {
       FF1440: 164123,
       FF1075: 123100,
     };
-    const effectiveSalePrice = getEffectiveSellingPrice({
-      name: product.name,
-      sku: product.sku,
-      providerPrice: product.sku === "FF250" ? 28787 : product.providerPrice,
-      fallbackPrice: fixedSalePrices[product.sku] ?? product.price,
-    });
-
+    const isFreeFire = normalizedGame === "free fire";
     const effectiveProviderPrice =
-      product.sku === "FF250" ? 28787 : product.providerPrice;
+      isFreeFire && product.sku === "FF250" ? 28787 : product.providerPrice;
+    const effectiveSalePrice = isFreeFire
+      ? getEffectiveSellingPrice({
+          name: product.name,
+          sku: product.sku,
+          providerPrice: effectiveProviderPrice,
+          fallbackPrice: fixedSalePrices[product.sku] ?? product.price,
+        })
+      : product.price;
 
     /*
      * =====================================
@@ -460,8 +472,10 @@ export async function POST(request: Request) {
      * sudah dijual rugi.
      */
 
-    const diamondAmount = getDiamondAmount(product.name, product.sku);
-    const storeSubsidizedPromo = diamondAmount === 5 || diamondAmount === 10;
+    const diamondAmount = normalizedGame === "free fire"
+      ? getDiamondAmount(product.name, product.sku)
+      : null;
+    const storeSubsidizedPromo = normalizedGame === "free fire" && (diamondAmount === 5 || diamondAmount === 10);
 
     if (subtotal < providerPriceSnapshot && !storeSubsidizedPromo) {
       console.error("CREATE ORDER BELOW PROVIDER PRICE:", {
@@ -490,32 +504,34 @@ export async function POST(request: Request) {
      * lalu memvalidasi UID yang dikembalikan layanan lookup.
      * Jika layanan lookup sedang gangguan, checkout tetap berjalan.
      */
-    try {
-      const lookupUrl = new URL(
-        "/api/free-fire/lookup",
-        new URL(request.url).origin,
-      );
-      lookupUrl.searchParams.set("uid", uid);
+    if (normalizedGame === "free fire") {
+      try {
+        const lookupUrl = new URL(
+          "/api/free-fire/lookup",
+          new URL(request.url).origin,
+        );
+        lookupUrl.searchParams.set("uid", uid);
 
       const lookupResponse = await fetch(lookupUrl, {
         cache: "no-store",
         signal: AbortSignal.timeout(9000),
       });
 
-      if (lookupResponse.ok) {
-        const lookup = await lookupResponse.json();
-        const lookupUid = String(lookup.uid ?? "");
-        const lookupNickname =
-          typeof lookup.nickname === "string"
-            ? lookup.nickname.trim().slice(0, 80)
-            : "";
+        if (lookupResponse.ok) {
+          const lookup = await lookupResponse.json();
+          const lookupUid = String(lookup.uid ?? "");
+          const lookupNickname =
+            typeof lookup.nickname === "string"
+              ? lookup.nickname.trim().slice(0, 80)
+              : "";
 
-        if (lookup.ok === true && lookupUid === uid && lookupNickname) {
-          playerNickname = lookupNickname;
+          if (lookup.ok === true && lookupUid === uid && lookupNickname) {
+            playerNickname = lookupNickname;
+          }
         }
+      } catch {
+        // Jangan gagalkan order jika layanan lookup nickname tidak tersedia.
       }
-    } catch {
-      // Jangan gagalkan order jika layanan lookup nickname tidak tersedia.
     }
 
     /*
