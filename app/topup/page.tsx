@@ -300,7 +300,7 @@ export default function TopUpPage() {
                   href="/topup/free-fire"
                   className="text-slate-400 transition hover:text-blue-400"
                 >
-                  Top Up Free Fire
+                  Top Up Game
                 </Link>
 
                 <Link
