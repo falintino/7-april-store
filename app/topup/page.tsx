@@ -43,6 +43,7 @@ const products = [
     description:
       "Diamond MLBB dengan input User ID dan Zone ID. Produk tampil setelah SKU Digiflazz diverifikasi.",
     href: "/topup/mobile-legends",
+    image: "",
     tag: "GAME BARU",
     price: "Cek katalog",
   },
@@ -51,6 +52,7 @@ const products = [
     description:
       "Produk Roblox yang diverifikasi terlebih dahulu agar metode top-up sesuai dengan SKU provider.",
     href: "/topup/roblox",
+    image: "",
     tag: "GAME BARU",
     price: "Cek katalog",
   },
