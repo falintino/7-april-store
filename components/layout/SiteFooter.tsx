@@ -24,8 +24,9 @@ export default function SiteFooter() {
               </div>
 
               <div>
-                <p className="font-bold text-white">7 April Store</p>
-                <p className="text-xs text-slate-400">Layanan Top Up Game</p>
+                <p className="text-sm font-bold text-white">7 April Store <span className="text-blue-400">×</span></p>
+                <p className="text-sm font-bold text-white">Store Falintino</p>
+                <p className="text-xs text-slate-400">Kolaborasi Top Up Game</p>
               </div>
             </Link>
 
