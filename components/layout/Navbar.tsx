@@ -25,6 +25,10 @@ const mainMenuItems = [
     label: "Top Up",
     href: "/topup",
   },
+  {
+    label: "Leaderboard",
+    href: "/leaderboard",
+  },
 ];
 
 const additionalMenuItems = [
