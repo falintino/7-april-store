@@ -130,12 +130,12 @@ export default function Navbar() {
           </div>
 
           <div>
-            <h1 className="text-lg font-bold text-white">
-              7 April Store
+            <h1 className="text-sm font-bold text-white sm:text-base">
+              7 April Store <span className="text-blue-400">×</span> Store Falintino
             </h1>
 
             <p className="text-xs text-slate-400">
-              Layanan Top Up Game
+              Kolaborasi Top Up Game
             </p>
           </div>
         </Link>
