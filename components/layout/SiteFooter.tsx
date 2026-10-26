@@ -146,7 +146,7 @@ export default function SiteFooter() {
             </nav>
 
             <h2 className="mt-7 text-sm font-bold text-white">
-              Ikuti 7 April Store
+              Ikuti Kolaborasi Kami
             </h2>
 
             <div className="mt-4 grid gap-3 text-sm text-slate-300">
