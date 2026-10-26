@@ -36,7 +36,7 @@ function getWibRanges() {
 }
 
 async function getLeaders(start: Date, end: Date): Promise<Leader[]> {
-  return prisma.$queryRaw<Leader[]>\`
+  return prisma.$queryRaw<Leader[]>`
     SELECT
       COALESCE(o."customerId", 'whatsapp:' || o."whatsapp") AS "identityKey",
       MAX(c."name") AS "customerName",
@@ -46,12 +46,12 @@ async function getLeaders(start: Date, end: Date): Promise<Leader[]> {
     LEFT JOIN "Customer" c ON c."id" = o."customerId"
     WHERE o."paymentStatus" = 'PAID'
       AND o."providerStatus" = 'SUCCESS'
-      AND o."createdAt" >= \$\{start}
-      AND o."createdAt" < \$\{end}
+      AND o."createdAt" >= ${start}
+      AND o."createdAt" < ${end}
     GROUP BY COALESCE(o."customerId", 'whatsapp:' || o."whatsapp")
     ORDER BY SUM(o."total") DESC
     LIMIT 10
-  \`;
+  `;
 }
 
 function maskName(name: string | null, identityKey: string) {
