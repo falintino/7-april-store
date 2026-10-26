@@ -28,7 +28,9 @@ export async function GET() {
       prisma.review.aggregate({ where, _avg: { rating: true } }),
     ]);
     const average = aggregate._avg.rating ? Math.round(aggregate._avg.rating * 10) / 10 : 0;
-    return NextResponse.json({ count, average, reviews: reviews.map((review) => ({ ...review, createdAt: review.createdAt.toISOString() })) }, { headers });
+    const session = await getSession();
+    const customer = session ? await prisma.customer.findUnique({ where: { id: session.id }, select: { id: true } }) : null;
+    return NextResponse.json({ count, average, canReview: Boolean(customer), reviews: reviews.map((review) => ({ ...review, createdAt: review.createdAt.toISOString() })) }, { headers });
   } catch (error) {
     console.error("Gagal memuat ulasan Free Fire:", error);
     return NextResponse.json({ message: "Ulasan belum tersedia." }, { status: 503, headers });
