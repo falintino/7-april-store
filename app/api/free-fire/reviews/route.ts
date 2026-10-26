@@ -39,15 +39,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ message: "Login ke akun 7 April Store terlebih dahulu untuk mengirim ulasan yang dihitung sebagai syarat promo." }, { status: 401, headers });
-    }
-    const customer = await prisma.customer.findUnique({ where: { id: session.id }, select: { id: true } });
-    if (!customer) {
-      return NextResponse.json({ message: "Akun pelanggan tidak ditemukan. Silakan login kembali." }, { status: 401, headers });
-    }
-
+    // Login tidak diwajibkan untuk mengulas. Invoice + UID memverifikasi transaksi berhasil.
     const body = await request.json() as Record<string, unknown>;
     const invoice = typeof body.invoice === "string" ? body.invoice.trim() : "";
     const uid = typeof body.uid === "string" ? body.uid.replace(/\D/g, "") : "";
@@ -63,7 +55,6 @@ export async function POST(request: NextRequest) {
     const order = await prisma.order.findFirst({
       where: {
         invoice, uid,
-        customerId: customer.id,
         paymentStatus: { in: ["PAID", "SUCCESS"] },
         providerStatus: { in: ["SUCCESS", "SUKSES"] },
         product: { game: "Free Fire" },
