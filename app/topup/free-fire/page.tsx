@@ -105,6 +105,20 @@ export default async function FreeFireTopUpPage() {
     },
   });
 
+  // Hitung hanya order yang pembayarannya PAID dan delivery Digiflazz SUCCESS.
+  // Order pending, gagal, refund, atau sekadar dibayar tetapi belum terkirim tidak dihitung.
+  const successfulSales = await prisma.order.groupBy({
+    by: ["productId"],
+    where: {
+      paymentStatus: "PAID",
+      providerStatus: "SUCCESS",
+    },
+    _count: { _all: true },
+  });
+  const soldCountByProductId = new Map(
+    successfulSales.map((item) => [item.productId, item._count._all]),
+  );
+
   // Harga khusus mengikuti modal provider terbaru.
   const displayProducts = products.map((product) => {
     const fixedPrices: Record<string, number> = {
@@ -129,7 +143,11 @@ export default async function FreeFireTopUpPage() {
       fallbackPrice: basePrice,
     });
 
-    return { ...product, price: effectivePrice };
+    return {
+      ...product,
+      price: effectivePrice,
+      soldCount: soldCountByProductId.get(product.id) ?? 0,
+    };
   });
 
   return (
