@@ -251,6 +251,30 @@ export async function POST(
     }
 
     /*
+     * Promo khusus ulasan menggunakan kode yang diawali REVIEW.
+     * Syarat dihitung hanya dari ulasan pada pesanan milik akun
+     * yang sedang login dan transaksinya sudah berhasil.
+     */
+    if (promo.code.trim().toUpperCase().startsWith("REVIEW")) {
+      const qualifyingReview = await prisma.review.findFirst({
+        where: {
+          order: {
+            customerId: customer.id,
+            paymentStatus: { in: ["PAID", "SUCCESS"] },
+            providerStatus: { in: ["SUCCESS", "SUKSES"] },
+          },
+        },
+        select: { id: true },
+      });
+
+      if (!qualifyingReview) {
+        return invalidPromo(
+          "Promo ini khusus pelanggan yang sudah mengirim ulasan untuk pesanan berhasil saat login ke akun 7 April Store."
+        );
+      }
+    }
+
+    /*
      * =========================================
      * STATUS PROMO
      * =========================================
