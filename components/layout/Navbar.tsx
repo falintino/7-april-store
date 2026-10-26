@@ -239,7 +239,7 @@ export default function Navbar() {
         <div className="max-h-[calc(100vh-80px)] overflow-y-auto border-t border-white/10 bg-[#07101f] px-5 py-5 shadow-2xl">
           <div className="mx-auto max-w-7xl">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-blue-400">
-              Layanan 7 April Store
+              7 April Store × Store Falintino
             </p>
 
             <nav className="grid gap-2">
