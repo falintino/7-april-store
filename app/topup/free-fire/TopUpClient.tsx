@@ -1045,15 +1045,16 @@ export default function TopUpClient({
                       Harga
                     </p>
 
-                    <p className="text-sm font-black text-blue-400">
-                      {formatRupiah(
-                        product.price,
-                      )}
-                    </p>
-
-                    <p className="mt-2 text-[10px] font-semibold text-slate-400">
-                      Terjual {product.soldCount.toLocaleString("id-ID")}x
-                    </p>
+                    <div className="mt-0.5 flex items-center justify-between gap-1.5">
+                      <p className="text-sm font-black text-blue-400">
+                        {formatRupiah(
+                          product.price,
+                        )}
+                      </p>
+                      <span className="shrink-0 text-right text-[9px] font-semibold leading-tight text-slate-400">
+                        Terjual {product.soldCount.toLocaleString("id-ID")}x
+                      </span>
+                    </div>
                   </button>
                 );
               },
