@@ -12,6 +12,7 @@ type Product = {
   sku: string;
   price: number;
   popular: boolean;
+  soldCount: number;
 };
 
 type TopUpClientProps = {
@@ -1048,6 +1049,10 @@ export default function TopUpClient({
                       {formatRupiah(
                         product.price,
                       )}
+                    </p>
+
+                    <p className="mt-2 text-[10px] font-semibold text-slate-400">
+                      Terjual {product.soldCount.toLocaleString("id-ID")}x
                     </p>
                   </button>
                 );
