@@ -8,11 +8,11 @@ const siteUrl = "https://store.falintino.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "7 April Store – Top Up Free Fire Murah & Cepat",
-    template: "%s | 7 April Store",
+    default: "7 April Store × Store Falintino – Top Up Game",
+    template: "%s | 7 April Store × Store Falintino",
   },
   description:
-    "7 April Store menyediakan top up Free Fire, Diamond Free Fire, dan produk digital game secara online dengan pembayaran QRIS.",
+    "7 April Store × Store Falintino menyediakan layanan top up game dan produk digital secara online dengan pembayaran QRIS.",
   keywords: [
     "7 April Store",
     "top up Free Fire",
@@ -24,10 +24,10 @@ export const metadata: Metadata = {
     "top up FF QRIS",
     "top up game",
   ],
-  applicationName: "7 April Store",
+  applicationName: "7 April Store × Store Falintino",
   category: "games",
-  creator: "7 April Store",
-  publisher: "7 April Store",
+  creator: "7 April Store × Store Falintino",
+  publisher: "7 April Store × Store Falintino",
   alternates: { canonical: siteUrl },
   robots: {
     index: true,
@@ -41,11 +41,11 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "7 April Store – Top Up Free Fire Murah & Cepat",
+    title: "7 April Store × Store Falintino – Top Up Game",
     description:
-      "Top up Free Fire dan Diamond FF secara online di 7 April Store. Harga transparan dan pembayaran QRIS.",
+      "Top up game secara online di 7 April Store × Store Falintino dengan harga transparan dan pembayaran QRIS.",
     url: siteUrl,
-    siteName: "7 April Store",
+    siteName: "7 April Store × Store Falintino",
     locale: "id_ID",
     type: "website",
     images: [
@@ -59,9 +59,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "7 April Store – Top Up Free Fire Murah & Cepat",
+    title: "7 April Store × Store Falintino – Top Up Game",
     description:
-      "Top up Free Fire dan Diamond FF secara online di 7 April Store.",
+      "Top up game secara online di 7 April Store × Store Falintino.",
     images: ["/cover.png"],
   },
   icons: {
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "7 April Store",
+  name: "7 April Store × Store Falintino",
   url: siteUrl,
   logo: `${siteUrl}/icon.svg`,
   email: "falintino10@gmail.com",
@@ -83,7 +83,7 @@ const organizationJsonLd = {
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "7 April Store",
+  name: "7 April Store × Store Falintino",
   url: siteUrl,
   inLanguage: "id-ID",
 };
