@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 
 type Props = {
   invoice: string;
@@ -14,19 +14,6 @@ export default function OrderReviewForm({ invoice, uid }: Props) {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [checkingLogin, setCheckingLogin] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    fetch("/api/free-fire/reviews", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((result: { canReview?: boolean }) => { if (active) setLoggedIn(result.canReview === true); })
-      .catch(() => { if (active) setLoggedIn(false); })
-      .finally(() => { if (active) setCheckingLogin(false); });
-    return () => { active = false; };
-  }, []);
-
   async function submitReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
@@ -50,15 +37,7 @@ export default function OrderReviewForm({ invoice, uid }: Props) {
 
   return (
     <section className="rounded-2xl border border-emerald-500/25 bg-slate-900/80 p-5 sm:p-6">
-      {checkingLogin ? (
-        <p className="py-3 text-center text-sm text-slate-300">Memeriksa status login...</p>
-      ) : !loggedIn ? (
-        <div className="py-3 text-center">
-          <p className="text-xl font-black text-white">Login untuk memberi ulasan</p>
-          <p className="mt-2 text-sm text-slate-300">Ulasan yang memenuhi syarat promo hanya bisa dikirim dari akun 7 April Store yang login dan memiliki pesanan berhasil.</p>
-          <a href="/login" className="mt-4 inline-flex rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-500">Login ke akun</a>
-        </div>
-      ) : submitted ? (
+      {submitted ? (
         <div role="status" className="py-3 text-center">
           <p className="text-xl font-black text-emerald-400">Terima kasih atas ulasanmu! 💙</p>
           <p className="mt-2 text-sm text-slate-300">Rating dan ulasan kamu berhasil dikirim.</p>
