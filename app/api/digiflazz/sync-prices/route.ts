@@ -749,6 +749,7 @@ async function syncPrices(
       if (diamondAmount !== null) {
         const ownerApprovedPromoAmounts = new Set([
           5, 10, 12, 20, 25, 30, 50,
+          100, 140, 210, 300, 355, 425, 500, 720, 860, 1000,
         ]);
 
         // Untuk nominal promo yang ditetapkan pemilik toko,
