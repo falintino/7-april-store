@@ -1283,11 +1283,6 @@ export async function POST(
         `${serverKey}:`
       ).toString("base64");
 
-    const enabledPayment =
-      paymentMethodMap[
-        paymentMethod
-      ];
-
     /*
      * =========================================
      * HITUNG FEE QRIS
@@ -1347,9 +1342,6 @@ export async function POST(
 
     const appUrl =
       getAppUrl();
-
-    const finishUrl =
-      `${appUrl}/payment/finish`;
 
     /*
      * =========================================
