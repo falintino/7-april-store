@@ -84,7 +84,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF7295" },
       update: {
         game: "Free Fire",
-        name: "7,295 Diamond",
+        name: "7295 Diamond",
         providerCode: "ff7295",
         price: 860591,
         providerPrice: 784188,
@@ -92,7 +92,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "7,295 Diamond",
+        name: "7295 Diamond",
         sku: "FF7295",
         providerCode: "ff7295",
         price: 860591,
@@ -105,7 +105,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF7310" },
       update: {
         game: "Free Fire",
-        name: "7,310 Diamond",
+        name: "7310 Diamond",
         providerCode: "ff7310",
         price: 862954,
         providerPrice: 783875,
@@ -113,7 +113,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "7,310 Diamond",
+        name: "7310 Diamond",
         sku: "FF7310",
         providerCode: "ff7310",
         price: 862954,
@@ -126,7 +126,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF7340" },
       update: {
         game: "Free Fire",
-        name: "7,340 Diamond",
+        name: "7340 Diamond",
         providerCode: "ff7340",
         price: 866137,
         providerPrice: 786695,
@@ -134,7 +134,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "7,340 Diamond",
+        name: "7340 Diamond",
         sku: "FF7340",
         providerCode: "ff7340",
         price: 866137,
@@ -147,7 +147,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF7360" },
       update: {
         game: "Free Fire",
-        name: "7,360 Diamond",
+        name: "7360 Diamond",
         providerCode: "ff7360",
         price: 868405,
         providerPrice: 788793,
@@ -155,7 +155,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "7,360 Diamond",
+        name: "7360 Diamond",
         sku: "FF7360",
         providerCode: "ff7360",
         price: 868405,
@@ -168,7 +168,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF7430" },
       update: {
         game: "Free Fire",
-        name: "7,430 Diamond",
+        name: "7430 Diamond",
         providerCode: "ff7430",
         price: 877007,
         providerPrice: 792421,
@@ -176,7 +176,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "7,430 Diamond",
+        name: "7430 Diamond",
         sku: "FF7430",
         providerCode: "ff7430",
         price: 877007,
@@ -189,7 +189,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF7645" },
       update: {
         game: "Free Fire",
-        name: "7,645 Diamond",
+        name: "7645 Diamond",
         providerCode: "ff7645",
         price: 902813,
         providerPrice: 819970,
@@ -197,7 +197,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "7,645 Diamond",
+        name: "7645 Diamond",
         sku: "FF7645",
         providerCode: "ff7645",
         price: 902813,
@@ -210,7 +210,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF7650" },
       update: {
         game: "Free Fire",
-        name: "7,650 Diamond",
+        name: "7650 Diamond",
         providerCode: "ff7650",
         price: 903601,
         providerPrice: 820690,
@@ -218,7 +218,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "7,650 Diamond",
+        name: "7650 Diamond",
         sku: "FF7650",
         providerCode: "ff7650",
         price: 903601,
@@ -231,7 +231,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF8010" },
       update: {
         game: "Free Fire",
-        name: "8,010 Diamond",
+        name: "8010 Diamond",
         providerCode: "ff8010",
         price: 945823,
         providerPrice: 858945,
@@ -239,7 +239,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "8,010 Diamond",
+        name: "8010 Diamond",
         sku: "FF8010",
         providerCode: "ff8010",
         price: 945823,
@@ -252,7 +252,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF9290" },
       update: {
         game: "Free Fire",
-        name: "9,290 Diamond",
+        name: "9290 Diamond",
         providerCode: "ff9290",
         price: 1099084,
         providerPrice: 1000025,
@@ -260,7 +260,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "9,290 Diamond",
+        name: "9290 Diamond",
         sku: "FF9290",
         providerCode: "ff9290",
         price: 1099084,
@@ -273,7 +273,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF9800" },
       update: {
         game: "Free Fire",
-        name: "9,800 Diamond",
+        name: "9800 Diamond",
         providerCode: "ff9800",
         price: 1158605,
         providerPrice: 1055725,
@@ -281,7 +281,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "9,800 Diamond",
+        name: "9800 Diamond",
         sku: "FF9800",
         providerCode: "ff9800",
         price: 1158605,
@@ -294,7 +294,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF14580" },
       update: {
         game: "Free Fire",
-        name: "14,580 Diamond",
+        name: "14580 Diamond",
         providerCode: "ff14580",
         price: 1758000,
         providerPrice: 1600885,
@@ -302,7 +302,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "14,580 Diamond",
+        name: "14580 Diamond",
         sku: "FF14580",
         providerCode: "ff14580",
         price: 1758000,
@@ -315,7 +315,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF36500" },
       update: {
         game: "Free Fire",
-        name: "36,500 Diamond",
+        name: "36500 Diamond",
         providerCode: "ff36500",
         price: 4311696,
         providerPrice: 3921555,
@@ -323,7 +323,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "36,500 Diamond",
+        name: "36500 Diamond",
         sku: "FF36500",
         providerCode: "ff36500",
         price: 4311696,
@@ -336,7 +336,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF37050" },
       update: {
         game: "Free Fire",
-        name: "37,050 Diamond",
+        name: "37050 Diamond",
         providerCode: "ff37050",
         price: 4378809,
         providerPrice: 3982568,
@@ -344,7 +344,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "37,050 Diamond",
+        name: "37050 Diamond",
         sku: "FF37050",
         providerCode: "ff37050",
         price: 4378809,
@@ -357,7 +357,7 @@ export default async function FreeFireTopUpPage() {
       where: { sku: "FF73100" },
       update: {
         game: "Free Fire",
-        name: "73,100 Diamond",
+        name: "73100 Diamond",
         providerCode: "ff73100",
         price: 8637586,
         providerPrice: 7854189,
@@ -365,7 +365,7 @@ export default async function FreeFireTopUpPage() {
       },
       create: {
         game: "Free Fire",
-        name: "73,100 Diamond",
+        name: "73100 Diamond",
         sku: "FF73100",
         providerCode: "ff73100",
         price: 8637586,
