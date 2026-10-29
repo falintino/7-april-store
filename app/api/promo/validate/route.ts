@@ -145,6 +145,30 @@ export async function POST(
       body.productId ?? ""
     ).trim();
 
+    // Promo spesial Free Fire: pembatasan lintas akun berdasarkan UID.
+    const freeFireUid = String(body.uid ?? "").trim();
+    const limitedFreeFirePromoCodes = ["FF50HEMAT", "FF100HEMAT", "FF140HEMAT"];
+    const isLimitedFreeFirePromo = limitedFreeFirePromoCodes.includes(code.toUpperCase());
+    if (isLimitedFreeFirePromo && !/^\\d{6,20}$/.test(freeFireUid)) {
+      return invalidPromo("Masukkan UID Free Fire yang valid sebelum menggunakan promo ini.");
+    }
+    if (isLimitedFreeFirePromo) {
+      const existingUidClaim = await prisma.order.findFirst({
+        where: {
+          uid: freeFireUid,
+          promoCode: { code: { in: limitedFreeFirePromoCodes, mode: "insensitive" } },
+          OR: [
+            { paymentStatus: { in: ["PAID", "SUCCESS"] }, promoRedeemedAt: { not: null } },
+            { paymentStatus: "PENDING", promoAppliedAt: { not: null } },
+          ],
+        },
+        select: { id: true },
+      });
+      if (existingUidClaim) {
+        return invalidPromo("UID Free Fire ini sudah memakai atau sedang memiliki klaim promo. Satu UID hanya boleh memakai satu dari tiga kode promo spesial.");
+      }
+    }
+
     // Semua promo checkout wajib digunakan oleh customer yang login.
     const session = await getSession();
 
