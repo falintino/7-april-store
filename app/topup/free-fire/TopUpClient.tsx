@@ -67,7 +67,6 @@ export default function TopUpClient({
   const whatsappInputRef = useRef<HTMLInputElement>(null);
   const productSectionRef = useRef<HTMLDivElement>(null);
   const paymentSectionRef = useRef<HTMLDivElement>(null);
-  const termsSectionRef = useRef<HTMLDivElement>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const [uid, setUid] = useState("");
@@ -405,7 +404,6 @@ export default function TopUpClient({
     whatsappValid &&
     productValid &&
     paymentValid &&
-    acceptedTerms &&
     promoReady &&
     !validatingPromo &&
     !loading;
@@ -621,11 +619,6 @@ export default function TopUpClient({
     if (!paymentValid) {
       paymentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       setErrorMessage("Pilih metode pembayaran terlebih dahulu.");
-      return;
-    }
-    if (!acceptedTerms) {
-      termsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      setErrorMessage("Centang persetujuan sebelum melanjutkan.");
       return;
     }
     if (!promoReady || validatingPromo) {
@@ -1461,71 +1454,6 @@ export default function TopUpClient({
           </div>
         )}
 
-        <div
-          className={[
-            "mt-5 rounded-xl border p-4 transition-colors",
-            acceptedTerms
-              ? "border-emerald-500/50 bg-emerald-500/[0.07]"
-              : "border-amber-400/70 bg-amber-400/[0.07] shadow-[0_0_22px_rgba(251,191,36,0.08)]",
-          ].join(" ")}
-        >
-          <p className={[
-            "mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-wide",
-            acceptedTerms ? "text-emerald-300" : "text-amber-300",
-          ].join(" ")}>
-            <span aria-hidden="true">{acceptedTerms ? "✓" : "☝️"}</span>
-            {acceptedTerms
-              ? "Persetujuan sudah dicentang"
-              : "Langkah terakhir — wajib dicentang"}
-          </p>
-
-          <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-slate-200">
-            <input
-              type="checkbox"
-              checked={acceptedTerms}
-              disabled={loading}
-              onChange={(event) => {
-                setAcceptedTerms(event.target.checked);
-                setErrorMessage("");
-              }}
-              className="mt-1 h-5 w-5 shrink-0 cursor-pointer accent-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060b16]"
-            />
-
-            <span>
-              <span className="font-bold text-white">
-                Centang kotak ini untuk mengaktifkan tombol Konfirmasi Pesanan.
-              </span>
-              <span className="mt-1 block text-xs leading-5 text-slate-300">
-                Saya telah memeriksa UID dan nominal, serta menyetujui{" "}
-                <Link
-                  href="/syarat-ketentuan"
-                  target="_blank"
-                  className="font-semibold text-blue-300 underline underline-offset-2 hover:text-blue-200"
-                >
-                  Syarat dan Ketentuan
-                </Link>
-                ,{" "}
-                <Link
-                  href="/kebijakan-pengiriman"
-                  target="_blank"
-                  className="font-semibold text-blue-300 underline underline-offset-2 hover:text-blue-200"
-                >
-                  Kebijakan Pengiriman
-                </Link>{" "}
-                dan{" "}
-                <Link
-                  href="/kebijakan-refund"
-                  target="_blank"
-                  className="font-semibold text-blue-300 underline underline-offset-2 hover:text-blue-200"
-                >
-                  Kebijakan Refund
-                </Link>
-                .
-              </span>
-            </span>
-          </label>
-        </div>
-
         <button
           type="button"
           disabled={loading}
@@ -1541,7 +1469,7 @@ export default function TopUpClient({
           <p className={`mt-3 text-center text-xs ${submitAttempted ? "font-semibold text-red-400" : "text-slate-500"}`}>
             {submitAttempted
               ? "Masih ada data yang belum lengkap. Kolom yang perlu diperbaiki ditandai merah."
-              : "Lengkapi data akun, pilih nominal dan metode pembayaran, lalu setujui ketentuan transaksi."}
+              : "Lengkapi data akun, pilih nominal dan metode pembayaran, lalu lanjutkan ke pembayaran."}
           </p>
         )}
       </div>
