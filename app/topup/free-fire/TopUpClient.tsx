@@ -174,6 +174,8 @@ export default function TopUpClient({
   const [loading, setLoading] =
     useState(false);
 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const [errorMessage, setErrorMessage] =
     useState("");
 
@@ -590,7 +592,44 @@ export default function TopUpClient({
     }
   }
 
-  async function handleConfirm() {
+  function handleConfirm() {
+    if (loading) return;
+
+    setSubmitAttempted(true);
+
+    if (!uidValid) {
+      uidInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      uidInputRef.current?.focus({ preventScroll: true });
+      setErrorMessage("UID Free Fire belum valid. Periksa kolom UID yang ditandai merah.");
+      return;
+    }
+    if (!whatsappValid) {
+      whatsappInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      whatsappInputRef.current?.focus({ preventScroll: true });
+      setErrorMessage("Nomor WhatsApp belum valid. Periksa kolom yang ditandai merah.");
+      return;
+    }
+    if (!productValid) {
+      productSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setErrorMessage("Pilih nominal produk terlebih dahulu.");
+      return;
+    }
+    if (!paymentValid) {
+      paymentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setErrorMessage("Pilih metode pembayaran terlebih dahulu.");
+      return;
+    }
+    if (!promoReady || validatingPromo) {
+      setErrorMessage("Periksa kode promo terlebih dahulu atau terapkan kode promo yang dimasukkan.");
+      return;
+    }
+    if (!selectedProduct || !selectedPaymentMethod) return;
+
+    setErrorMessage("");
+    setShowConfirmModal(true);
+  }
+
+  async function handleBuyNow() {
     if (loading) return;
 
     setSubmitAttempted(true);
@@ -1441,6 +1480,81 @@ export default function TopUpClient({
             <div className="mt-3 flex items-center justify-between gap-4 border-t border-emerald-500/20 pt-3">
               <span className="font-bold text-white">Total setelah promo</span>
               <span className="text-lg font-black text-emerald-300">{formatRupiah(appliedPromoMatches && appliedPromo?.paymentFeeWaived ? effectiveProductPrice : previewCustomerTotal)}</span>
+            </div>
+          </div>
+        )}
+
+        {showConfirmModal && selectedProduct && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 px-4 py-6 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-order-title"
+          >
+            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-slate-900 text-white shadow-2xl">
+              <div className="border-b border-white/10 px-5 py-4">
+                <h2 id="confirm-order-title" className="text-lg font-black">Detail Pesanan</h2>
+                <p className="mt-1 text-xs leading-5 text-slate-400">Periksa kembali data pesananmu sebelum membeli.</p>
+              </div>
+              <div className="space-y-4 p-5">
+                <div className="text-center">
+                  <p className="text-xs text-slate-400">Total Pembayaran</p>
+                  <p className="mt-1 text-3xl font-black text-blue-400">{formatRupiah(previewCustomerTotal)}</p>
+                </div>
+                <div className="space-y-3 border-t border-white/10 pt-4 text-sm">
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-slate-400">Item</span>
+                    <span className="text-right font-semibold">{selectedProduct.name}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-slate-400">UID Free Fire</span>
+                    <span className="text-right font-semibold">{uid.trim()}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-slate-400">WhatsApp</span>
+                    <span className="text-right font-semibold">{whatsapp}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-slate-400">Sistem Pembayaran</span>
+                    <span className="text-right font-semibold">QRIS</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-slate-400">Harga Produk</span>
+                    <span className="text-right font-semibold">{formatRupiah(effectiveProductPrice)}</span>
+                  </div>
+                  {appliedPromoMatches && appliedPromo?.discountAmount ? (
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="text-emerald-400">Diskon Promo</span>
+                      <span className="text-right font-semibold text-emerald-400">−{formatRupiah(appliedPromo.discountAmount)}</span>
+                    </div>
+                  ) : null}
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-slate-400">Biaya QRIS</span>
+                    <span className="text-right font-semibold">{previewPaymentFee === 0 ? "Gratis" : formatRupiah(previewPaymentFee)}</span>
+                  </div>
+                </div>
+                <p className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-3 text-xs leading-5 text-amber-200">
+                  Pastikan UID dan nominal sudah benar. Setelah memilih Beli Sekarang, kamu akan diarahkan ke halaman pembayaran QRIS.
+                </p>
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => setShowConfirmModal(false)}
+                    className="h-11 rounded-xl border border-white/10 bg-white/5 text-sm font-bold transition hover:bg-white/10 disabled:opacity-50"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => void handleBuyNow()}
+                    className="h-11 rounded-xl bg-blue-600 text-sm font-black transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {loading ? "Memproses..." : "Beli Sekarang"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
