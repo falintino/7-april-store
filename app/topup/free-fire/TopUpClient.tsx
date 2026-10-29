@@ -549,6 +549,7 @@ export default function TopUpClient({
           code,
           productId: selectedProduct.id,
           whatsapp,
+          uid: uid.trim(),
         }),
       });
       const result = await response.json();
