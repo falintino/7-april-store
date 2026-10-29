@@ -179,7 +179,9 @@ async function checkPendingOrders(request: Request) {
         providerUpdatedAt: "asc",
       },
 
-      take: 1,
+      // Ambil beberapa order per eksekusi agar antrean tidak menunggu
+      // satu transaksi saja setiap kali cron berjalan.
+      take: 5,
 
       select: {
         id: true,
