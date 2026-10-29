@@ -132,7 +132,8 @@ function normalizeOptionalInteger(
 }
 
 function normalizeOptionalDate(
-  value: unknown
+  value: unknown,
+  endOfDay = false
 ) {
   if (
     value === null ||
@@ -142,17 +143,16 @@ function normalizeOptionalDate(
     return null;
   }
 
-  if (
-    typeof value !==
-    "string"
-  ) {
+  if (typeof value !== "string") {
     return undefined;
   }
 
-  // datetime-local mengirim "YYYY-MM-DDTHH:mm" tanpa zona waktu.
-  // Parsing eksplisit sebagai WIB (UTC+07:00) agar tidak bergantung zona waktu server.
-  const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);
-  const normalizedValue = hasTimezone ? value : `${value}:00+07:00`;
+  // Date-only form values are interpreted as WIB. Start dates use 00:00,
+  // expiration dates use the final millisecond of that local day.
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const normalizedValue = dateOnly
+    ? `${value}T${endOfDay ? "23:59:59.999" : "00:00:00"}+07:00`
+    : value;
   const date = new Date(normalizedValue);
 
   if (Number.isNaN(date.getTime())) {
@@ -161,7 +161,6 @@ function normalizeOptionalDate(
 
   return date;
 }
-
 export async function GET() {
   const authenticated =
     await isAdminAuthenticated();
@@ -345,7 +344,8 @@ export async function POST(
 
     const expiresAt =
       normalizeOptionalDate(
-        body.expiresAt
+        body.expiresAt,
+        true
       );
 
     const firstOrderOnly =
