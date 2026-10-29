@@ -475,9 +475,25 @@ export async function POST(request: Request) {
     const diamondAmount = normalizedGame === "free fire"
       ? getDiamondAmount(product.name, product.sku)
       : null;
-    const storeSubsidizedPromo = normalizedGame === "free fire" && (diamondAmount === 5 || diamondAmount === 10);
 
-    if (subtotal < providerPriceSnapshot && !storeSubsidizedPromo) {
+    // Free Fire catalog prices are owner-configured target prices. Keep those
+    // prices unchanged at checkout; do not reject an order solely because the
+    // latest provider cost moved above the configured sale price.
+    // This can reduce or eliminate margin, so monitor provider price changes.
+    const configuredFreeFireTarget =
+      normalizedGame === "free fire" &&
+      getEffectiveSellingPrice({
+        name: product.name,
+        sku: product.sku,
+        providerPrice: effectiveProviderPrice,
+        fallbackPrice: fixedSalePrices[product.sku] ?? product.price,
+      }) === subtotal;
+
+    if (
+      subtotal < providerPriceSnapshot &&
+      !configuredFreeFireTarget &&
+      !(normalizedGame === "free fire" && (diamondAmount === 5 || diamondAmount === 10))
+    ) {
       console.error("CREATE ORDER BELOW PROVIDER PRICE:", {
         productId: product.id,
         sku: product.sku,
