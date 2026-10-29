@@ -61,7 +61,21 @@ export async function POST(request: Request) {
   }
 
   const rawBody = await request.text();
-  if (!validSignature(rawBody, request.headers.get("x-hub-signature"), secret)) {
+  const receivedSignature = request.headers.get("x-hub-signature");
+  if (!validSignature(rawBody, receivedSignature, secret)) {
+    // Safe diagnostics only: never log the secret, raw body, or full signature.
+    const normalizedSignature = receivedSignature?.trim() ?? "";
+    console.warn("Digiflazz webhook signature rejected", {
+      hasSignatureHeader: receivedSignature !== null,
+      hasSha1Prefix: normalizedSignature.startsWith("sha1="),
+      receivedSignatureLength: normalizedSignature.length,
+      receivedDigestLength: normalizedSignature.startsWith("sha1=")
+        ? normalizedSignature.length - 5
+        : normalizedSignature.length,
+      expectedSignatureLength: 45,
+      secretLength: secret.length,
+      rawBodyLength: Buffer.byteLength(rawBody, "utf8"),
+    });
     return NextResponse.json({ success: false, message: "Signature tidak valid." }, { status: 401 });
   }
 
