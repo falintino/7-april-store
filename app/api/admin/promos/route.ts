@@ -149,14 +149,15 @@ function normalizeOptionalDate(
     return undefined;
   }
 
-  const date =
-    new Date(value);
+  // Kolom datetime-local mengirim waktu tanpa zona waktu.
+  // Perlakukan waktu admin sebagai WIB (UTC+7), bukan zona waktu server.
+  const hasTimezone = /(?:Z|[+-]\\d{2}:?\\d{2})$/i.test(value);
+  const normalizedValue = hasTimezone
+    ? value
+    : `${value}+07:00`;
+  const date = new Date(normalizedValue);
 
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return undefined;
   }
 
