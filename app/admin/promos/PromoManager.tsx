@@ -100,6 +100,7 @@ function formatDate(
     {
       dateStyle: "medium",
       timeStyle: "short",
+      timeZone: "Asia/Jakarta",
     }
   ).format(date);
 }
