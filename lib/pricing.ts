@@ -118,7 +118,7 @@ export function getDiamondAmount(
   sku: string,
 ) {
   const match = `${name} ${sku}`.match(
-    /\b(\d{1,4})\b/,
+    /\b(\d{1,5})\b/,
   );
 
   if (!match) {
