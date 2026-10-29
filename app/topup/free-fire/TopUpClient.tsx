@@ -177,9 +177,6 @@ export default function TopUpClient({
   const [errorMessage, setErrorMessage] =
     useState("");
 
-  const [acceptedTerms, setAcceptedTerms] =
-    useState(false);
-
   const [promoCode, setPromoCode] = useState("");
   const [showPromoCode, setShowPromoCode] = useState(false);
   const [appliedPromo, setAppliedPromo] = useState<{
@@ -1188,7 +1185,7 @@ export default function TopUpClient({
 
       {/* STEP 4 */}
 
-      <div ref={termsSectionRef} className={`mt-5 rounded-2xl border bg-slate-900/60 p-5 ${submitAttempted && !acceptedTerms ? "border-red-500 ring-2 ring-red-500/20" : "border-white/10"}`}>
+      <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-black">
             4
