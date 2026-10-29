@@ -9,6 +9,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type DigiflazzWebhook = {
+  sed?: string;
+  hook_id?: string;
+  hook?: { url?: string; secret?: string; type?: string; status?: number };
   data?: {
     ref_id?: string;
     customer_no?: string;
@@ -67,6 +70,12 @@ export async function POST(request: Request) {
     payload = JSON.parse(rawBody) as DigiflazzWebhook;
   } catch {
     return NextResponse.json({ success: false, message: "Payload JSON tidak valid." }, { status: 400 });
+  }
+
+  // Digiflazz sends a lightweight ping payload when a webhook is configured.
+  // Acknowledge it after signature verification; it is not a transaction event.
+  if (typeof payload.hook_id === "string" && typeof payload.sed === "string") {
+    return NextResponse.json({ success: true, event: "ping", hookId: payload.hook_id });
   }
 
   const data = payload.data;
