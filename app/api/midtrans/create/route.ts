@@ -310,6 +310,33 @@ export async function POST(
       );
     }
 
+    // Satu UID Free Fire hanya boleh memakai satu dari tiga promo spesial.
+    const limitedFreeFirePromoCodes = ["FF50HEMAT", "FF100HEMAT", "FF140HEMAT"];
+    const requestedPromoCode = (promoCodeInput || order.promoCode?.code || "").trim().toUpperCase();
+    if (
+      limitedFreeFirePromoCodes.includes(requestedPromoCode) &&
+      order.product.game.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\\s+/g, " ") === "free fire"
+    ) {
+      const existingUidClaim = await prisma.order.findFirst({
+        where: {
+          uid: order.uid,
+          invoice: { not: order.invoice },
+          promoCode: { code: { in: limitedFreeFirePromoCodes, mode: "insensitive" } },
+          OR: [
+            { paymentStatus: { in: ["PAID", "SUCCESS"] }, promoRedeemedAt: { not: null } },
+            { paymentStatus: "PENDING", promoAppliedAt: { not: null } },
+          ],
+        },
+        select: { invoice: true },
+      });
+      if (existingUidClaim) {
+        return NextResponse.json(
+          { success: false, message: "UID Free Fire ini sudah memakai atau sedang memiliki klaim promo. Satu UID hanya boleh memakai satu dari tiga kode promo spesial." },
+          { status: 409 },
+        );
+      }
+    }
+
     // Identitas promo berasal dari akun yang login, bukan nomor kontak checkout.
     let promoCustomerWhatsapp: string | null = null;
 
