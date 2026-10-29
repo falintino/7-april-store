@@ -12,6 +12,7 @@ function Stars({ rating }: { rating: number }) {
 export default function FreeFireReviews({ showForm = true }: { showForm?: boolean }) {
   const [data, setData] = useState<ReviewData>({ count: 0, average: 0, reviews: [] });
   const [loading, setLoading] = useState(true);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [invoice, setInvoice] = useState("");
   const [uid, setUid] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -23,7 +24,7 @@ export default function FreeFireReviews({ showForm = true }: { showForm?: boolea
 
   async function loadReviews() {
     try {
-      const response = await fetch("/api/free-fire/reviews", { cache: "no-store" });
+      const response = await fetch(`/api/free-fire/reviews${showAllReviews ? "?all=1" : ""}`, { cache: "no-store" });
       if (!response.ok) return;
       const result = await response.json() as ReviewData;
       setData(result);
@@ -34,7 +35,7 @@ export default function FreeFireReviews({ showForm = true }: { showForm?: boolea
     }
   }
 
-  useEffect(() => { void loadReviews(); }, []);
+  useEffect(() => { void loadReviews(); }, [showAllReviews]);
 
   async function sendReview() {
     setSubmitting(true);
@@ -86,7 +87,13 @@ export default function FreeFireReviews({ showForm = true }: { showForm?: boolea
         </div>
         <div className={`grid gap-6 p-5 sm:p-7 ${showForm ? "sm:grid-cols-2" : "grid-cols-1"}`}>
           <div className="space-y-3">
-            <h3 className="font-bold text-white">Ulasan terbaru</h3>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="font-bold text-white">Ulasan pelanggan</h3>
+              <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-slate-950/70 p-1" role="tablist" aria-label="Tampilan ulasan">
+                <button type="button" role="tab" aria-selected={!showAllReviews} onClick={() => setShowAllReviews(false)} className={`rounded-lg px-3 py-2 text-xs font-bold transition ${!showAllReviews ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"}`}>Terbaru</button>
+                <button type="button" role="tab" aria-selected={showAllReviews} onClick={() => setShowAllReviews(true)} className={`rounded-lg px-3 py-2 text-xs font-bold transition ${showAllReviews ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"}`}>Semua ({data.count})</button>
+              </div>
+            </div>
             {loading ? <p className="text-sm text-slate-400">Memuat ulasan…</p> : data.reviews.length ? data.reviews.map((review) => (
               <article key={review.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
                 <div className="flex items-center justify-between gap-2"><p className="font-semibold text-white">{review.displayName}</p><Stars rating={review.rating} /></div>
