@@ -1421,6 +1421,9 @@ export async function POST(
               gross_amount: customerTotal,
             },
             item_details: itemDetails,
+            // Show only QRIS on the hosted SNAP checkout.
+            // "other_qris" is Midtrans's generic QRIS channel.
+            enabled_payments: ["other_qris"],
             customer_details: {
               first_name: "Pelanggan 7 April Store",
               phone: order.whatsapp,
