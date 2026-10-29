@@ -359,12 +359,7 @@ export function getEffectiveSellingPrice({
     return fallbackPrice;
   }
 
-  // Nominal 5 dan 10 DM memang disubsidi toko sebagai harga khusus.
-  // Untuk nominal lain, harga yang ditampilkan tidak boleh di bawah modal provider,
-  // agar harga pada katalog konsisten dengan validasi saat checkout.
-  if (amount === 5 || amount === 10) {
-    return target;
-  }
-
-  return Math.max(target, providerPrice);
+  // Harga promo yang ditetapkan pemilik toko digunakan apa adanya.
+  // Nominal tertentu boleh disubsidi toko meskipun di bawah modal provider.
+  return target;
 }
