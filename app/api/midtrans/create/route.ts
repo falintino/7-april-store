@@ -23,6 +23,8 @@ type MidtransResponse = {
   transaction_id?: string;
   actions?: Array<{ name?: string; method?: string; url?: string }>;
   error_messages?: string[];
+  status_code?: string;
+  status_message?: string;
 };
 
 const FREE_PAYMENT_FEE = "FREE_PAYMENT_FEE";
