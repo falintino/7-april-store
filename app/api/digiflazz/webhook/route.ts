@@ -61,11 +61,28 @@ export async function POST(request: Request) {
   }
 
   const rawBody = await request.text();
+  let payload: DigiflazzWebhook;
+  try {
+    payload = JSON.parse(rawBody) as DigiflazzWebhook;
+  } catch {
+    return NextResponse.json({ success: false, message: "Payload JSON tidak valid." }, { status: 400 });
+  }
+
   const receivedSignature = request.headers.get("x-hub-signature");
+  const isPing = typeof payload.hook_id === "string" && typeof payload.sed === "string";
+
+  // Digiflazz's documented ping request can arrive without X-Hub-Signature.
+  // A ping has no transaction data and this branch performs no order changes.
+  // If a signature is provided, still validate it before acknowledging the ping.
+  if (isPing && !receivedSignature) {
+    return NextResponse.json({ success: true, event: "ping", hookId: payload.hook_id });
+  }
+
   if (!validSignature(rawBody, receivedSignature, secret)) {
     // Safe diagnostics only: never log the secret, raw body, or full signature.
     const normalizedSignature = receivedSignature?.trim() ?? "";
     console.warn("Digiflazz webhook signature rejected", {
+      isPing,
       hasSignatureHeader: receivedSignature !== null,
       hasSha1Prefix: normalizedSignature.startsWith("sha1="),
       receivedSignatureLength: normalizedSignature.length,
@@ -79,16 +96,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, message: "Signature tidak valid." }, { status: 401 });
   }
 
-  let payload: DigiflazzWebhook;
-  try {
-    payload = JSON.parse(rawBody) as DigiflazzWebhook;
-  } catch {
-    return NextResponse.json({ success: false, message: "Payload JSON tidak valid." }, { status: 400 });
-  }
-
-  // Digiflazz sends a lightweight ping payload when a webhook is configured.
-  // Acknowledge it after signature verification; it is not a transaction event.
-  if (typeof payload.hook_id === "string" && typeof payload.sed === "string") {
+  if (isPing) {
     return NextResponse.json({ success: true, event: "ping", hookId: payload.hook_id });
   }
 
