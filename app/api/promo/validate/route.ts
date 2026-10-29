@@ -149,7 +149,7 @@ export async function POST(
     const freeFireUid = String(body.uid ?? "").trim();
     const limitedFreeFirePromoCodes = ["FF50HEMAT", "FF100HEMAT", "FF140HEMAT"];
     const isLimitedFreeFirePromo = limitedFreeFirePromoCodes.includes(code.toUpperCase());
-    if (isLimitedFreeFirePromo && !/^\\d{6,20}$/.test(freeFireUid)) {
+    if (isLimitedFreeFirePromo && !/^\d{6,20}$/.test(freeFireUid)) {
       return invalidPromo("Masukkan UID Free Fire yang valid sebelum menggunakan promo ini.");
     }
     if (isLimitedFreeFirePromo) {
