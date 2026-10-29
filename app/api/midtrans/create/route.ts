@@ -1495,9 +1495,16 @@ export async function POST(
       console.error(
         "MIDTRANS QRIS INVALID RESPONSE:",
         {
-          transactionId: data.transaction_id,
-          actionNames: data.actions?.map((action) => action.name),
+          httpStatus: midtransResponse.status,
+          responseKeys: data && typeof data === "object" ? Object.keys(data) : [],
+          statusCode: data?.status_code,
+          statusMessage: data?.status_message,
+          transactionIdPresent: Boolean(data?.transaction_id),
+          actionNames: Array.isArray(data?.actions)
+            ? data.actions.map((action) => action.name ?? "unnamed")
+            : [],
           hasQrAction: Boolean(qrAction?.url),
+          // Never log server keys, authorization headers, QR URLs, or customer details.
         }
       );
 
