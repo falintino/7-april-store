@@ -6,8 +6,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "no-store, max-age=0" };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const showAll = new URL(request.url).searchParams.get("all") === "1";
     const where = {
       approved: true,
       moderationStatus: "VISIBLE",
@@ -21,7 +22,7 @@ export async function GET() {
       prisma.review.findMany({
         where,
         orderBy: { createdAt: "desc" },
-        take: 30,
+        take: showAll ? 100 : 3,
         select: { id: true, rating: true, comment: true, displayName: true, createdAt: true },
       }),
       prisma.review.count({ where }),
