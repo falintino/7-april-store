@@ -105,44 +105,25 @@ function formatDate(
   ).format(date);
 }
 
-function toDateTimeLocal(
+function toDateLocal(
   value:
     | string
     | Date
     | null
 ) {
-  if (!value) {
-    return "";
-  }
+  if (!value) return "";
 
-  const date =
-    new Date(value);
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
 
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
-    return "";
-  }
-
-  const pad = (
-    value: number
-  ) =>
-    String(value).padStart(
-      2,
-      "0"
-    );
-
-  return `${date.getFullYear()}-${pad(
-    date.getMonth() + 1
-  )}-${pad(
-    date.getDate()
-  )}T${pad(
-    date.getHours()
-  )}:${pad(
-    date.getMinutes()
-  )}`;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const part = (type: string) => parts.find((item) => item.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
 }
 
 function getPromoTypeLabel(
@@ -482,13 +463,13 @@ export default function PromoManager({
     );
 
     setStartsAt(
-      toDateTimeLocal(
+      toDateLocal(
         promo.startsAt
       )
     );
 
     setExpiresAt(
-      toDateTimeLocal(
+      toDateLocal(
         promo.expiresAt
       )
     );
@@ -1332,7 +1313,7 @@ export default function PromoManager({
             </label>
 
             <input
-              type="datetime-local"
+              type="date"
               value={startsAt}
               disabled={loading}
               onChange={(
@@ -1352,7 +1333,7 @@ export default function PromoManager({
             </label>
 
             <input
-              type="datetime-local"
+              type="date"
               value={expiresAt}
               disabled={loading}
               onChange={(
