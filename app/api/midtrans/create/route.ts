@@ -20,6 +20,8 @@ type PaymentMethod =
 type MidtransResponse = {
   token?: string;
   redirect_url?: string;
+  transaction_id?: string;
+  actions?: Array<{ name?: string; method?: string; url?: string }>;
   error_messages?: string[];
 };
 
@@ -1273,8 +1275,8 @@ export async function POST(
 
     const endpoint =
       isProduction
-        ? "https://app.midtrans.com/snap/v1/transactions"
-        : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+        ? "https://api.midtrans.com/v2/charge"
+        : "https://api.sandbox.midtrans.com/v2/charge";
 
     const authorization =
       Buffer.from(
@@ -1428,43 +1430,27 @@ export async function POST(
 
           body:
             JSON.stringify({
-              transaction_details: {
-                order_id:
-                  midtransOrderId,
+              payment_type: "qris",
 
-                gross_amount:
-                  customerTotal,
+              transaction_details: {
+                order_id: midtransOrderId,
+                gross_amount: customerTotal,
               },
 
-              item_details:
-                itemDetails,
+              item_details: itemDetails,
 
               customer_details: {
-                first_name:
-                  "Pelanggan 7 April Store",
-
-                phone:
-                  order.whatsapp,
+                first_name: "Pelanggan 7 April Store",
+                phone: order.whatsapp,
               },
 
-              enabled_payments: [
-                enabledPayment,
-              ],
-
-              callbacks: {
-                finish:
-                  finishUrl,
-
-                error:
-                  finishUrl,
+              qris: {
+                acquirer: "gopay",
               },
 
-              expiry: {
-                unit:
-                  "minutes",
-
-                duration:
-                  60,
+              custom_expiry: {
+                expiry_duration: 60,
+                unit: "minute",
               },
             }),
 
@@ -1506,27 +1492,37 @@ export async function POST(
       );
     }
 
-    if (
-      !data.token ||
-      !data.redirect_url
-    ) {
+    const qrAction =
+      data.actions?.find(
+        (action) =>
+          action.name === "generate-qr-code" ||
+          action.name === "generate-qr-code-v2"
+      );
+
+    if (!data.transaction_id || !qrAction?.url) {
       console.error(
-        "MIDTRANS INVALID RESPONSE:",
-        data
+        "MIDTRANS QRIS INVALID RESPONSE:",
+        {
+          transactionId: data.transaction_id,
+          actionNames: data.actions?.map((action) => action.name),
+          hasQrAction: Boolean(qrAction?.url),
+        }
       );
 
       return NextResponse.json(
         {
           success: false,
-
           message:
-            "Midtrans tidak mengembalikan link pembayaran.",
+            "Midtrans belum mengembalikan QRIS. Silakan coba lagi.",
         },
         {
-          status: 500,
+          status: 502,
         }
       );
     }
+
+    const redirectUrl =
+      `${appUrl}/payment/qris?invoice=${encodeURIComponent(midtransOrderId)}&qr=${encodeURIComponent(qrAction.url)}&amount=${customerTotal}&expires=${Date.now() + 60 * 60 * 1000}`;
 
     /*
      * =========================================
@@ -1545,7 +1541,7 @@ export async function POST(
 
       update: {
         transactionId:
-          midtransOrderId,
+          data.transaction_id,
 
         paymentType:
           paymentMethod,
@@ -1562,7 +1558,7 @@ export async function POST(
           order.id,
 
         transactionId:
-          midtransOrderId,
+          data.transaction_id,
 
         paymentType:
           paymentMethod,
@@ -1588,10 +1584,9 @@ export async function POST(
       success: true,
 
       token:
-        data.token,
+        data.transaction_id,
 
-      redirectUrl:
-        data.redirect_url,
+      redirectUrl,
 
       paymentMethod,
 
