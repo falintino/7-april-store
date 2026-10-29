@@ -1536,6 +1536,12 @@ export default function TopUpClient({
                 <p className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-3 text-xs leading-5 text-amber-200">
                   Pastikan UID dan nominal sudah benar. Setelah memilih Beli Sekarang, kamu akan diarahkan ke halaman pembayaran QRIS.
                 </p>
+                {errorMessage && (
+                  <div role="alert" className="rounded-lg border border-red-500/40 bg-red-950/60 p-3 text-sm leading-5 text-red-200">
+                    <p className="font-bold">Pembayaran belum berhasil dibuat</p>
+                    <p className="mt-1">{errorMessage}</p>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <button
                     type="button"
