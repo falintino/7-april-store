@@ -22,10 +22,10 @@ export default function RetryDigiflazzButton({
   const [diagnostics, setDiagnostics] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
 
-  // Show recovery for every paid order awaiting refund with a known provider RC.
+  // Show recovery for paid failed/refund-required orders with a known provider RC.
   // RC70 is handled safely by the backend using the existing ref_id.
   const allowedRetry =
-    providerStatus === "REFUND_REQUIRED" &&
+    ["REFUND_REQUIRED", "FAILED"].includes(providerStatus) &&
     Boolean(providerRc?.trim()) &&
     !manualFulfilled;
 
