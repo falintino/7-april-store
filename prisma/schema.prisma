@@ -601,3 +601,17 @@ model ReviewAudit {
   @@index([reviewId, createdAt])
   @@index([action, createdAt])
 }
+
+
+model OperatingExpense {
+  id          String   @id @default(cuid())
+  category    String
+  description String
+  amount      Int
+  spentAt     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([spentAt])
+  @@index([category, spentAt])
+}
