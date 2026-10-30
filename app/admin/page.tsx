@@ -673,6 +673,13 @@ export default async function AdminPage({
             </Link>
 
             <Link
+              href="/admin/finance"
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 text-xs font-bold text-emerald-300 transition hover:bg-emerald-500/20"
+            >
+              💰 Kasir & Keuangan
+            </Link>
+
+            <Link
               href="/admin/reviews"
               className="inline-flex h-10 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 text-xs font-bold text-amber-300 transition hover:bg-amber-500/20"
             >
