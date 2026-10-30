@@ -557,10 +557,11 @@ export async function processDigiflazzOrder(
      * lebih rendah dari harga produk atau modal provider saat ini.
      * Ini penting untuk mencegah RC 69 akibat batas harga terlalu rendah.
      */
+    const AUTO_SUBSIDY_LIMIT = 25_000;
     const providerMaxPrice = Math.max(
       order.providerPriceSnapshot ?? 0,
       order.product.providerPrice,
-      order.total,
+      order.total + AUTO_SUBSIDY_LIMIT,
     );
 
     if (
