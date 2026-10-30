@@ -202,8 +202,7 @@ export async function POST(
      */
 
     if (
-      order.providerStatus !==
-        "REFUND_REQUIRED" ||
+      !["REFUND_REQUIRED", "FAILED"].includes(order.providerStatus) ||
       !normalRetry
     ) {
       return NextResponse.json(
@@ -283,7 +282,7 @@ export async function POST(
               "PAID",
 
             providerStatus:
-              "REFUND_REQUIRED",
+              order.providerStatus,
 
             providerRc:
               "70",
