@@ -24,7 +24,7 @@ export default async function AdminFinancePage() {
   if (!validSession(jar.get(COOKIE)?.value)) redirect("/admin/login");
   const [orders, expenses, products, promos] = await Promise.all([
     prisma.order.findMany({ where: { paymentStatus: { in: ["PAID", "SUCCESS", "REFUNDED", "PARTIAL_REFUND"] } }, include: { product: true, payment: true, promoCode: true }, orderBy: { createdAt: "desc" } }),
-    prisma.operatingExpense.findMany({ orderBy: { spentAt: "desc" }, take: 100 }),
+    prisma.operatingExpense.findMany({ orderBy: { spentAt: "desc" } }),
     prisma.product.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
     prisma.promoCode.findMany({ orderBy: { usedCount: "desc" }, take: 10 }),
   ]);
