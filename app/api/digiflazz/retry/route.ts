@@ -356,7 +356,7 @@ export async function POST(
         where: {
           id: order.id,
           paymentStatus: "PAID",
-          providerStatus: "REFUND_REQUIRED",
+          providerStatus: order.providerStatus,
           providerRc,
         },
         data: {
