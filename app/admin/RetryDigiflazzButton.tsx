@@ -33,8 +33,8 @@ export default function RetryDigiflazzButton({
     return null;
   }
 
-  async function retryOrder(approveOverThreshold = false) {
-    if (loading && !approveOverThreshold) return;
+  async function retryOrder() {
+    if (loading) return;
     const confirmed = window.confirm(
       `Pulihkan order ${invoice} (RC ${providerRc})? Pastikan transaksi sebelumnya sudah dipastikan gagal. ${maxPrice.trim() ? `max_price yang akan dipakai: Rp${Number(maxPrice).toLocaleString("id-ID")}.` : "Tidak ada override max_price."} RC70 hanya akan dicek ulang dengan Ref ID yang sama.`,
     );
@@ -50,7 +50,7 @@ export default function RetryDigiflazzButton({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ invoice, ...(maxPrice.trim() ? { maxPrice: Number(maxPrice) } : {}), ...(approveOverThreshold ? { approveOverThreshold: true } : {}) }),
+        body: JSON.stringify({ invoice, ...(maxPrice.trim() ? { maxPrice: Number(maxPrice) } : {}),  }),
       });
 
       const responseText = await response.text();
@@ -62,10 +62,6 @@ export default function RetryDigiflazzButton({
       }
 
       if (!response.ok || !result.success) {
-        if (result.requiresApproval) {
-          const accepted = window.confirm(`${result.message}\\n\\nInvoice: ${result.invoice}\\nPembayaran pelanggan: Rp${Number(result.customerTotal).toLocaleString("id-ID")}\\nmax_price: Rp${Number(result.maxPrice).toLocaleString("id-ID")}\\nPerkiraan subsidi: Rp${Number(result.estimatedSubsidy).toLocaleString("id-ID")}\\nBatas tanpa persetujuan: Rp${Number(result.subsidyLimit).toLocaleString("id-ID")}\\n\\nSetujui dan lanjutkan retry?`);
-          if (accepted) { await retryOrder(true); return; }
-        }
         setMessage(result.message || "Retry gagal dijalankan.");
         return;
       }
@@ -93,7 +89,7 @@ export default function RetryDigiflazzButton({
       <label className="flex max-w-[260px] flex-col gap-1 text-[10px] text-slate-300">
         max_price Digiflazz (opsional, Rp)
         <input type="number" min="1" step="1" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="Isi sesuai harga buyer Digiflazz" className="h-8 rounded-md border border-slate-700 bg-slate-950 px-2 text-xs text-white outline-none focus:border-amber-400" />
-        <span className="text-slate-500">Jika perkiraan subsidi di atas Rp25.000, sistem meminta persetujuan tambahan.</span>
+        <span className="text-slate-500">Toko menanggung selisih harga promo sesuai max_price yang kamu masukkan.</span>
       </label>
       <button
         type="button"
