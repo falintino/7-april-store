@@ -7,9 +7,12 @@ import { prisma } from "@/lib/prisma";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const MAX_UNAPPROVED_SUBSIDY = 25_000;
+
 type RequestBody = {
   invoice?: unknown;
   maxPrice?: unknown;
+  approveOverThreshold?: unknown;
 };
 
 export async function POST(
@@ -189,6 +192,8 @@ export async function POST(
     const normalRetry = providerRc.length > 0;
     if (priceRetry && !["69", "02"].includes(providerRc)) return NextResponse.json({ success: false, message: "Override harga hanya diperbolehkan untuk RC69 atau RC02." }, { status: 409 });
     const estimatedSubsidy = priceRetry ? Math.max(0, requestedMaxPrice! - Math.max(0, order.total)) : 0;
+    const overThreshold = estimatedSubsidy > MAX_UNAPPROVED_SUBSIDY;
+    if (overThreshold && body.approveOverThreshold !== true) return NextResponse.json({ success: false, requiresApproval: true, message: "Perkiraan subsidi melewati Rp25.000. Konfirmasi persetujuan admin diperlukan sebelum retry dilanjutkan.", invoice: order.invoice, customerTotal: order.total, maxPrice: requestedMaxPrice, estimatedSubsidy, subsidyLimit: MAX_UNAPPROVED_SUBSIDY }, { status: 409 });
 
     /*
      * =========================================
@@ -464,6 +469,8 @@ export async function POST(
         maxPrice: retryMaxPrice,
         customerTotal: order.total,
         estimatedSubsidy,
+        subsidyLimit: MAX_UNAPPROVED_SUBSIDY,
+        approvalRequired: overThreshold,
       });
     } catch (error) {
       console.error(
