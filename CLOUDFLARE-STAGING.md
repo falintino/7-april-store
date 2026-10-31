@@ -21,6 +21,8 @@ npm run cf:preview
 
 The preview script builds the Next.js app for Workers before starting the local preview.
 
+Cloudflare Workers Builds starts the first connected build after a commit is pushed to this staging branch. Subsequent commits to this branch trigger staging deployments; do not merge this branch into `main` as part of the staging test.
+
 Only deploy after database connectivity, admin login, payment callbacks, Digiflazz processing, and order status updates have been tested on the preview URL.
 
 ## Runtime configuration still required
