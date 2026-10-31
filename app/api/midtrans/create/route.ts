@@ -186,17 +186,19 @@ function calculateDiscount({
 export async function POST(
   request: Request
 ) {
-  // Temporary safety switch: prevent new Midtrans checkout sessions.
-  // Keep /api/midtrans/notification enabled so existing customer payments
-  // can still be confirmed by Midtrans webhooks.
-  return NextResponse.json(
-    {
-      success: false,
-      paymentDisabled: true,
-      message: "Pembayaran sementara dinonaktifkan. Silakan hubungi admin untuk informasi pesanan.",
-    },
-    { status: 503 }
-  );
+  // Temporary safety switch: set PAYMENTS_DISABLED=true in the Worker
+  // runtime variables to reject new checkouts. The notification endpoint
+  // remains enabled so existing payments can still be confirmed.
+  if (process.env.PAYMENTS_DISABLED === "true") {
+    return NextResponse.json(
+      {
+        success: false,
+        paymentDisabled: true,
+        message: "Pembayaran sementara dinonaktifkan. Silakan hubungi admin untuk informasi pesanan.",
+      },
+      { status: 503 }
+    );
+  }
 
   const prisma = getPrisma();
   try {
