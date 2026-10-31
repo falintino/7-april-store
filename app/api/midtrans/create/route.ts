@@ -304,7 +304,7 @@ export async function POST(
      * =========================================
      */
 
-    let order =
+    const foundOrder =
       await prisma.order.findUnique({
         where: {
           invoice,
@@ -317,7 +317,7 @@ export async function POST(
         },
       });
 
-    if (!order) {
+    if (!foundOrder) {
       return NextResponse.json(
         {
           success: false,
@@ -329,6 +329,9 @@ export async function POST(
         }
       );
     }
+
+    // Keep the narrowed non-null type even when the order is refreshed later.
+    let order: NonNullable<typeof foundOrder> = foundOrder;
 
     // Satu UID Free Fire hanya boleh memakai satu dari tiga promo spesial.
     const limitedFreeFirePromoCodes = ["FF50HEMAT", "FF100HEMAT", "FF140HEMAT"];
