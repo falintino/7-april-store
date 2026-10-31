@@ -577,7 +577,7 @@ export async function POST(
        * =========================================
        */
 
-      if (!promo.active) {
+      if (!promo!.active) {
         return NextResponse.json(
           {
             success: false,
@@ -600,8 +600,8 @@ export async function POST(
        */
 
       if (
-        promo.startsAt &&
-        promo.startsAt.getTime() >
+        promo!.startsAt &&
+        promo!.startsAt.getTime() >
           now.getTime()
       ) {
         return NextResponse.json(
@@ -623,8 +623,8 @@ export async function POST(
        */
 
       if (
-        promo.expiresAt &&
-        promo.expiresAt.getTime() <=
+        promo!.expiresAt &&
+        promo!.expiresAt.getTime() <=
           now.getTime()
       ) {
         return NextResponse.json(
@@ -646,19 +646,19 @@ export async function POST(
        */
 
       if (
-        promo.maxUses !== null
+        promo!.maxUses !== null
       ) {
         if (
           !Number.isInteger(
-            promo.maxUses
+            promo!.maxUses
           ) ||
-          promo.maxUses <= 0
+          promo!.maxUses <= 0
         ) {
           console.error(
             "MIDTRANS PROMO INVALID MAX USES:",
             {
               promoId:
-                promo.id,
+                promo!.id,
             }
           );
 
@@ -675,8 +675,8 @@ export async function POST(
         }
 
         if (
-          promo.usedCount >=
-          promo.maxUses
+          promo!.usedCount >=
+          promo!.maxUses
         ) {
           return NextResponse.json(
             {
@@ -697,9 +697,9 @@ export async function POST(
        * =========================================
        */
 
-      if (promo.productId !== null) {
+      if (promo!.productId !== null) {
         const promoTargetProduct = await prisma.product.findUnique({
-          where: { id: promo.productId },
+          where: { id: promo!.productId },
           select: { id: true, name: true, price: true, game: true },
         });
 
@@ -737,10 +737,10 @@ export async function POST(
        */
 
       const requiresCustomer =
-        promo.maxUsesPerCustomer !==
+        promo!.maxUsesPerCustomer !==
           null ||
-        promo.firstOrderOnly ||
-        promo.minCompletedOrders !==
+        promo!.firstOrderOnly ||
+        promo!.minCompletedOrders !==
           null;
 
       if (
@@ -783,7 +783,7 @@ export async function POST(
        */
 
       if (
-        promo.firstOrderOnly &&
+        promo!.firstOrderOnly &&
         completedOrders > 0
       ) {
         return NextResponse.json(
@@ -805,21 +805,21 @@ export async function POST(
        */
 
       if (
-        promo.minCompletedOrders !==
+        promo!.minCompletedOrders !==
         null
       ) {
         if (
           !Number.isInteger(
-            promo.minCompletedOrders
+            promo!.minCompletedOrders
           ) ||
-          promo.minCompletedOrders <
+          promo!.minCompletedOrders <
             0
         ) {
           console.error(
             "MIDTRANS PROMO INVALID MIN COMPLETED ORDERS:",
             {
               promoId:
-                promo.id,
+                promo!.id,
             }
           );
 
@@ -837,14 +837,14 @@ export async function POST(
 
         if (
           completedOrders <
-          promo.minCompletedOrders
+          promo!.minCompletedOrders
         ) {
           return NextResponse.json(
             {
               success: false,
 
               message:
-                `Promo ini khusus pelanggan yang sudah melakukan minimal ${promo.minCompletedOrders} transaksi berhasil.`,
+                `Promo ini khusus pelanggan yang sudah melakukan minimal ${promo!.minCompletedOrders} transaksi berhasil.`,
             },
             {
               status: 400,
@@ -860,21 +860,21 @@ export async function POST(
        */
 
       if (
-        promo.maxUsesPerCustomer !==
+        promo!.maxUsesPerCustomer !==
         null
       ) {
         if (
           !Number.isInteger(
-            promo.maxUsesPerCustomer
+            promo!.maxUsesPerCustomer
           ) ||
-          promo.maxUsesPerCustomer <=
+          promo!.maxUsesPerCustomer <=
             0
         ) {
           console.error(
             "MIDTRANS PROMO INVALID MAX USES PER CUSTOMER:",
             {
               promoId:
-                promo.id,
+                promo!.id,
             }
           );
 
@@ -897,7 +897,7 @@ export async function POST(
                 customerWhatsapp,
 
               promoCodeId:
-                promo.id,
+                promo!.id,
 
               paymentStatus:
                 "PAID",
@@ -910,7 +910,7 @@ export async function POST(
 
         if (
           customerPromoUses >=
-          promo.maxUsesPerCustomer
+          promo!.maxUsesPerCustomer
         ) {
           return NextResponse.json(
             {
@@ -934,19 +934,19 @@ export async function POST(
        */
 
       if (
-        promo.minOrder !== null
+        promo!.minOrder !== null
       ) {
         if (
           !Number.isInteger(
-            promo.minOrder
+            promo!.minOrder
           ) ||
-          promo.minOrder < 0
+          promo!.minOrder < 0
         ) {
           console.error(
             "MIDTRANS PROMO INVALID MIN ORDER:",
             {
               promoId:
-                promo.id,
+                promo!.id,
             }
           );
 
@@ -964,14 +964,14 @@ export async function POST(
 
         if (
           baseSubtotal <
-          promo.minOrder
+          promo!.minOrder
         ) {
           return NextResponse.json(
             {
               success: false,
 
               message:
-                `Promo berlaku untuk pembelian minimal Rp${promo.minOrder.toLocaleString(
+                `Promo berlaku untuk pembelian minimal Rp${promo!.minOrder.toLocaleString(
                   "id-ID"
                 )}.`,
             },
@@ -989,7 +989,7 @@ export async function POST(
        */
 
       if (
-        promo.type ===
+        promo!.type ===
         FREE_PAYMENT_FEE
       ) {
         order =
@@ -1009,7 +1009,7 @@ export async function POST(
                 baseSubtotal,
 
               promoCodeId:
-                promo.id,
+                promo!.id,
 
               paymentFeeWaived:
                 true,
@@ -1028,9 +1028,9 @@ export async function POST(
         paymentFeeWaived =
           true;
       } else if (
-        promo.type ===
+        promo!.type ===
           FIXED_DISCOUNT ||
-        promo.type ===
+        promo!.type ===
           PERCENT_DISCOUNT
       ) {
         /*
@@ -1042,13 +1042,13 @@ export async function POST(
         const discountAmount =
           calculateDiscount({
             promoType:
-              promo.type,
+              promo!.type,
 
             discountValue:
-              promo.discountValue,
+              promo!.discountValue,
 
             maxDiscount:
-              promo.maxDiscount,
+              promo!.maxDiscount,
 
             subtotal:
               baseSubtotal,
@@ -1065,10 +1065,10 @@ export async function POST(
             "MIDTRANS PROMO INVALID DISCOUNT:",
             {
               promoId:
-                promo.id,
+                promo!.id,
 
               promoType:
-                promo.type,
+                promo!.type,
             }
           );
 
@@ -1118,16 +1118,16 @@ export async function POST(
 
         if (
           !Number.isInteger(
-            promo.minimumMargin
+            promo!.minimumMargin
           ) ||
-          promo.minimumMargin < -1_000_000 ||
-          promo.minimumMargin > 1_000_000
+          promo!.minimumMargin < -1_000_000 ||
+          promo!.minimumMargin > 1_000_000
         ) {
           console.error(
             "MIDTRANS PROMO INVALID MINIMUM MARGIN:",
             {
               promoId:
-                promo.id,
+                promo!.id,
             }
           );
 
@@ -1154,7 +1154,7 @@ export async function POST(
 
         const minimumAllowedPrice =
           providerCost +
-          promo.minimumMargin;
+          promo!.minimumMargin;
 
         if (
           finalTotal <
@@ -1194,7 +1194,7 @@ export async function POST(
                 finalTotal,
 
               promoCodeId:
-                promo.id,
+                promo!.id,
 
               paymentFeeWaived:
                 false,
