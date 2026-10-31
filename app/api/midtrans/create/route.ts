@@ -186,23 +186,16 @@ function calculateDiscount({
 export async function POST(
   request: Request
 ) {
-  // Read the switch from the live Cloudflare Worker environment.
-  // Keep the notification endpoint separate so existing payments can settle.
-  const { env } = getCloudflareContext();
-  const paymentsDisabled =
-    (env as typeof env & { PAYMENTS_DISABLED?: string }).PAYMENTS_DISABLED === "true" ||
-    process.env.PAYMENTS_DISABLED === "true";
-
-  if (paymentsDisabled) {
-    return NextResponse.json(
-      {
-        success: false,
-        paymentDisabled: true,
-        message: "Pembayaran sementara dinonaktifkan. Silakan hubungi admin untuk informasi pesanan.",
-      },
-      { status: 503 }
-    );
-  }
+  // EMERGENCY: disable all new Midtrans checkout creation.
+  // Keep /api/midtrans/notification active for previously created transactions.
+  return NextResponse.json(
+    {
+      success: false,
+      paymentDisabled: true,
+      message: "Pembayaran sementara dinonaktifkan. Silakan hubungi admin untuk informasi pesanan.",
+    },
+    { status: 503 }
+  );
 
   const prisma = getPrisma();
   try {
