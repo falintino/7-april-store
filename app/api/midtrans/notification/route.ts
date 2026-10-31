@@ -310,9 +310,9 @@ export async function POST(
     }
 
     const { env } = getCloudflareContext();
-    const serverKey = (
-      env as typeof env & { MIDTRANS_SERVER_KEY?: string }
-    ).MIDTRANS_SERVER_KEY;
+    const serverKey =
+      (env as typeof env & { MIDTRANS_SERVER_KEY?: string }).MIDTRANS_SERVER_KEY ||
+      process.env.MIDTRANS_SERVER_KEY;
 
     if (!serverKey) {
       console.error(
