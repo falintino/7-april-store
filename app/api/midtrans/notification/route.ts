@@ -1,5 +1,6 @@
 ﻿import crypto from "crypto";
 import { NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 import { getPrisma } from "@/lib/prisma-cloudflare";
 import { assertPaymentModesMatch } from "@/lib/digiflazz";
@@ -308,9 +309,10 @@ export async function POST(
       );
     }
 
-    const serverKey =
-      process.env
-        .MIDTRANS_SERVER_KEY;
+    const { env } = getCloudflareContext();
+    const serverKey = (
+      env as typeof env & { MIDTRANS_SERVER_KEY?: string }
+    ).MIDTRANS_SERVER_KEY;
 
     if (!serverKey) {
       console.error(
