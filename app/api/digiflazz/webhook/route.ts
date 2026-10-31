@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 import { processOrderDelivery } from "@/lib/order-delivery";
 
 export const runtime = "nodejs";
@@ -53,6 +53,7 @@ function validSignature(rawBody: string, received: string | null, secret: string
 }
 
 export async function POST(request: Request) {
+  const prisma = getPrisma();
   const secret = process.env.DIGIFLAZZ_WEBHOOK_SECRET?.trim();
 
   if (!secret) {
