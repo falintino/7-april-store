@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 import { assertPaymentModesMatch } from "@/lib/digiflazz";
 import { getCustomerTotal } from "@/lib/payment-fees";
 import { getDiamondAmount } from "@/lib/pricing";
@@ -185,6 +186,21 @@ function calculateDiscount({
 export async function POST(
   request: Request
 ) {
+  // Temporary safety switch: set PAYMENTS_DISABLED=true in the Worker
+  // runtime variables to reject new checkouts. The notification endpoint
+  // remains enabled so existing payments can still be confirmed.
+  if (process.env.PAYMENTS_DISABLED === "true") {
+    return NextResponse.json(
+      {
+        success: false,
+        paymentDisabled: true,
+        message: "Pembayaran sementara dinonaktifkan. Silakan hubungi admin untuk informasi pesanan.",
+      },
+      { status: 503 }
+    );
+  }
+
+  const prisma = getPrisma();
   try {
     const body =
       await request.json();
@@ -245,14 +261,14 @@ export async function POST(
      * =========================================
      */
 
+    const { env } = getCloudflareContext();
     const serverKey =
-      process.env
-        .MIDTRANS_SERVER_KEY;
+      (env as typeof env & { MIDTRANS_SERVER_KEY?: string }).MIDTRANS_SERVER_KEY ||
+      process.env.MIDTRANS_SERVER_KEY;
 
     const isProduction =
-      process.env
-        .MIDTRANS_IS_PRODUCTION ===
-      "true";
+      ((env as typeof env & { MIDTRANS_IS_PRODUCTION?: string }).MIDTRANS_IS_PRODUCTION ||
+        process.env.MIDTRANS_IS_PRODUCTION) === "true";
 
     if (!serverKey) {
       return NextResponse.json(
@@ -288,7 +304,7 @@ export async function POST(
      * =========================================
      */
 
-    let order =
+    const foundOrder =
       await prisma.order.findUnique({
         where: {
           invoice,
@@ -301,7 +317,7 @@ export async function POST(
         },
       });
 
-    if (!order) {
+    if (!foundOrder) {
       return NextResponse.json(
         {
           success: false,
@@ -313,6 +329,9 @@ export async function POST(
         }
       );
     }
+
+    // Keep the narrowed non-null type even when the order is refreshed later.
+    let order: NonNullable<typeof foundOrder> = foundOrder;
 
     // Satu UID Free Fire hanya boleh memakai satu dari tiga promo spesial.
     const limitedFreeFirePromoCodes = ["FF50HEMAT", "FF100HEMAT", "FF140HEMAT"];

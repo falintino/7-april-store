@@ -2,9 +2,10 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
 import { createSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 
 export async function POST(request: Request) {
+  const prisma = getPrisma();
   try {
     const body = (await request.json()) as {
       email?: string;

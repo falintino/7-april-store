@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["@prisma/client", ".prisma/client"],
   async headers() {
     return [
       {
@@ -23,26 +27,10 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      {
-        source: "/stok-akun",
-        destination: "/topup",
-        permanent: true,
-      },
-      {
-        source: "/pesanan-akun",
-        destination: "/topup",
-        permanent: true,
-      },
-      {
-        source: "/akun",
-        destination: "/topup",
-        permanent: true,
-      },
-      {
-        source: "/akun/:path*",
-        destination: "/topup",
-        permanent: true,
-      },
+      { source: "/stok-akun", destination: "/topup", permanent: true },
+      { source: "/pesanan-akun", destination: "/topup", permanent: true },
+      { source: "/akun", destination: "/topup", permanent: true },
+      { source: "/akun/:path*", destination: "/topup", permanent: true },
     ];
   },
 };

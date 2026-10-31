@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
 import { createSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 
 function normalizeWhatsapp(value: string) {
   const digits = value.replace(/\D/g, "");
@@ -15,6 +15,7 @@ function normalizeWhatsapp(value: string) {
 }
 
 export async function POST(request: Request) {
+  const prisma = getPrisma();
   try {
     const body = (await request.json()) as {
       name?: string;

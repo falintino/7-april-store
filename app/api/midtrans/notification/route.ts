@@ -1,7 +1,8 @@
 ﻿import crypto from "crypto";
 import { NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 import { assertPaymentModesMatch } from "@/lib/digiflazz";
 import { processOrderDelivery } from "@/lib/order-delivery";
 import { getCustomerTotal } from "@/lib/payment-fees";
@@ -229,6 +230,7 @@ function normalizePaymentMethodForFee(
 export async function POST(
   request: Request
 ) {
+  const prisma = getPrisma();
   try {
     const notification =
       (await request.json()) as MidtransNotification;
@@ -307,9 +309,10 @@ export async function POST(
       );
     }
 
+    const { env } = getCloudflareContext();
     const serverKey =
-      process.env
-        .MIDTRANS_SERVER_KEY;
+      (env as typeof env & { MIDTRANS_SERVER_KEY?: string }).MIDTRANS_SERVER_KEY ||
+      process.env.MIDTRANS_SERVER_KEY;
 
     if (!serverKey) {
       console.error(

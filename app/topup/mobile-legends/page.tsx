@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 import GameTopUpClient from "../GameTopUpClient";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MobileLegendsPage() {
+  const prisma = getPrisma();
   const products = await prisma.product.findMany({
     where: { game: "Mobile Legends", active: true },
     orderBy: [{ popular: "desc" }, { price: "asc" }],

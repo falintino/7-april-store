@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 import { getDiamondAmount, getEffectiveSellingPrice } from "@/lib/pricing";
 
 function generateInvoice() {
@@ -18,7 +18,7 @@ function generateInvoice() {
   return `7A-${year}${month}${day}-${random}`;
 }
 
-async function createUniqueInvoice() {
+async function createUniqueInvoice(prisma: ReturnType<typeof getPrisma>) {
   for (let attempt = 0; attempt < 5; attempt++) {
     const invoice = generateInvoice();
 
@@ -41,6 +41,7 @@ async function createUniqueInvoice() {
 }
 
 export async function POST(request: Request) {
+  const prisma = getPrisma();
   try {
     /*
      * =====================================
@@ -556,7 +557,7 @@ export async function POST(request: Request) {
      * =====================================
      */
 
-    const invoice = await createUniqueInvoice();
+    const invoice = await createUniqueInvoice(prisma);
 
     /*
      * =====================================

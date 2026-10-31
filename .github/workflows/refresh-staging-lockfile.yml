@@ -1,0 +1,38 @@
+name: Refresh staging npm lockfile
+
+on:
+  push:
+    branches:
+      - cloudflare/opennext-staging
+    paths:
+      - package.json
+      - .github/workflows/refresh-staging-lockfile.yml
+
+permissions:
+  contents: write
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cloudflare/opennext-staging
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Regenerate package-lock.json
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Commit updated lockfile
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "package-lock.json is already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "Refresh staging npm lockfile"
+          git push
