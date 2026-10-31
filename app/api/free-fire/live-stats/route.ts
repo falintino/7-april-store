@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +14,7 @@ const successfulOrderWhere = {
 };
 
 export async function GET() {
+  const prisma = getPrisma();
   try {
     const [totalTransactions, recentOrders] = await Promise.all([
       prisma.order.count({ where: successfulOrderWhere }),

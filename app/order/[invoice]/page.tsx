@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 import PayButton from "./PayButton";
 import OrderAutoRefresh from "./OrderAutoRefresh";
 import SaveOrderHistory from "./SaveOrderHistory";
@@ -145,6 +145,7 @@ function paymentMethodName(
 export default async function OrderPage({
   params,
 }: PageProps) {
+  const prisma = getPrisma();
   const { invoice } = await params;
 
   const order =

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PromoBannerCarousel from "@/components/ads/PromoBannerCarousel";
 import WhatsAppPromoBanner from "@/components/ads/WhatsAppPromoBanner";
 import SiteFooter from "@/components/layout/SiteFooter";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 import { getEffectiveSellingPrice } from "@/lib/pricing";
 
 import OrderStatusCheck from "./OrderStatusCheck";
@@ -34,6 +34,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function FreeFireTopUpPage() {
+  const prisma = getPrisma();
   // Product records should be maintained by admin/seed workflows, not written on every page view.
   // Running many upserts on each request can exhaust the Prisma connection pool and slow page loads.
 
