@@ -186,6 +186,18 @@ function calculateDiscount({
 export async function POST(
   request: Request
 ) {
+  // Temporary safety switch: prevent new Midtrans checkout sessions.
+  // Keep /api/midtrans/notification enabled so existing customer payments
+  // can still be confirmed by Midtrans webhooks.
+  return NextResponse.json(
+    {
+      success: false,
+      paymentDisabled: true,
+      message: "Pembayaran sementara dinonaktifkan. Silakan hubungi admin untuk informasi pesanan.",
+    },
+    { status: 503 }
+  );
+
   const prisma = getPrisma();
   try {
     const body =
