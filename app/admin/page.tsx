@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 
 import AdminLogoutButton from "./AdminLogoutButton";
 import RetryDigiflazzButton from "./RetryDigiflazzButton";
@@ -211,6 +211,7 @@ export default async function AdminPage({
 }: {
   searchParams?: SearchParams;
 }) {
+  const prisma = getPrisma();
   const cookieStore =
     await cookies();
 
