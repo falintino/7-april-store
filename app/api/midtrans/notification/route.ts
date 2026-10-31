@@ -1,7 +1,7 @@
 ﻿import crypto from "crypto";
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 import { assertPaymentModesMatch } from "@/lib/digiflazz";
 import { processOrderDelivery } from "@/lib/order-delivery";
 import { getCustomerTotal } from "@/lib/payment-fees";
@@ -229,6 +229,7 @@ function normalizePaymentMethodForFee(
 export async function POST(
   request: Request
 ) {
+  const prisma = getPrisma();
   try {
     const notification =
       (await request.json()) as MidtransNotification;
