@@ -186,10 +186,14 @@ function calculateDiscount({
 export async function POST(
   request: Request
 ) {
-  // Temporary safety switch: set PAYMENTS_DISABLED=true in the Worker
-  // runtime variables to reject new checkouts. The notification endpoint
-  // remains enabled so existing payments can still be confirmed.
-  if (process.env.PAYMENTS_DISABLED === "true") {
+  // Read the switch from the live Cloudflare Worker environment.
+  // Keep the notification endpoint separate so existing payments can settle.
+  const { env } = getCloudflareContext();
+  const paymentsDisabled =
+    (env as typeof env & { PAYMENTS_DISABLED?: string }).PAYMENTS_DISABLED === "true" ||
+    process.env.PAYMENTS_DISABLED === "true";
+
+  if (paymentsDisabled) {
     return NextResponse.json(
       {
         success: false,
@@ -261,7 +265,6 @@ export async function POST(
      * =========================================
      */
 
-    const { env } = getCloudflareContext();
     const serverKey =
       (env as typeof env & { MIDTRANS_SERVER_KEY?: string }).MIDTRANS_SERVER_KEY ||
       process.env.MIDTRANS_SERVER_KEY;
