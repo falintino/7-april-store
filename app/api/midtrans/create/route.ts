@@ -248,13 +248,13 @@ export async function POST(
      */
 
     const { env } = getCloudflareContext();
-    const serverKey = (
-      env as typeof env & { MIDTRANS_SERVER_KEY?: string }
-    ).MIDTRANS_SERVER_KEY;
+    const serverKey =
+      (env as typeof env & { MIDTRANS_SERVER_KEY?: string }).MIDTRANS_SERVER_KEY ||
+      process.env.MIDTRANS_SERVER_KEY;
 
     const isProduction =
-      (env as typeof env & { MIDTRANS_IS_PRODUCTION?: string })
-        .MIDTRANS_IS_PRODUCTION === "true";
+      ((env as typeof env & { MIDTRANS_IS_PRODUCTION?: string }).MIDTRANS_IS_PRODUCTION ||
+        process.env.MIDTRANS_IS_PRODUCTION) === "true";
 
     if (!serverKey) {
       return NextResponse.json(
