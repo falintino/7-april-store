@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma-cloudflare";
 import { assertPaymentModesMatch } from "@/lib/digiflazz";
 import { getCustomerTotal } from "@/lib/payment-fees";
 import { getDiamondAmount } from "@/lib/pricing";
@@ -185,6 +185,7 @@ function calculateDiscount({
 export async function POST(
   request: Request
 ) {
+  const prisma = getPrisma();
   try {
     const body =
       await request.json();
