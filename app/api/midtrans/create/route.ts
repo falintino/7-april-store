@@ -1188,7 +1188,7 @@ export async function POST(
               subtotal:
                 baseSubtotal,
 
-              discountAmount,
+              discountAmount: discountAmount ?? 0,
 
               total:
                 finalTotal,
@@ -1260,7 +1260,7 @@ export async function POST(
 
     if (
       bankTransferMethods.has(
-        paymentMethod
+        paymentMethod as PaymentMethod
       ) &&
       order.total <
         BANK_VA_MINIMUM
