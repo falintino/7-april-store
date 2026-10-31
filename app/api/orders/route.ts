@@ -18,7 +18,7 @@ function generateInvoice() {
   return `7A-${year}${month}${day}-${random}`;
 }
 
-async function createUniqueInvoice() {
+async function createUniqueInvoice(prisma: ReturnType<typeof getPrisma>) {
   for (let attempt = 0; attempt < 5; attempt++) {
     const invoice = generateInvoice();
 
@@ -557,7 +557,7 @@ export async function POST(request: Request) {
      * =====================================
      */
 
-    const invoice = await createUniqueInvoice();
+    const invoice = await createUniqueInvoice(prisma);
 
     /*
      * =====================================
