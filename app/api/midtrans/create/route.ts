@@ -253,9 +253,8 @@ export async function POST(
     ).MIDTRANS_SERVER_KEY;
 
     const isProduction =
-      process.env
-        .MIDTRANS_IS_PRODUCTION ===
-      "true";
+      (env as typeof env & { MIDTRANS_IS_PRODUCTION?: string })
+        .MIDTRANS_IS_PRODUCTION === "true";
 
     if (!serverKey) {
       return NextResponse.json(
