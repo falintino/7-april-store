@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx prisma/seed.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
@@ -22,7 +25,8 @@
     "next": "16.2.10",
     "react": "19.1.1",
     "react-dom": "19.1.1",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "@opennextjs/cloudflare": "latest"
   },
   "devDependencies": {
     "@types/node": "^24",
@@ -33,6 +37,7 @@
     "prisma": "^6.16.2",
     "tailwindcss": "^4",
     "tsx": "^4.23.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "latest"
   }
 }
