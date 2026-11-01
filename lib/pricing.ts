@@ -197,16 +197,20 @@ export function calculateBaseSellingPrice({
 
   /*
    * Membership:
-   * tetap 3%.
+   * Harga jual dikunci mengikuti harga resmi 7 April Store.
+   * Sinkronisasi hanya memperbarui providerPrice, bukan harga jual.
    */
-  if (
-    sku.startsWith(
-      "FF_MEMBERSHIP_",
-    )
-  ) {
-    return roundUpRp10(
-      providerPrice * 1.03,
-    );
+  const fixedMembershipPrices: Record<string, number> = {
+    FF_MEMBERSHIP_WEEKLY: 25160,
+    FF_MEMBERSHIP_MONTHLY: 75410,
+  };
+
+  if (fixedMembershipPrices[sku] !== undefined) {
+    return fixedMembershipPrices[sku];
+  }
+
+  if (sku.startsWith("FF_MEMBERSHIP_")) {
+    return roundUpRp10(providerPrice * 1.03);
   }
 
   const diamondAmount =
