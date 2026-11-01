@@ -132,6 +132,12 @@ async function checkPendingOrders(request: Request) {
      * tidak menghalangi transaksi baru.
      */
 
+    // Batasi checker ke order yang dibuat dalam 7 hari terakhir.
+    // Order PAID/PENDING yang lebih lama tidak disentuh otomatis.
+    const pendingSince = new Date(
+      Date.now() - 7 * 24 * 60 * 60 * 1000
+    );
+
     const pendingWhere = {
       paymentStatus: "PAID" as const,
 
@@ -139,6 +145,10 @@ async function checkPendingOrders(request: Request) {
 
       providerRefId: {
         not: null,
+      },
+
+      createdAt: {
+        gte: pendingSince,
       },
     };
 
