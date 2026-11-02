@@ -31,6 +31,38 @@ function findNickname(data: any): string | null {
   )?.trim() ?? null;
 }
 
+
+async function readCutiezyNickname(uid: string, apiKey: string): Promise<{ nickname: string; region: string } | null> {
+  const url = new URL("https://api.cutiezy.id/api/check/games/free-fire");
+  url.searchParams.set("user_id", uid);
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/json",
+      "X-API-Key": apiKey,
+    },
+    cache: "no-store",
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!response.ok) return null;
+
+  const data: any = await response.json();
+  const returnedId = String(data?.data?.id ?? "");
+  const nickname = typeof data?.data?.nickname === "string"
+    ? data.data.nickname.trim()
+    : "";
+
+  // Only accept a successful response that belongs to the requested UID.
+  if (data?.success !== true || data?.ok !== true || !nickname || (returnedId && returnedId !== uid)) {
+    return null;
+  }
+
+  return {
+    nickname,
+    region: String(data?.data?.country_code ?? "ID").trim() || "ID",
+  };
+}
+
 async function readOmegaNickname(uid: string, apiKey: string): Promise<string | null> {
   const url = new URL("https://api.omegatronik.co.id/api/game/freefire-dg");
   url.searchParams.set("id", uid);
@@ -76,7 +108,24 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Configure this in Vercel Environment Variables. Never expose the key in frontend code.
+
+  // Cutiezy is the primary provider. Keep its API key on the server only.
+  const cutiezyKey = process.env.CUTIEZY_API_KEY?.trim();
+  if (cutiezyKey) {
+    try {
+      const result = await readCutiezyNickname(uid, cutiezyKey);
+      if (result) {
+        return NextResponse.json(
+          { ok: true, uid, nickname: result.nickname, region: result.region },
+          { headers: { ...noStore, "X-Content-Type-Options": "nosniff" } },
+        );
+      }
+    } catch {
+      // If Cutiezy is unavailable, continue to the existing providers.
+    }
+  }
+
+  // Configure this in server environment variables. Never expose the key in frontend code.
   const omegaKey = process.env.OMEGATRONIK_API_KEY?.trim();
   if (omegaKey) {
     try {
@@ -118,7 +167,7 @@ export async function GET(request: NextRequest) {
         ok: false,
         message: omegaKey
           ? "Belum berhasil membaca nickname dari layanan cek ID. Coba lagi nanti."
-          : "API Omega Tronik belum dikonfigurasi. Tambahkan OMEGATRONIK_API_KEY di Vercel.",
+          : "Layanan cek ID belum berhasil dihubungi. Periksa konfigurasi API atau coba lagi nanti.",
       },
       { status: 503, headers: noStore },
     );
