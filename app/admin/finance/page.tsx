@@ -39,7 +39,14 @@ function periodKey(value: Date, period: Period) {
   const monday = new Date(Date.UTC(year, month - 1, day));
   const weekday = monday.getUTCDay() || 7;
   monday.setUTCDate(monday.getUTCDate() - weekday + 1);
-  return `${monday.getUTCFullYear()}-W${String(Math.ceil((((monday.getTime() - Date.UTC(monday.getUTCFullYear(), 0, 1)) / 86400000) + 1) / 7)).padStart(2, "0")}`;
+  const thursday = new Date(monday);
+  thursday.setUTCDate(monday.getUTCDate() + 3);
+  const isoYear = thursday.getUTCFullYear();
+  const jan4 = new Date(Date.UTC(isoYear, 0, 4));
+  const weekOneMonday = new Date(jan4);
+  weekOneMonday.setUTCDate(jan4.getUTCDate() - ((jan4.getUTCDay() || 7) - 1));
+  const week = Math.floor((monday.getTime() - weekOneMonday.getTime()) / 604800000) + 1;
+  return `${isoYear}-W${String(week).padStart(2, "0")}`;
 }
 function periodLabel(key: string, period: Period) {
   if (period === "Seluruh") return "Seluruh periode";
